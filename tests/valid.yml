@@ -7,7 +7,7 @@ upstream-url:
 legal:
   main-copyright-owner: Comune di Reggio Emilia e amici
   repo-owner: Comune di Reggio Emilia # copyright owner
-  authors-file: tests/AUTHORS             # file listing copyright information
+  authors-file: tests/AUTHORS         # file listing copyright information
   license: AGPL-3.0-or-later        # SPDX expression of license
 
 maintenance:                        # Maintainance status as open-source software
@@ -24,10 +24,10 @@ maintenance:                        # Maintainance status as open-source softwar
 
 description:
   name: Medusa                                          # Short descriptive name
-  logo: tests/img/logo.png                                    # Logo (size > 500px)
+  logo: tests/img/logo.png                              # Logo (size > 500px)
   shortdesc:
     - en: A really interesting software.             # Max 100 characters
-    - it: Un software molto interessante.             # Max 100 characters
+    - it: Un software molto interessante.            # Max 100 characters
   longdesc:
     - en: >
         Very long description of this software, also split
@@ -56,21 +56,15 @@ description:
         Si può annotare qualunque informazione importante,
         tra le quali "Perché questo e non Y?" o "42?".
   screenshots:                                          # Screen shots used to get a quick look&feel of the software
-    - tests/img/nested_img/gopher-coin.png
-    - tests/img/nested_img/swimming-ocean.gif
+    - tests/img/sshot1.png
+    - tests/img/sshot2.png
+    - tests/img/sshot3.png
   videos:                                               # Demo videos of the software
     - https://www.youtube.com/watch?v=Hhpe1CHtLmI
   version: "1.0"                                        # Last stable version
   released: 2017-04-15                                  # Date of last stable software release
   platforms: web                    # or Windows, Mac, Linux, etc.
 
-# it-riuso:
-#   ipa: BF14X            # Codice IPA della PA che ha pubblicato questo repo (repo-owner)
-#
-# it-pianotriennale:      # Aderenza al piano triennale. Chiave sotto namespace "ita-", quindi solo italiana
-#   use-spid: yes         # yes, no, or "n/a" se il software non ha un login
-#   use-pagopa: yes
-#
 meta:                            # Meta information to help categorization of this software
   scope: it
   pa-type: city
@@ -91,3 +85,10 @@ dependencies:             # List of dependencies. The only mandatory list is the
     - IBM SoftLayer 4.5
   hardware:             # List of special hardware required. Optional.
     - NFC Reader (chipset xxx)
+
+# it-riuso:
+#   ipa: BF14X            # Codice IPA della PA che ha pubblicato questo repo (repo-owner)
+#
+# it-pianotriennale:      # Aderenza al piano triennale. Chiave sotto namespace "ita-", quindi solo italiana
+#   use-spid: yes         # yes, no, or "n/a" se il software non ha un login
+#   use-pagopa: yes

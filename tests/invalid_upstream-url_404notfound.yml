@@ -1,8 +1,8 @@
 version: "0.1"                     # publiccode YAML standard version 0.0.1
-url: "https://github.com/publiccodenet/publiccode.yml-parser-lisp-at-work.git"  # URL of this repository
+url: "https://github.com/publiccodenet/publiccode.yml-parser-go.git"  # URL of this repository
 upstream-url:
   - "https://github.com/publiccodenet/publiccode.yml-parser-go"
-  - "https://github.com/publiccodenet/publiccode.yml-parser-go"
+  - "https://github.com/publiccodenet/publiccode.yml-parser-lisp-at-work.git"
 
 legal:
   main-copyright-owner: Comune di Reggio Emilia e amici

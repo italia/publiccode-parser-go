@@ -56,8 +56,9 @@ description:
         Si può annotare qualunque informazione importante,
         tra le quali "Perché questo e non Y?" o "42?".
   screenshots:                                          # Screen shots used to get a quick look&feel of the software
-    - tests/img/nested_img/gopher-coin.png
-    - tests/img/nested_img/swimming-ocean.gif
+    - tests/img/sshot1.png
+    - tests/img/sshot2.png
+    - tests/img/sshot3.png
   videos:                                               # Demo videos of the software
     - https://www.youtube.com/watch?v=Hhpe1CHtLmI
   version: "1.0"                                        # Last stable version
