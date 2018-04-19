@@ -88,7 +88,7 @@ dependencies:             # List of dependencies. The only mandatory list is the
 
 # it-riuso:
 #   ipa: BF14X            # Codice IPA della PA che ha pubblicato questo repo (repo-owner)
-#
+
 # it-pianotriennale:      # Aderenza al piano triennale. Chiave sotto namespace "ita-", quindi solo italiana
 #   use-spid: yes         # yes, no, or "n/a" se il software non ha un login
 #   use-pagopa: yes

@@ -136,14 +136,23 @@ func (p *parser) decodeArrString(key string, value []string) error {
 		}
 	case "dependencies/open":
 		for _, v := range value {
+			if len(v) > 50 {
+				return newErrorInvalidValue(key, " %s is too long.  (max 50 chars)", key)
+			}
 			p.pc.Dependencies.Open = append(p.pc.Dependencies.Open, v)
 		}
 	case "dependencies/proprietary":
 		for _, v := range value {
+			if len(v) > 50 {
+				return newErrorInvalidValue(key, " %s is too long.  (max 50 chars)", key)
+			}
 			p.pc.Dependencies.Proprietary = append(p.pc.Dependencies.Proprietary, v)
 		}
 	case "dependencies/hardware":
 		for _, v := range value {
+			if len(v) > 50 {
+				return newErrorInvalidValue(key, " %s is too long.  (max 50 chars)", key)
+			}
 			p.pc.Dependencies.Hardware = append(p.pc.Dependencies.Hardware, v)
 		}
 	default:
