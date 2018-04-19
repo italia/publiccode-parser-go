@@ -1,5 +1,6 @@
 package publiccode
 
+// checkPaTypes tells whether the pa-type is a valid type or not and returns it.
 func (p *parser) checkSpdx(key, spdx string) error {
 	for _, l := range spdxLicenses {
 		if l == spdx {
@@ -9,6 +10,8 @@ func (p *parser) checkSpdx(key, spdx string) error {
 	return newErrorInvalidValue(key, "unknown license: %s", spdx)
 }
 
+// A spdxLicenses represents a list of the SPDX valid licenses.
+// Refers to https://spdx.org/licenses/
 var spdxLicenses = []string{
 	"0BSD",
 	"AAL",

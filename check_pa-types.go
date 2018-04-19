@@ -1,14 +1,16 @@
 package publiccode
 
+// checkPaTypes tells whether the pa-type is a valid type or not and returns it.
 func (p *parser) checkPaTypes(key, paType string) (string, error) {
 	for _, t := range paTypes {
 		if t == paType {
 			return paType, nil
 		}
 	}
-	return "", newErrorInvalidValue(key, "unknown pa-type: %s", paType)
+	return paType, newErrorInvalidValue(key, "unknown pa-type: %s", paType)
 }
 
+// A paTypes represents a list of the types of public administration which is expected to use this software.
 var paTypes = []string{
 	// International.
 	"city",       // City

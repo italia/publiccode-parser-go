@@ -3,16 +3,11 @@ package publiccode
 import (
 	"bytes"
 	"fmt"
-	"net/http"
-	"net/url"
-	"os"
-	"path/filepath"
-	"regexp"
-	"time"
 
 	"gopkg.in/yaml.v2"
 )
 
+// Parse loads the yaml bytes and tries to parse it. Return an error if fails.
 func Parse(in []byte, pc *PublicCode) error {
 	var s map[interface{}]interface{}
 
@@ -103,62 +98,4 @@ func (p *parser) decoderec(prefix string, s map[interface{}]interface{}) (es Err
 		}
 	}
 	return
-}
-
-func (p *parser) checkEmail(key string, fn string) error {
-	re := regexp.MustCompile(`^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,4}$`)
-	if !re.MatchString(fn) {
-		return newErrorInvalidValue(key, "invalid email: %v", fn)
-	}
-
-	return nil
-}
-
-func (p *parser) checkUrl(key string, value string) (*url.URL, error) {
-	u, err := url.Parse(value)
-	if err != nil {
-		return nil, newErrorInvalidValue(key, "not a valid URL: %s", value)
-	}
-	if u.Scheme == "" {
-		return nil, newErrorInvalidValue(key, "missing URL scheme: %s", value)
-	}
-	if r, err := http.Get(value); err != nil || r.StatusCode != 200 {
-		return nil, newErrorInvalidValue(key, "URL is unreachable: %s", value)
-	}
-
-	return u, nil
-}
-
-func (p *parser) checkFile(key string, fn string) (string, error) {
-	if _, err := os.Stat(fn); err != nil {
-		return "", newErrorInvalidValue(key, "file does not exist: %v", fn)
-	}
-	return fn, nil
-}
-
-func (p *parser) checkDate(key string, value string) (time.Time, error) {
-	if t, err := time.Parse("2006-01-02", value); err != nil {
-		return t, newErrorInvalidValue(key, "cannot parse date: %v", err)
-	} else {
-		return t, nil
-	}
-}
-
-func (p *parser) checkImage(key string, value string) error {
-	// Based on https://github.com/italia/publiccode.yml/blob/master/schema.md#key-descriptionlogo
-	//TODO: check two version of the Logo
-	//TODO: check .png size
-	//TODO: raster should exists iff vector does not exists
-	if _, err := p.checkFile(key, value); err != nil {
-		return err
-	}
-	fileExt := filepath.Ext(value)
-	for _, v := range []string{".png", ".svg"} {
-		if v == fileExt {
-			p.pc.Maintenance.Type = value
-			return nil
-		}
-	}
-	return newErrorInvalidValue(key, "image must be .svg or .png: %v", value)
-
 }

@@ -11,10 +11,19 @@ func TestDecodeValueErrors(t *testing.T) {
 		file   string
 		errkey string
 	}{
-		{"tests/valid.yml", ""},
-		{"tests/invalid_version.yml", "version"},
-		{"tests/invalid_url_schema.yml", "url"},
-		{"tests/invalid_url_404notfound.yml", "url"},
+		{"tests/valid.yml", ""}, // Valid yml.
+
+		{"tests/invalid_version.yml", "version"}, // Invalid version.
+
+		{"tests/invalid_url_schema.yml", "url"},      // Invalid url. Missing schema.
+		{"tests/invalid_url_404notfound.yml", "url"}, // Invalid url. 404 not found.
+
+		{"tests/invalid_url_schema.yml", "url"},      // Invalid url. Missing schema.
+		{"tests/invalid_url_404notfound.yml", "url"}, // Invalid url. 404 not found.
+
+		{"tests/valid_upstream-url_missing.yml", ""},                   // Valid upstream-url. Missing upstream-url.
+		{"tests/invalid_upstream-url_schema.yml", "upstream-url"},      // Invalid upstream-url. Missing schema.
+		{"tests/invalid_upstream-url_404notfound.yml", "upstream-url"}, // Invalid upstream-url. 404 not found.
 	}
 
 	for _, test := range testFiles {
