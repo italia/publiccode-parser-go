@@ -3,6 +3,7 @@ package publiccode
 import (
 	"bytes"
 	"fmt"
+	"net/http"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -121,6 +122,10 @@ func (p *parser) checkUrl(key string, value string) (*url.URL, error) {
 	if u.Scheme == "" {
 		return nil, newErrorInvalidValue(key, "missing URL scheme: %s", value)
 	}
+	if r, err := http.Get(value); err != nil || r.StatusCode != 200 {
+		return nil, newErrorInvalidValue(key, "URL is unreachable: %s", value)
+	}
+
 	return u, nil
 }
 

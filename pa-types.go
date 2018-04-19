@@ -1,12 +1,12 @@
 package publiccode
 
-func (p *parser) checkPaTypes(key, paType string) error {
+func (p *parser) checkPaTypes(key, paType string) (string, error) {
 	for _, t := range paTypes {
 		if t == paType {
-			return nil
+			return paType, nil
 		}
 	}
-	return newErrorInvalidValue(key, "unknown pa-type: %s", paType)
+	return "", newErrorInvalidValue(key, "unknown pa-type: %s", paType)
 }
 
 var paTypes = []string{

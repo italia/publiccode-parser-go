@@ -1,10 +1,11 @@
 package publiccode
 
 var mandatoryKeys = []string{
-	"version", "url",
-	"legal/license", "legal/repo-owner",
-	"maintenance/type", "maintenance/maintainer",
-	"maintenance/technical-contacts",
+	"version",
+	"url",
+	"legal/license",
+	"legal/repo-owner",
+	"maintenance/type",
 	"description/name",
 	"description/platforms",
 	"description/shortdesc",
@@ -118,8 +119,13 @@ func (p *parser) decodeArrString(key string, value []string) error {
 		}
 	case "meta/pa-type":
 		for _, v := range value {
-			p.pc.Meta.PaType = append(p.pc.Meta.PaType, v)
+			if u, err := p.checkPaTypes(key, v); err != nil {
+				return err
+			} else {
+				p.pc.Meta.PaType = append(p.pc.Meta.PaType, u)
+			}
 		}
+
 	case "meta/tags":
 		for _, v := range value {
 			p.pc.Meta.Tags = append(p.pc.Meta.Tags, v)
@@ -150,10 +156,9 @@ func (p *parser) decodeArrObj(key string, value map[interface{}]interface{}) err
 	switch key {
 	case "maintenance/technical-contacts":
 		for _, v := range value {
-
 			var contact Contact
-			for k, val := range v.(map[interface{}]interface{}) {
 
+			for k, val := range v.(map[interface{}]interface{}) {
 				if k.(string) == "name" {
 					contact.Name = val.(string)
 				} else if k.(string) == "email" {
@@ -166,6 +171,12 @@ func (p *parser) decodeArrObj(key string, value map[interface{}]interface{}) err
 				} else {
 					return newErrorInvalidValue(key, " %s contains an invalid value", k)
 				}
+			}
+			if contact.Name == "" {
+				return newErrorInvalidValue(key, " name is mandatory.")
+			}
+			if contact.Email == "" {
+				return newErrorInvalidValue(key, " email is mandatory.")
 			}
 			p.pc.Maintenance.TechnicalContacts = append(p.pc.Maintenance.TechnicalContacts, contact)
 		}
@@ -212,9 +223,21 @@ func (p *parser) decodeArrObj(key string, value map[interface{}]interface{}) err
 }
 
 func (p *parser) finalize() (es ErrorParseMulti) {
-	// mandatory "maintenance/until" if commercial "maintenance/type"
+	// "maintenance/until" is mandatory (if the software is commercially maintained)
 	if p.pc.Maintenance.Type == "commercial" && p.pc.Maintenance.Until.IsZero() {
 		es = append(es, newErrorInvalidValue("maintenance/until", "not found, mandatory for a commercial maintenance"))
+	}
+	// "maintenance/maintainer" is mandatory  (if there is a maintenance)
+	if &p.pc.Maintenance != nil {
+		if p.pc.Maintenance.Maintainer == nil {
+			es = append(es, newErrorInvalidValue("maintenance/maintainer", "not found, mandatory if  (if there is a maintenance)"))
+		}
+	}
+	// "maintenance/technical-contacts" is mandatory  (if there is a maintenance)
+	if &p.pc.Maintenance != nil {
+		if p.pc.Maintenance.TechnicalContacts == nil {
+			es = append(es, newErrorInvalidValue("maintenance/technical-contacts", "not found, mandatory if  (if there is a maintenance)"))
+		}
 	}
 
 	// mandatory "description/released" if "description/version" is present
