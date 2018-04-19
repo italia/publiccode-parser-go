@@ -257,7 +257,7 @@ func (p *parser) finalize() (es ErrorParseMulti) {
 	// mandatoryKeys check
 	for k, v := range p.missing {
 		if v {
-			es = append(es, ErrorInvalidKey{k + " is a mandatory key."})
+			es = append(es, newErrorInvalidValue(k, k+" is a mandatory key."))
 		}
 	}
 

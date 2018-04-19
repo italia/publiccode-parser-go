@@ -11,19 +11,27 @@ func TestDecodeValueErrors(t *testing.T) {
 		file   string
 		errkey string
 	}{
+		// // valid
 		{"tests/valid.yml", ""}, // Valid yml.
 
+		// // Version
 		{"tests/invalid_version.yml", "version"}, // Invalid version.
 
-		{"tests/invalid_url_schema.yml", "url"},      // Invalid url. Missing schema.
-		{"tests/invalid_url_404notfound.yml", "url"}, // Invalid url. 404 not found.
+		// // Url
+		{"tests/invalid_url_schema.yml", "url"},      // Missing schema.
+		{"tests/invalid_url_404notfound.yml", "url"}, // 404 not found.
 
-		{"tests/invalid_url_schema.yml", "url"},      // Invalid url. Missing schema.
-		{"tests/invalid_url_404notfound.yml", "url"}, // Invalid url. 404 not found.
+		// // UpstreamURL
+		{"tests/valid_upstream-url_missing.yml", ""},                   // Valid. Missing non-mandatory.
+		{"tests/invalid_upstream-url_schema.yml", "upstream-url"},      // Missing schema.
+		{"tests/invalid_upstream-url_404notfound.yml", "upstream-url"}, // 404 not found.
 
-		{"tests/valid_upstream-url_missing.yml", ""},                   // Valid upstream-url. Missing upstream-url.
-		{"tests/invalid_upstream-url_schema.yml", "upstream-url"},      // Invalid upstream-url. Missing schema.
-		{"tests/invalid_upstream-url_404notfound.yml", "upstream-url"}, // Invalid upstream-url. 404 not found.
+		//Legal
+		{"tests/valid_legal_missing.yml", ""},                              // Valid. Missing non-mandatory.
+		{"tests/invalid_legal-repo-owner_missing.yml", "legal/repo-owner"}, // Missing legal/repo-owner.
+		{"tests/invalid_legal-license_missing.yml", "legal/license"},       // Missing legal/license.
+		{"tests/invalid_legal-license_nospdxlicense.yml", "legal/license"}, // Non-SPDX license.
+
 	}
 
 	for _, test := range testFiles {
@@ -50,7 +58,7 @@ func TestDecodeValueErrors(t *testing.T) {
 				} else if len(multi) != 1 {
 					t.Errorf("too many errors generated: %#v", multi)
 				} else if e, ok := multi[0].(ErrorInvalidValue); !ok || e.Key != test.errkey {
-					t.Errorf("wrong error generated: %#v", err)
+					t.Errorf("wrong error generated: %#v - instead of %s", e, test.errkey)
 				}
 			}
 		})
