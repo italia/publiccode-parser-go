@@ -11,17 +11,17 @@ func TestDecodeValueErrors(t *testing.T) {
 		file   string
 		errkey string
 	}{
-		// // valid
+		// A complete and valid yml
 		{"tests/valid.yml", ""}, // Valid yml.
 
-		// // Version
+		// Version
 		{"tests/invalid_version.yml", "version"}, // Invalid version.
 
-		// // Url
+		// Url
 		{"tests/invalid_url_schema.yml", "url"},      // Missing schema.
 		{"tests/invalid_url_404notfound.yml", "url"}, // 404 not found.
 
-		// // UpstreamURL
+		// UpstreamURL
 		{"tests/valid_upstream-url_missing.yml", ""},                   // Valid. Missing non-mandatory.
 		{"tests/invalid_upstream-url_schema.yml", "upstream-url"},      // Missing schema.
 		{"tests/invalid_upstream-url_404notfound.yml", "upstream-url"}, // 404 not found.
