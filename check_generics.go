@@ -4,7 +4,6 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"path/filepath"
 	"regexp"
 	"time"
 )
@@ -31,7 +30,11 @@ func (p *parser) checkUrl(key string, value string) (*url.URL, error) {
 	if u.Scheme == "" {
 		return nil, newErrorInvalidValue(key, "missing URL scheme: %s", value)
 	}
-	if r, err := http.Get(value); err != nil || r.StatusCode != 200 {
+	r, err := http.Get(value)
+	if err != nil {
+		return nil, newErrorInvalidValue(key, "Http.get failed for: %s", value)
+	}
+	if r.StatusCode != 200 {
 		return nil, newErrorInvalidValue(key, "URL is unreachable: %s", value)
 	}
 
@@ -40,8 +43,18 @@ func (p *parser) checkUrl(key string, value string) (*url.URL, error) {
 
 // checkFile tells whether the file resource exists and return it.
 func (p *parser) checkFile(key string, fn string) (string, error) {
-	if _, err := os.Stat(fn); err != nil {
-		return "", newErrorInvalidValue(key, "file does not exist: %v", fn)
+	if BaseDir == "" {
+		if _, err := os.Stat(fn); err != nil {
+			return "", newErrorInvalidValue(key, "file does not exist: %v", fn)
+		}
+	} else {
+		//Remote bitbucket
+		_, err := p.checkUrl(key, BaseDir+fn)
+
+		//_, err := p.checkUrl(key, "https://bitbucket.org/marco-capobussi/publiccode-example/raw/master/"+fn)
+		if err != nil {
+			return "", newErrorInvalidValue(key, "file does not exist on remote: %v", BaseDir+fn)
+		}
 	}
 	return fn, nil
 }
@@ -56,22 +69,16 @@ func (p *parser) checkDate(key string, value string) (time.Time, error) {
 	}
 }
 
-// checkDate tells whether the string in a valid image. It also checks if the file exists.
+// checkImage tells whether the string in a valid image. It also checks if the file exists.
 func (p *parser) checkImage(key string, value string) error {
 	// Based on https://github.com/italia/publiccode.yml/blob/master/schema.md#key-descriptionlogo
 	//TODO: check two version of the Logo
-	//TODO: check .png size
+	//TODO: check extensions and image size
 	//TODO: raster should exists iff vector does not exists
+
 	if _, err := p.checkFile(key, value); err != nil {
 		return err
 	}
-	fileExt := filepath.Ext(value)
-	for _, v := range []string{".png", ".svg"} {
-		if v == fileExt {
-			p.pc.Maintenance.Type = value
-			return nil
-		}
-	}
-	return newErrorInvalidValue(key, "image must be .svg or .png: %v", value)
 
+	return nil
 }

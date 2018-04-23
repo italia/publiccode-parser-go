@@ -5,6 +5,11 @@ import (
 	"time"
 )
 
+// BaseDir is the Base Directory of the PublicCode file.
+// If local will be empty: ""
+// If remote will be the url of the repository
+var BaseDir = ""
+
 // Version of the PublicCode specs.
 // Source https://github.com/publiccodenet/publiccode.yml
 const Version = "0.1"
