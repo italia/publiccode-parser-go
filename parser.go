@@ -3,13 +3,11 @@ package publiccode
 import (
 	"bytes"
 	"fmt"
-	"net/url"
-	"os"
-	"time"
 
 	"gopkg.in/yaml.v2"
 )
 
+// Parse loads the yaml bytes and tries to parse it. Return an error if fails.
 func Parse(in []byte, pc *PublicCode) error {
 	var s map[interface{}]interface{}
 
@@ -57,56 +55,47 @@ func (p *parser) decoderec(prefix string, s map[interface{}]interface{}) (es Err
 			k = prefix + "/" + k
 		}
 		delete(p.missing, k)
+
 		switch v := v.(type) {
-		case map[interface{}]interface{}:
-			if errs := p.decoderec(k, v); len(errs) > 0 {
-				es = append(es, errs...)
-			}
 		case string:
 			if err := p.decodeString(k, v); err != nil {
 				es = append(es, err)
 			}
 		case []interface{}:
-			var sl []string
+			sl := []string{}
+			sli := make(map[interface{}]interface{})
+
 			for idx, v1 := range v {
+				// if array of strings
 				if s, ok := v1.(string); ok {
 					sl = append(sl, s)
+					if len(sl) == len(v) { //the v1.(string) check should be extracted.
+						if err := p.decodeArrString(k, sl); err != nil {
+							es = append(es, err)
+						}
+					}
+					// if array of objects
+				} else if _, ok := v1.(map[interface{}]interface{}); ok {
+					sli[k] = v1
+					if err := p.decodeArrObj(k, sli); err != nil {
+						es = append(es, err)
+					}
+
 				} else {
 					es = append(es, newErrorInvalidValue(k, "array element %d not a string", idx))
 				}
 			}
-			if err := p.decodeArrString(k, sl); err != nil {
-				es = append(es, err)
+		case map[interface{}]interface{}:
+
+			if errs := p.decoderec(k, v); len(errs) > 0 {
+				es = append(es, errs...)
 			}
 		default:
-			panic(fmt.Errorf("invalid type: %T", v))
+			if v == nil {
+				panic(fmt.Errorf("key \"%s\" is empty. Remove it or fill with valid values.", k))
+			}
+			panic(fmt.Errorf("key \"%s\" - invalid type: %T", k, v))
 		}
 	}
 	return
-}
-
-func (p *parser) checkFile(key string, fn string) error {
-	if _, err := os.Stat(fn); err != nil {
-		return newErrorInvalidValue(key, "file does not exist: %v", fn)
-	}
-	return nil
-}
-
-func (p *parser) checkUrl(key string, value string) (*url.URL, error) {
-	u, err := url.Parse(value)
-	if err != nil {
-		return nil, newErrorInvalidValue(key, "not a valid URL: %s", value)
-	}
-	if u.Scheme == "" {
-		return nil, newErrorInvalidValue(key, "missing URL scheme: %s", value)
-	}
-	return u, nil
-}
-
-func (p *parser) checkDate(key string, value string) (time.Time, error) {
-	if t, err := time.Parse("2006-01-02", value); err != nil {
-		return t, newErrorInvalidValue(key, "cannot parse date: %v", err)
-	} else {
-		return t, nil
-	}
 }
