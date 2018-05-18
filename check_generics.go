@@ -70,15 +70,17 @@ func (p *parser) checkDate(key string, value string) (time.Time, error) {
 }
 
 // checkImage tells whether the string in a valid image. It also checks if the file exists.
-func (p *parser) checkImage(key string, value string) error {
-	// Based on https://github.com/italia/publiccode.yml/blob/master/schema.md#key-descriptionlogo
-	//TODO: check two version of the Logo
-	//TODO: check extensions and image size
-	//TODO: raster should exists iff vector does not exists
+func (p *parser) checkImage(key string, value string) (string, error) {
+	// Based on:
+	// https://github.com/publiccodenet/publiccode.yml/blob/develop/schema.md#key-logo
+	// https://github.com/publiccodenet/publiccode.yml/blob/develop/schema.md#key-monochromelogo
+	//TODO: check extensions
+	//TODO: check image size
 
-	if _, err := p.checkFile(key, value); err != nil {
-		return err
+	file, err := p.checkFile(key, value)
+	if err != nil {
+		return file, err
 	}
 
-	return nil
+	return file, nil
 }

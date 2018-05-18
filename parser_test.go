@@ -5,6 +5,8 @@ import (
 	"io/ioutil"
 	"net/http"
 	"testing"
+
+	"github.com/davecgh/go-spew/spew"
 )
 
 // Test publiccode.yml local files for key errors.
@@ -17,24 +19,20 @@ func TestDecodeValueErrors(t *testing.T) {
 	}{
 		// A complete and valid yml
 		{"tests/valid.yml", ""}, // Valid yml.
+		//
+		// // Version
+		// {"tests/invalid_version.yml", "publiccode-yaml-version"}, // Invalid version.
 
-		// Version
-		{"tests/invalid_version.yml", "version"}, // Invalid version.
-
-		// Url
-		{"tests/invalid_url_schema.yml", "url"},      // Missing schema.
-		{"tests/invalid_url_404notfound.yml", "url"}, // 404 not found.
-
-		// UpstreamURL
-		{"tests/valid_upstream-url_missing.yml", ""},                   // Valid. Missing non-mandatory.
-		{"tests/invalid_upstream-url_schema.yml", "upstream-url"},      // Missing schema.
-		{"tests/invalid_upstream-url_404notfound.yml", "upstream-url"}, // 404 not found.
-
-		//Legal
-		{"tests/valid_legal_missing.yml", ""},                              // Valid. Missing non-mandatory.
-		{"tests/invalid_legal-repo-owner_missing.yml", "legal/repo-owner"}, // Missing legal/repo-owner.
-		{"tests/invalid_legal-license_missing.yml", "legal/license"},       // Missing legal/license.
-		{"tests/invalid_legal-license_nospdxlicense.yml", "legal/license"}, // Non-SPDX license.
+		// // Name, ApplicationSuite (no test), URL, LandingURL
+		// // Name
+		// {"tests/invalid_name_missing.yml", "name"}, // Missing name.
+		// // Url
+		// {"tests/invalid_url_missing.yml", "url"},     // Missing url.
+		// {"tests/invalid_url_schema.yml", "url"},      // Missing schema.
+		// {"tests/invalid_url_404notfound.yml", "url"}, // 404 not found.
+		// // LandingUrl
+		// {"tests/invalid_landingUrl_schema.yml", "landingURL"},      // Missing schema.
+		// {"tests/invalid_landingUrl_404notfound.yml", "landingURL"}, // 404 not found.
 
 	}
 
@@ -52,6 +50,8 @@ func TestDecodeValueErrors(t *testing.T) {
 			var pc PublicCode
 			err = Parse(data, &pc)
 
+			spew.Dump(pc)
+
 			if test.errkey == "" && err != nil {
 				t.Error("unexpected error:\n", err)
 			} else if test.errkey != "" && err == nil {
@@ -62,7 +62,7 @@ func TestDecodeValueErrors(t *testing.T) {
 				} else if len(multi) != 1 {
 					t.Errorf("too many errors generated: %#v", multi)
 				} else if e, ok := multi[0].(ErrorInvalidValue); !ok || e.Key != test.errkey {
-					t.Errorf("wrong error generated: %#v - instead of %s", e, test.errkey)
+					t.Errorf("wrong error generated: %#v - instead of %s", e.Key, test.errkey)
 				}
 			}
 		})
@@ -77,11 +77,11 @@ func TestDecodeValueErrorsRemote(t *testing.T) {
 		file   string
 		errkey string
 	}{
-		// A complete and valid REMOTE yml
-		{"https://bitbucket.org/marco-capobussi/publiccode-example/raw/master/publiccode.yml", ""}, // Valid remote publiccode.yml.
-
-		// A complete but invalid REMOTE yml
-		{"https://bitbucket.org/marco-capobussi/publiccode-example/raw/master/publiccode.yml-invalid", "description/logo"}, // Invalid remote publiccode.yml.
+		// // A complete and valid REMOTE yml
+		// {"https://bitbucket.org/marco-capobussi/publiccode-example/raw/master/publiccode.yml", ""}, // Valid remote publiccode.yml.
+		//
+		// // A complete but invalid REMOTE yml
+		// {"https://bitbucket.org/marco-capobussi/publiccode-example/raw/master/publiccode.yml-invalid", "description/logo"}, // Invalid remote publiccode.yml.
 	}
 
 	for _, test := range testRemoteFiles {

@@ -12,64 +12,101 @@ var BaseDir = ""
 
 // Version of the PublicCode specs.
 // Source https://github.com/publiccodenet/publiccode.yml
-const Version = "0.1"
+const Version = "http://w3id.org/publiccode/version/0.1"
 
-// A PublicCode represents a standard metadata description for public software and policy repositories.
 type PublicCode struct {
-	Version     string
-	Url         *url.URL
-	UpstreamUrl []*url.URL
+	PubliccodeYamlVersion string `yaml:"publiccode-yaml-version"`
+
+	Name             string   `yaml:"name"`
+	ApplicationSuite string   `yaml:"applicationSuite"`
+	URL              *url.URL `yaml:"url"`
+	LandingURL       *url.URL `yaml:"landingURL"`
+
+	IsBasedOn       []string  `yaml:"isBasedOn"`
+	SoftwareVersion string    `yaml:"softwareVersion"`
+	ReleaseDate     time.Time `yaml:"releaseDate"`
+	Logo            string    `yaml:"logo"`
+	MonochromeLogo  string    `yaml:"monochromeLogo"`
+
+	Platforms []string `yaml:"platforms"`
+
+	API *url.URL `yaml:"api"`
+
+	Tags []string `yaml:"tags"`
+
+	FreeTags map[string][]string `yaml:"freeTags"`
+
+	UsedBy []string `yaml:"usedBy"`
+
+	Roadmap *url.URL `yaml:"roadmap"`
+
+	DevelopmentStatus string `yaml:"developmentStatus"`
+
+	SoftwareType struct {
+		Type        string     `yaml:"type"`
+		IsRelatedTo []*url.URL `yaml:"isRelatedTo"`
+	} `yaml:"softwareType"`
+
+	IntendedAudience struct {
+		OnlyFor              []string `yaml:"onlyFor"`
+		Countries            []string `yaml:"countries"`
+		UnsupportedCountries []string `yaml:"unsupportedCountries"`
+	} `yaml:"intendedAudience"`
+
+	Description map[string]Desc `yaml:"description"`
 
 	Legal struct {
-		License            string
-		MainCopyrightOwner string
-		AuthorsFile        string
-		RepoOwner          string
-	}
+		License            string `yaml:"license"`
+		MainCopyrightOwner string `yaml:"mainCopyrightOwner"`
+		RepoOwner          string `yaml:"repoOwner"`
+		AuthorsFile        string `yaml:"authorsFile"`
+	} `yaml:"legal"`
 
 	Maintenance struct {
-		Type              string
-		Until             time.Time
-		Maintainer        []string
-		TechnicalContacts []Contact
-	}
+		Type        string       `yaml:"type"`
+		Contractors []Contractor `yaml:"contractors"`
+		Contacts    []Contact    `yaml:"contacts"`
+	} `yaml:"maintenance"`
 
-	Description struct {
-		Name        string
-		Logo        []string
-		Shortdesc   []Desc
-		LongDesc    []Desc
-		Screenshots []string
-		Videos      []*url.URL
-		Version     string
-		Released    time.Time
-		Platforms   string
-	}
-
-	Meta struct {
-		Scope    []string
-		PaType   []string
-		Category string
-		Tags     []string
-		UsedBy   []string
-	}
+	Localisation struct {
+		LocalisationReady  bool     `yaml:"localisationReady"`
+		AvailableLanguages []string `yaml:"availableLanguages"`
+	} `yaml:"localisation"`
 
 	Dependencies struct {
-		Hardware    []string
-		Open        []string
-		Proprietary []string
-	}
+		Open        []Dependency `yaml:"open"`
+		Proprietary []Dependency `yaml:"proprietary"`
+		Hardware    []Dependency `yaml:"hardware"`
+	} `yaml:"dependencies"`
 }
-
-// A Contact represents all the standard informations about a technical contact.
-type Contact struct {
-	Name        string
-	Email       string
-	Affiliation string
-}
-
-// A Desc represents a generic description with multiple languages.
 type Desc struct {
-	En string
-	It string
+	LocalisedName    string     `yaml:"localisedName"`
+	ShortDescription string     `yaml:"shortDescription"`
+	LongDescription  string     `yaml:"longDescription"`
+	Documentation    *url.URL   `yaml:"documentation"`
+	FeatureList      []string   `yaml:"featureList"`
+	Screenshots      []string   `yaml:"screenshots"`
+	Videos           []*url.URL `yaml:"videos"`
+	Awards           []string   `yaml:"awards"`
+}
+
+type Contractor struct {
+	Name    string    `yaml:"name"`
+	Website *url.URL  `yaml:"website"`
+	Until   time.Time `yaml:"until"`
+}
+
+type Contact struct {
+	Name        string `yaml:"name"`
+	Email       string `yaml:"email"`
+	Affiliation string `yaml:"affiliation"`
+	Phone       string `yaml:"phone"`
+}
+
+type Dependency struct {
+	Name       string `yaml:"name"`
+	VersionMin string `yaml:"versionMin"`
+	VersionMax string `yaml:"versionMax"`
+	Optional   bool   `yaml:"optional"`
+	Version    string `yaml:"version"`
 }

@@ -45,6 +45,7 @@ func (p *parser) parse(s map[interface{}]interface{}) error {
 }
 
 func (p *parser) decoderec(prefix string, s map[interface{}]interface{}) (es ErrorParseMulti) {
+
 	for ki, v := range s {
 		k, ok := ki.(string)
 		if !ok {
@@ -59,6 +60,10 @@ func (p *parser) decoderec(prefix string, s map[interface{}]interface{}) (es Err
 		switch v := v.(type) {
 		case string:
 			if err := p.decodeString(k, v); err != nil {
+				es = append(es, err)
+			}
+		case bool:
+			if err := p.decodeBool(k, v); err != nil {
 				es = append(es, err)
 			}
 		case []interface{}:
@@ -85,8 +90,8 @@ func (p *parser) decoderec(prefix string, s map[interface{}]interface{}) (es Err
 					es = append(es, newErrorInvalidValue(k, "array element %d not a string", idx))
 				}
 			}
-		case map[interface{}]interface{}:
 
+		case map[interface{}]interface{}:
 			if errs := p.decoderec(k, v); len(errs) > 0 {
 				es = append(es, errs...)
 			}

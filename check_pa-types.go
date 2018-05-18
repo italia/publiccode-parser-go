@@ -14,10 +14,10 @@ func (p *parser) checkPaTypes(key, paType string) (string, error) {
 var paTypes = []string{
 	// International.
 	"city",       // City
-	"hospital",   // Hospital
-	"police",     // Police
-	"school",     // School
-	"university", // University
+	"health",     // Health service
+	"police",     // Police forces
+	"school",     // School of any level
+	"university", // University of any level
 	// Italy.
 	"it-ag-turismo",    // Agenzie ed Enti per il Turismo
 	"it-ag-lavoro",     // Agenzie ed Enti Regionali del Lavoro

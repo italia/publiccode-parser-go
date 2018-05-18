@@ -1,8 +1,7 @@
 publiccode-yaml-version: "http://w3id.org/publiccode/version/0.1"
 
-name: Medusa
 applicationSuite: MegaProductivitySuite
-url: "hxxps://github.com/italia/developers.italia.it.git"        # URL of this repository
+url: "https://github.com/italia/developers.italia.it.git"        # URL of this repository
 landingURL: "https://developers.italia.it"
 
 isBasedOn: "https://github.com/italia/developers.italia.it.git"   # The original repository, "Otello"
