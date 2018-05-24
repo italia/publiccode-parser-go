@@ -4,7 +4,9 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"path/filepath"
 	"regexp"
+	"strings"
 	"time"
 )
 
@@ -70,17 +72,32 @@ func (p *parser) checkDate(key string, value string) (time.Time, error) {
 }
 
 // checkImage tells whether the string in a valid image. It also checks if the file exists.
+// Reference: https://github.com/publiccodenet/publiccode.yml/blob/develop/schema.mdù
+// TODO: check image size.
 func (p *parser) checkImage(key string, value string) (string, error) {
-	// Based on:
-	// https://github.com/publiccodenet/publiccode.yml/blob/develop/schema.md#key-logo
-	// https://github.com/publiccodenet/publiccode.yml/blob/develop/schema.md#key-monochromelogo
-	//TODO: check extensions
-	//TODO: check image size
+	validExt := []string{".svg", ".svgz", ".png"}
+	ext := strings.ToLower(filepath.Ext(value))
 
+	// Check for valid extension.
+	if !contains(validExt, ext) {
+		return value, newErrorInvalidValue(key, "invalid file extension for: %s", value)
+	}
+
+	// Check existence of file.
 	file, err := p.checkFile(key, value)
 	if err != nil {
 		return file, err
 	}
 
 	return file, nil
+}
+
+// contains returns true if the slice of strings contains the searched string.
+func contains(slice []string, item string) bool {
+	for _, s := range slice {
+		if s == item {
+			return true
+		}
+	}
+	return false
 }
