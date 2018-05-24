@@ -78,7 +78,10 @@ type PublicCode struct {
 		Proprietary []Dependency `yaml:"proprietary"`
 		Hardware    []Dependency `yaml:"hardware"`
 	} `yaml:"dependencies"`
+
+	Ita ExtensionITA `yaml:"ita"`
 }
+
 type Desc struct {
 	LocalisedName    string     `yaml:"localisedName"`
 	ShortDescription string     `yaml:"shortDescription"`

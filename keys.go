@@ -23,10 +23,29 @@ var mandatoryKeys = []string{
 }
 
 func (p *parser) decodeBool(key string, boolValue bool) (err error) {
-
 	switch key {
 	case "localisation/localisationReady":
 		p.pc.Localisation.LocalisationReady = boolValue
+	case "ita/spid":
+		p.pc.Ita.Spid = boolValue
+	case "ita/pagopa":
+		p.pc.Ita.Pagopa = boolValue
+	case "ita/cie":
+		p.pc.Ita.Cie = boolValue
+	case "ita/anpr":
+		p.pc.Ita.Anpr = boolValue
+	case "ita/designKit/seo":
+		p.pc.Ita.DesignKit.Seo = boolValue
+	case "ita/designKit/ui":
+		p.pc.Ita.DesignKit.UI = boolValue
+	case "ita/designKit/web":
+		p.pc.Ita.DesignKit.Web = boolValue
+	case "ita/designKit/content":
+		p.pc.Ita.DesignKit.Content = boolValue
+	case "ita/accessibile":
+		p.pc.Ita.Accessibile = boolValue
+	case "ita/interoperabile":
+		p.pc.Ita.Interoperabile = boolValue
 
 	default:
 		return ErrorInvalidKey{key + " : Boolean"}
@@ -140,7 +159,9 @@ func (p *parser) decodeString(key string, value string) (err error) {
 			}
 		}
 		return newErrorInvalidValue(key, "invalid value: %s", value)
-
+	case key == "ita/riuso/codiceIPA":
+		// TODO: check valid codiceIPA
+		p.pc.Ita.Riuso.CodiceIPA = value
 	default:
 		return ErrorInvalidKey{key + " : String"}
 	}
