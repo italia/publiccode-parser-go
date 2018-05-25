@@ -1,7 +1,10 @@
 package publiccode
 
+import "strings"
+
 // checkCountryCodes2 tells whether the 2-letter country code is valid (ISO 3166-1 alpha-2) or not and returns it.
 func (p *parser) checkCountryCodes2(key, code string) error {
+	code = strings.ToUpper(code)
 	for _, c := range countryCodes2 {
 		if c == code {
 			return nil
@@ -10,7 +13,7 @@ func (p *parser) checkCountryCodes2(key, code string) error {
 	return newErrorInvalidValue(key, "unknown ISO 3166-1 alpha-2 country code: %s", code)
 }
 
-// A countryCodes2 represents a list of the valid (ISO 3166-1 alpha-2) codes.
+// A countryCodes2 is a list of the valid (ISO 3166-1 alpha-2) codes.
 // Updated: 2018-05-01
 // Reference: https://www.iso.org/glossary-for-iso-3166.html
 var countryCodes2 = []string{
@@ -40,7 +43,7 @@ var countryCodes2 = []string{
 	"BJ", // Benin
 	"BM", // Bermuda
 	"BT", // Bhutan
-	"BO", // Bolivia, Plurinational State of
+	"BO", // Bolivia (Plurinational State of)
 	"BQ", // Bonaire, Sint Eustatius and Saba
 	"BA", // Bosnia and Herzegovina
 	"BW", // Botswana
@@ -131,8 +134,8 @@ var countryCodes2 = []string{
 	"KZ", // Kazakhstan
 	"KE", // Kenya
 	"KI", // Kiribati
-	"KP", // Korea; Democratic People's Republic of
-	"KR", // Korea; Republic of
+	"KP", // Democratic People's Republic of Korea
+	"KR", // Republic of Korea
 	"KW", // Kuwait
 	"KG", // Kyrgyzstan
 	"LA", // Lao People's Democratic Republic
@@ -158,8 +161,8 @@ var countryCodes2 = []string{
 	"MU", // Mauritius
 	"YT", // Mayotte
 	"MX", // Mexico
-	"FM", // Micronesia; Federated States of
-	"MD", // Moldova; Republic of
+	"FM", // Micronesia (Federated States of)
+	"MD", // Republic of Moldova
 	"MC", // Monaco
 	"MN", // Mongolia
 	"ME", // Montenegro
@@ -183,7 +186,7 @@ var countryCodes2 = []string{
 	"OM", // Oman
 	"PK", // Pakistan
 	"PW", // Palau
-	"PS", // Palestine; State of
+	"PS", // State of Palestine
 	"PA", // Panama
 	"PG", // Papua New Guinea
 	"PY", // Paraguay
@@ -254,10 +257,10 @@ var countryCodes2 = []string{
 	"UY", // Uruguay
 	"UZ", // Uzbekistan
 	"VU", // Vanuatu
-	"VE", // Venezuela; Bolivarian Republic of
+	"VE", // Venezuela (Bolivarian Republic of)
 	"VN", // Viet Nam
-	"VG", // Virgin Islands; British
-	"VI", // Virgin Islands; U.S.
+	"VG", // British Virgin Islands
+	"VI", // United States Virgin Islands
 	"WF", // Wallis and Futuna
 	"EH", // Western Sahara
 	"YE", // Yemen
