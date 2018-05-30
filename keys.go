@@ -124,14 +124,14 @@ func (p *parser) decodeString(key string, value string) (err error) {
 		var desc = p.pc.Description[k]
 		if attr == "localisedName" {
 			desc.LocalisedName = value
-			return
+			return p.checkLanguageCodes3(key, k)
 		}
 		if attr == "longDescription" {
 			if len(value) < 500 || len(value) > 10000 {
 				return newErrorInvalidValue(key, "\"%s\" has an invalid number of characters: %d.  (min 500 chars, max 10.000 chars)", key, len(value))
 			}
 			desc.LongDescription = value
-			return
+			return p.checkLanguageCodes3(key, k)
 		}
 		if attr == "documentation" {
 			desc.Documentation, err = p.checkUrl(key, value)
@@ -142,7 +142,7 @@ func (p *parser) decodeString(key string, value string) (err error) {
 				return newErrorInvalidValue(key, "\"%s\" has an invalid number of characters: %d.  (max 150 chars)", key, len(value))
 			}
 			desc.ShortDescription = value
-			return err
+			return p.checkLanguageCodes3(key, k)
 		}
 		return ErrorInvalidKey{key + " : String"}
 	case key == "legal/authorsFile":
@@ -265,7 +265,7 @@ func (p *parser) decodeArrString(key string, value []string) error {
 				desc.Videos = append(desc.Videos, u)
 			}
 		}
-		return nil
+		return p.checkLanguageCodes3(key, k)
 	case key == "localisation/availableLanguages":
 		for _, v := range value {
 			p.pc.Localisation.AvailableLanguages = append(p.pc.Localisation.AvailableLanguages, v)
