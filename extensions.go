@@ -19,6 +19,8 @@ package publiccode
 type ExtensionITA struct {
 	Accessibile    bool `yaml:"accessibile"`
 	Interoperabile bool `yaml:"interoperabile"`
+	Privacy        bool `yaml:"privacy"`
+	Sicurezza      bool `yaml:"sicurezza"`
 	Spid           bool `yaml:"spid"`
 	Cie            bool `yaml:"cie"`
 	Anpr           bool `yaml:"anpr"`

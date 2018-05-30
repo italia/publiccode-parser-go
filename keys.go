@@ -46,6 +46,10 @@ func (p *parser) decodeBool(key string, boolValue bool) (err error) {
 		p.pc.Ita.Accessibile = boolValue
 	case "ita/interoperabile":
 		p.pc.Ita.Interoperabile = boolValue
+	case "ita/privacy":
+		p.pc.Ita.Privacy = boolValue
+	case "ita/sicurezza":
+		p.pc.Ita.Sicurezza = boolValue
 
 	default:
 		return ErrorInvalidKey{key + " : Boolean"}

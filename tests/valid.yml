@@ -22,7 +22,6 @@ tags:
   - robotics
   - it-portale-trasparenza
 
-
 freeTags:
   en:
     - english-free-tag
@@ -141,3 +140,25 @@ dependencies:             # List of dependencies. The only mandatory list is the
   hardware:             # List of special hardware required. Optional.
     - name: NFC Reader
       optional: yes
+
+# ITA: Italian extension.
+ita:
+  accessibile: yes
+  interoperabile: yes
+  privacy: yes
+  sicurezza: yes
+
+  riuso:
+    # Codice IPA della PA che ha pubblicato questo repo (repo-owner)
+    codiceIPA: c_h501
+
+  spid: yes
+  pagopa: yes
+  cie: yes
+  anpr: yes
+
+  designKit:
+    seo: no
+    ui: yes
+    web: yes
+    content: no
