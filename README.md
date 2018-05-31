@@ -4,75 +4,16 @@ A Go parser for publiccode.yml files
 
 **Features**
 
-* Parse and validate a standard publiccode.yml (no extensions)
+* Parse and validate a standard international publiccode.yml
+* Includes italian extension.
 
 **Contributing**
 
-Example steps in order to add a key-val (add `nickname` field).
+Contributing is always appreciated.
 
-* Add `nickname` in `valid.yml`
+Feel free to open issues, fork and submit a Pull Request.
 
-```
-publiccode-yaml-version: "http://w3id.org/publiccode/version/0.1"
-name: Medusa
-
-nickname: Meds
-
-applicationSuite: MegaProductivitySuite
-url: "https://github.com/italia/developers.italia.it.git"        # URL of this repository
-landingURL: "https://developers.italia.it"
-...
-```
-
-* Add it into publiccode struct in `publiccode.go` (or its `extensions.go`)
-
-```
-type PublicCode struct {
-	PubliccodeYamlVersion string `yaml:"publiccode-yaml-version"`
-	...
-
-  Nickname         string   `yaml:"nickname"`
-
-  ...
-}
-```
-
-* Run go tests.
-
-```
-go test -race .
-
---- FAIL: TestDecodeValueErrors (5.22s)
-    --- FAIL: TestDecodeValueErrors/#00 (5.22s)
-    	parser_test.go:54: unexpected error:
-    		 invalid key: nickname : String
-FAIL
-FAIL	publiccode.yml-parser-go	5.255s
-```
-
-* Catched! `nickname` key is detected as String, and there is no definition in the keys list.
-
-* Open `keys.go` and search the right function that will handle the new String element.
-  When found, add the right key to the switch case.
-
-```
-func (p *parser) decodeString(key string, value string) (err error) {
-	switch {
-  ...
-  case key == "nickname":
-    p.pc.Nickname = value
-  ...
-  }
-}
-```
-
-* Done!
-
-* Run go tests again. It should return `ok` and no errors.
-
-```
-ok  	publiccode.yml-parser-go	6.665s
-```
+If you want to know more, like "add a new field", check out CONTRIBUTING.md
 
 ## License
 
