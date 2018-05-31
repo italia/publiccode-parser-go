@@ -89,9 +89,6 @@ func (p *parser) decodeString(key string, value string) (err error) {
 		return err
 	case key == "platforms":
 		return p.decodeArrString(key, []string{value})
-	case key == "api":
-		p.pc.API, err = p.checkUrl(key, value)
-		return err
 	case key == "tags":
 		return p.decodeArrString(key, []string{value})
 	case key == "roadmap":
@@ -198,6 +195,7 @@ func (p *parser) decodeArrString(key string, value []string) error {
 		for _, v := range value {
 			p.pc.FreeTags[k] = append(p.pc.FreeTags[k], v)
 		}
+		return p.checkLanguageCodes3(key, k)
 	case key == "usedBy":
 		for _, v := range value {
 			p.pc.UsedBy = append(p.pc.UsedBy, v)

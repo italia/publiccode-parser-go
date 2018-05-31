@@ -30,8 +30,6 @@ type PublicCode struct {
 
 	Platforms []string `yaml:"platforms"`
 
-	API *url.URL `yaml:"api"`
-
 	Tags []string `yaml:"tags"`
 
 	FreeTags map[string][]string `yaml:"freeTags"`

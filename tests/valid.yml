@@ -15,17 +15,78 @@ platforms:                   # or Windows, Mac, Linux, etc.
   - android
   - ios
 
-api: "https://docs.developers.italia.it"
-
 tags:
-  - content-management
+  - 3dgraphics
+  - accessibility
+  - accounting
+  - amusement
+  - archiving
+  - art
   - artificial-intelligence
+  - backend
+  - calculator
+  - calendar
+  - chat
+  - classroom-management
+  - clock
+  - content-management
+  - compression
+  - construction
+  - contact-management
+  - database
+  - debugger
+  - dictionary
+  - documentation
+  - electronics
+  - email
+  - emulator
+  - engineering
+  - file-manager
+  - file-transfer
+  - finance
+  - flowchart
+  - gui-designer
+  - identity
+  - instant-messaging
+  - library
+  - medical
+  - monitor
   - museum
+  - music
+  - news
+  - ocr
+  - parallel-computing
+  - photography
+  - presentation
+  - printing
+  - procurement
+  - project-management
+  - publishing
+  - raster-graphics
+  - remote-access
+  - revision-control
+  - robotics
+  - scanning
+  - security
+  - sports
+  - spreadsheet
+  - telephony
+  - terminal-emulator
+  - texteditor
+  - texttools
+  - translation
+  - vector-graphics
+  - video-conference
+  - viewer
+  - web-browser
+  - whistleblowing
+  - word-processor
+  - wordprocessor
 
 freeTags:
-  en:
+  eng:
     - english-free-tag
-  it:
+  ita:
     - tag-libero-italiano
 
 usedBy:
@@ -45,7 +106,7 @@ softwareType:
 
 intendedAudience:
   onlyFor:
-    - city
+    - cities
     - health
     - it-ag-agricolo
   countries: # FIXME ISO 3166-1 alpha-2 + EU
