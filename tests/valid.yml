@@ -158,10 +158,12 @@ legal:
 
 maintenance:
   type: "contract"
+
   contractors:
     - name: "Fornitore Privato SPA" # if maintainance is a contract
       website: "https://developers.italia.it"
       until: "2019-01-01"
+
   contacts:
     - name: Francesco Rossi
       email: "francesco.rossi@comune.reggioemilia.it"

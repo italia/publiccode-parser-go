@@ -276,6 +276,9 @@ func (p *parser) decodeArrString(key string, value []string) error {
 		return p.checkLanguageCodes3(key, k)
 	case key == "localisation/availableLanguages":
 		for _, v := range value {
+			if err := p.checkLanguageCodes3(key, v); err != nil {
+				return err
+			}
 			p.pc.Localisation.AvailableLanguages = append(p.pc.Localisation.AvailableLanguages, v)
 		}
 
