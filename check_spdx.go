@@ -1,13 +1,16 @@
 package publiccode
 
+import spdxValidator "github.com/r3vit/go-spdx/spdx"
+
 // checkPaTypes tells whether the pa-type is a valid type or not and returns it.
 func (p *parser) checkSpdx(key, spdx string) error {
-	for _, l := range spdxLicenses {
-		if l == spdx {
-			return nil
-		}
+	_, err := spdxValidator.Parse(spdx)
+	if err != nil {
+		return newErrorInvalidValue(key, "error: %v - invalid value: %s", err, spdx)
 	}
-	return newErrorInvalidValue(key, "unknown license: %s", spdx)
+
+	return nil
+
 }
 
 // A spdxLicenses represents a list of the SPDX valid licenses.
