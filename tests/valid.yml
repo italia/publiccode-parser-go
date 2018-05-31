@@ -7,7 +7,7 @@ landingURL: "https://developers.italia.it"
 
 isBasedOn: "https://github.com/italia/developers.italia.it.git"   # The original repository, "Otello"
 softwareVersion: "1.0"                                        # Last stable version
-releaseDate: 2017-04-15                               # Date of last stable software release
+releaseDate: 2017-04-15                     # Date of last stable software release
 logo: tests/img/logo.svg
 monochromeLogo: tests/img/logo-mono.svg
 
@@ -18,9 +18,9 @@ platforms:                   # or Windows, Mac, Linux, etc.
 api: "https://docs.developers.italia.it"
 
 tags:
-  - cms
-  - robotics
-  - it-portale-trasparenza
+  - content-management
+  - artificial-intelligence
+  - museum
 
 freeTags:
   en:
