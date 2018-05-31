@@ -85,6 +85,7 @@ type Desc struct {
 	ShortDescription string     `yaml:"shortDescription"`
 	LongDescription  string     `yaml:"longDescription"`
 	Documentation    *url.URL   `yaml:"documentation"`
+	APIDocumentation *url.URL   `yaml:"apiDocumentation"`
 	FeatureList      []string   `yaml:"featureList"`
 	Screenshots      []string   `yaml:"screenshots"`
 	Videos           []*url.URL `yaml:"videos"`

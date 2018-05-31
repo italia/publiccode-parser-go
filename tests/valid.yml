@@ -107,9 +107,9 @@ softwareType:
 intendedAudience:
   onlyFor:
     - cities
-    - health
+    - health-services
     - it-ag-agricolo
-  countries: # FIXME ISO 3166-1 alpha-2 + EU
+  countries:
     - it
     - de
   unsupportedCountries:     # Explicitly unsupported countries
@@ -134,6 +134,8 @@ description:
           is and why one should need it. This is 632 characters.
 
     documentation: "https://docs.developers.italia.it"
+    apiDocumentation: "https://developers.italia.it/it/api"
+
     featureList:
        - Very important feature
        - Will run without a problem

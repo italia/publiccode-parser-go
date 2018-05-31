@@ -134,6 +134,10 @@ func (p *parser) decodeString(key string, value string) (err error) {
 			desc.Documentation, err = p.checkUrl(key, value)
 			return err
 		}
+		if attr == "apiDocumentation" {
+			desc.APIDocumentation, err = p.checkUrl(key, value)
+			return err
+		}
 		if attr == "shortDescription" {
 			if len(value) > 150 {
 				return newErrorInvalidValue(key, "\"%s\" has an invalid number of characters: %d.  (max 150 chars)", key, len(value))
@@ -210,10 +214,16 @@ func (p *parser) decodeArrString(key string, value []string) error {
 		}
 	case key == "intendedAudience/countries":
 		for _, v := range value {
+			if err := p.checkCountryCodes2(key, v); err != nil {
+				return err
+			}
 			p.pc.IntendedAudience.Countries = append(p.pc.IntendedAudience.Countries, v)
 		}
 	case key == "intendedAudience/unsupportedCountries":
 		for _, v := range value {
+			if err := p.checkCountryCodes2(key, v); err != nil {
+				return err
+			}
 			p.pc.IntendedAudience.UnsupportedCountries = append(p.pc.IntendedAudience.UnsupportedCountries, v)
 		}
 	case key == "intendedAudience/onlyFor":
