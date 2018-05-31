@@ -13,11 +13,11 @@ func (p *parser) checkPaTypes(key, paType string) (string, error) {
 // A paTypes represents a list of the types of public administration which is expected to use this software.
 var paTypes = []string{
 	// International.
-	"city",       // City
-	"health",     // Health service
-	"police",     // Police forces
-	"school",     // School of any level
-	"university", // University of any level
+	"cities",          // City
+	"health-services", // Health service
+	"police-forces",   // Police forces
+	"schools",         // School of any level
+	"universities",    // University of any level
 	// Italy.
 	"it-ag-turismo",    // Agenzie ed Enti per il Turismo
 	"it-ag-lavoro",     // Agenzie ed Enti Regionali del Lavoro
