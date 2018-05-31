@@ -12,7 +12,7 @@ func (p *parser) checkTag(key, tag string) (string, error) {
 
 // A tagList represents a list of the possible tags.
 var tagList = []string{
-	// International
+	// International tags.
 	"3dgraphics",    // application for viewing, creating, or processing 3-d graphics
 	"accessibility", // accessibility
 	"accounting",    // accounting software
@@ -79,6 +79,4 @@ var tagList = []string{
 	"whistleblowing",          // software for whistleblowing / anticorruption
 	"word-processor",          // a word processor
 	"wordprocessor",           // a word processor
-	// Italy.
-	"it-portale-trasparenza",
 }
