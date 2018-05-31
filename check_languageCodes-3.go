@@ -1,7 +1,17 @@
 package publiccode
 
-// checkLanguageCodes3 tells whether the 3-letter language code is valid (ISO 639-3 alpha-3 codes) or not and returns it.
+import "strings"
+
+// checkLanguageCodes3 tells whether the 3-letter language code is valid (ISO 639-3 alpha-3 code) or not and returns it.
 func (p *parser) checkLanguageCodes3(key, code string) error {
+	// If it's not a valid 3 letters code.
+	if len(code) != 3 {
+		return newErrorInvalidValue(key, "invalid ISO 639-3 alpha-3 country code: %s", code)
+	}
+
+	// ISO 639 codes should be considered case-insensitive.
+	// Reference: https://www.loc.gov/standards/iso639-2/faq.html#21
+	code = strings.ToLower(code)
 	for _, c := range languageCodes3 {
 		if c == code {
 			return nil
