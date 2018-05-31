@@ -2,8 +2,13 @@ package publiccode
 
 import "strings"
 
-// checkCountryCodes2 tells whether the 2-letter country code is valid (ISO 3166-1 alpha-2) or not and returns it.
+// checkCountryCodes2 tells whether the 2-letter country code is valid (ISO 3166-1 alpha-2 code) or not and returns it.
 func (p *parser) checkCountryCodes2(key, code string) error {
+	// If it's not a valid 2 letters code.
+	if len(code) != 2 {
+		return newErrorInvalidValue(key, "invalid ISO 3166-1 alpha-2 country code: %s", code)
+	}
+
 	code = strings.ToUpper(code)
 	for _, c := range countryCodes2 {
 		if c == code {
