@@ -128,12 +128,6 @@ maintenance:
 localisation:
   # Does the software support, at least by design, multiple languages?
   localisationReady: yes
-  # Languages already available
-  availableLanguages:
-    - eng
-    - ita
-    - fra
-    - deu
 
 dependencies:             # List of dependencies. The only mandatory list is the proprietary one
   open:                 # List of open dependencies. Optional

@@ -126,8 +126,6 @@ maintenance:
       phone: +39 16 24231322
 
 localisation:
-  # Does the software support, at least by design, multiple languages?
-  localisationReady: yes
   # Languages already available
   availableLanguages:
     - eng

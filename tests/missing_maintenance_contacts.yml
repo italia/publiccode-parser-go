@@ -1,4 +1,4 @@
-publiccode-yaml-version: "http://w3id.org/publiccode/version/0.k"
+publiccode-yaml-version: "http://w3id.org/publiccode/version/0.1"
 
 name: Medusa
 applicationSuite: MegaProductivitySuite
@@ -7,7 +7,7 @@ landingURL: "https://developers.italia.it"
 
 isBasedOn: "https://github.com/italia/developers.italia.it.git"   # The original repository, "Otello"
 softwareVersion: "1.0"                                        # Last stable version
-releaseDate: 2017-04-15                               # Date of last stable software release
+releaseDate: 2017-04-15                     # Date of last stable software release
 logo: tests/img/logo.svg
 monochromeLogo: tests/img/logo-mono.svg
 
@@ -15,18 +15,25 @@ platforms:                   # or Windows, Mac, Linux, etc.
   - android
   - ios
 
-api: "https://docs.developers.italia.it"
-
 tags:
-  - cms
+  - calendar
+  - chat
+  - classroom-management
+  - museum
+  - music
+  - news
+  - ocr
+  - parallel-computing
+  - revision-control
   - robotics
-  - it-portale-trasparenza
-
+  - scanning
+  - security
+  - sports
 
 freeTags:
-  en:
+  eng:
     - english-free-tag
-  it:
+  ita:
     - tag-libero-italiano
 
 usedBy:
@@ -49,7 +56,7 @@ intendedAudience:
     - cities
     - health-services
     - it-ag-agricolo
-  countries: # FIXME ISO 3166-1 alpha-2 + EU
+  countries:
     - it
     - de
   unsupportedCountries:     # Explicitly unsupported countries
@@ -62,9 +69,20 @@ description:
     longDescription: >
           Very long description of this software, also split
           on multiple rows. You should note what the software
-          is and why one should need it.
+          is and why one should need it. This is 158 characters.
+          Very long description of this software, also split
+          on multiple rows. You should note what the software
+          is and why one should need it. This is 316 characters.
+          Very long description of this software, also split
+          on multiple rows. You should note what the software
+          is and why one should need it. This is 474 characters.
+          Very long description of this software, also split
+          on multiple rows. You should note what the software
+          is and why one should need it. This is 632 characters.
 
     documentation: "https://docs.developers.italia.it"
+    apiDocumentation: "https://developers.italia.it/it/api"
+
     featureList:
        - Very important feature
        - Will run without a problem
@@ -87,23 +105,11 @@ legal:
 
 maintenance:
   type: "contract"
+
   contractors:
     - name: "Fornitore Privato SPA" # if maintainance is a contract
       website: "https://developers.italia.it"
       until: "2019-01-01"
-  contacts:
-    - name: Francesco Rossi
-      email: "francesco.rossi@comune.reggioemilia.it"
-      affiliation: Comune di Reggio Emilia
-      phone: +39 231 13215112
-    - name: Dario Bianchi
-      email: "dario.bianchi@fornitore.it"
-      affiliation: Fornitore Privato S.P.A.
-      phone: +39 16 24231322
-    - name: Giancarlo Verdi
-      email: "dario.bianchi@fornitore.it"
-      affiliation: Fornitore Privato S.P.A.
-      phone: +39 16 24231322
 
 localisation:
   # Does the software support, at least by design, multiple languages?
@@ -132,3 +138,25 @@ dependencies:             # List of dependencies. The only mandatory list is the
   hardware:             # List of special hardware required. Optional.
     - name: NFC Reader
       optional: yes
+
+# ITA: Italian extension.
+ita:
+  accessibile: yes
+  interoperabile: yes
+  privacy: yes
+  sicurezza: yes
+
+  riuso:
+    # Codice IPA della PA che ha pubblicato questo repo (repo-owner)
+    codiceIPA: c_h501
+
+  spid: yes
+  pagopa: yes
+  cie: yes
+  anpr: yes
+
+  designKit:
+    seo: no
+    ui: yes
+    web: yes
+    content: no

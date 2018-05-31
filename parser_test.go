@@ -15,28 +15,31 @@ func TestDecodeValueErrors(t *testing.T) {
 		file   string
 		errkey string
 	}{
-		// A complete and valid yml
-		{"tests/valid.yml", ""}, // Valid yml.
-		//
-		// // Version
-		// {"tests/invalid_version.yml", "publiccode-yaml-version"}, // Invalid version.
+		// A complete and valid yml.
+		{"tests/valid.yml", ""},
 
-		// // Name, ApplicationSuite (no test), URL, LandingURL
-		// // Name
-		// {"tests/invalid_name_missing.yml", "name"}, // Missing name.
-		// // Url
-		// {"tests/invalid_url_missing.yml", "url"},     // Missing url.
-		// {"tests/invalid_url_schema.yml", "url"},      // Missing schema.
-		// {"tests/invalid_url_404notfound.yml", "url"}, // 404 not found.
-		// // LandingUrl
-		// {"tests/invalid_landingUrl_schema.yml", "landingURL"},      // Missing schema.
-		// {"tests/invalid_landingUrl_404notfound.yml", "landingURL"}, // 404 not found.
-
+		// Missing mandatory fields.
+		{"tests/missing_publiccode-yaml-version.yml", "publiccode-yaml-version"}, // Missing version.
+		{"tests/missing_name.yml", "name"},                                       // Missing name.
+		// {"tests/missing_legal_license.yml", "legal/license"},                                     // Missing legal/license.
+		// {"tests/missing_legal_repoOwner.yml", "legal/repoOwner"},                                 // Missing legal/repoOwner.
+		// {"tests/missing_localisation_availableLanguages.yml", "localisation/availableLanguages"}, // Missing localisation/availableLanguages.
+		// {"tests/missing_localisation_localisationReady.yml", "localisation/localisationReady"},   // Missing localisation/localisationReady.
+		// {"tests/missing_maintenance_contacts.yml", "maintenance/contacts"},                       // Missing maintenance/contacts.
+		// {"tests/missing_maintenance_type.yml", "maintenance/type"},                               // Missing maintenance/type.
+		// {"tests/missing_platforms.yml", "platforms"},                                             // Missing platforms.
+		// {"tests/missing_releaseDate.yml", "releaseDate"},                                         // Missing releaseDate.
+		// {"tests/missing_softwareType_type.yml", "softwareType/type"},                             // Missing softwareType/type.
+		// {"tests/missing_softwareVersion.yml", "softwareVersion"},                                 // Missing softwareVersion.
+		// {"tests/missing_tags.yml", "tags"},                                                       // Missing tags.
+		// {"tests/missing_url.yml", "url"},                                                         // Missing url.
 	}
 
 	for _, test := range testFiles {
-		t.Run(test.errkey, func(t *testing.T) {
 
+		t.Run(test.errkey, func(t *testing.T) {
+			// All tests are run in parallel with each other.
+			t.Parallel()
 			// Read data.
 			data, err := ioutil.ReadFile(test.file)
 			if err != nil {
@@ -47,8 +50,6 @@ func TestDecodeValueErrors(t *testing.T) {
 			// Parse data into pc struct.
 			var pc PublicCode
 			err = Parse(data, &pc)
-
-			//spew.Dump(pc)
 
 			if test.errkey == "" && err != nil {
 				t.Error("unexpected error:\n", err)
@@ -63,8 +64,10 @@ func TestDecodeValueErrors(t *testing.T) {
 					t.Errorf("wrong error generated: %#v - instead of %s", e.Key, test.errkey)
 				}
 			}
+
 		})
 	}
+
 }
 
 // Test publiccode.yml remote files for key errors.
@@ -77,9 +80,9 @@ func TestDecodeValueErrorsRemote(t *testing.T) {
 	}{
 		// // A complete and valid REMOTE yml
 		// {"https://bitbucket.org/marco-capobussi/publiccode-example/raw/master/publiccode.yml", ""}, // Valid remote publiccode.yml.
-		//
-		// // A complete but invalid REMOTE yml
-		// {"https://bitbucket.org/marco-capobussi/publiccode-example/raw/master/publiccode.yml-invalid", "description/logo"}, // Invalid remote publiccode.yml.
+		// //
+		// // // A complete but invalid REMOTE yml
+		// {"https://bitbucket.org/marco-capobussi/publiccode-example/raw/master/publiccode.yml-invalid", "publiccode-yaml-version"}, // Invalid remote publiccode.yml.
 	}
 
 	for _, test := range testRemoteFiles {

@@ -104,7 +104,6 @@ legal:
   authorsFile: tests/AUTHORS              # file listing copyright information
 
 maintenance:
-  type: "contract"
 
   contractors:
     - name: "Fornitore Privato SPA" # if maintainance is a contract

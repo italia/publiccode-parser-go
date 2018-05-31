@@ -45,7 +45,6 @@ roadmap: "https://designers.italia.it/roadmap/"
 developmentStatus: development
 
 softwareType:
-  type: "standalone"
   isRelatedTo:
     - "https://github.com/italia/writing-toolkit.git"
     - "https://github.com/italia/design-react.git"

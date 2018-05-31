@@ -98,7 +98,6 @@ description:
        - 1st Price Software of the year
 
 legal:
-  license: AGPL-3.0-or-later        # SPDX expression of license
   mainCopyrightOwner: City of Chicago
   repoOwner: City of Chicago
   authorsFile: tests/AUTHORS              # file listing copyright information
