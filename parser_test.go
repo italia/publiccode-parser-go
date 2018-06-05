@@ -19,8 +19,8 @@ func TestDecodeValueErrors(t *testing.T) {
 		{"tests/valid.yml", ""},
 
 		// Missing mandatory fields.
-		{"tests/missing_publiccode-yaml-version.yml", "publiccode-yaml-version"}, // Missing version.
-		{"tests/missing_name.yml", "name"},                                       // Missing name.
+		// {"tests/missing_publiccode-yaml-version.yml", "publiccode-yaml-version"}, // Missing version.
+		// {"tests/missing_name.yml", "name"},                                       // Missing name.
 		// {"tests/missing_legal_license.yml", "legal/license"},                                     // Missing legal/license.
 		// {"tests/missing_legal_repoOwner.yml", "legal/repoOwner"},                                 // Missing legal/repoOwner.
 		// {"tests/missing_localisation_availableLanguages.yml", "localisation/availableLanguages"}, // Missing localisation/availableLanguages.

@@ -282,6 +282,18 @@ func (p *parser) decodeArrString(key string, value []string) error {
 			p.pc.Localisation.AvailableLanguages = append(p.pc.Localisation.AvailableLanguages, v)
 		}
 
+	case key == "ita/ecosistemi":
+		for _, v := range value {
+			ecosistemi := []string{"sanita", "welfare", "finanza-pubblica", "scuola", "istruzione-superiore-ricerca",
+				"difesa-sicurezza-soccorso-legalita", "giustizia", "infrastruttura-logistica", "sviluppo-sostenibilita",
+				"beni-culturali-turismo", "agricoltura", "italia-europa-mondo"}
+
+			if !contains(ecosistemi, v) {
+				return newErrorInvalidValue(key, "unknown ita/ecosistemi: %s", v)
+			}
+			p.pc.Ita.Ecosistemi = append(p.pc.Ita.Ecosistemi, v)
+		}
+
 	default:
 		return ErrorInvalidKey{key + " : Array of Strings"}
 
