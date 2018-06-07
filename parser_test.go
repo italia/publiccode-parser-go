@@ -5,6 +5,8 @@ import (
 	"io/ioutil"
 	"net/http"
 	"testing"
+
+	"github.com/davecgh/go-spew/spew"
 )
 
 // Test publiccode.yml local files for key errors.
@@ -50,6 +52,8 @@ func TestDecodeValueErrors(t *testing.T) {
 			// Parse data into pc struct.
 			var pc PublicCode
 			err = Parse(data, &pc)
+
+			spew.Dump(pc.Description["eng"])
 
 			if test.errkey == "" && err != nil {
 				t.Error("unexpected error:\n", err)

@@ -112,6 +112,7 @@ func (p *parser) decodeString(key string, value string) (err error) {
 			}
 		}
 		return newErrorInvalidValue(key, "invalid value: %s", value)
+
 	case regexp.MustCompile(`^description/[a-z]{3}`).MatchString(key):
 		if p.pc.Description == nil {
 			p.pc.Description = make(map[string]Desc)
@@ -121,31 +122,37 @@ func (p *parser) decodeString(key string, value string) (err error) {
 		var desc = p.pc.Description[k]
 		if attr == "localisedName" {
 			desc.LocalisedName = value
-			return p.checkLanguageCodes3(key, k)
+			p.pc.Description[k] = desc
 		}
 		if attr == "longDescription" {
 			if len(value) < 500 || len(value) > 10000 {
 				return newErrorInvalidValue(key, "\"%s\" has an invalid number of characters: %d.  (min 500 chars, max 10.000 chars)", key, len(value))
 			}
 			desc.LongDescription = value
-			return p.checkLanguageCodes3(key, k)
+			p.pc.Description[k] = desc
 		}
 		if attr == "documentation" {
 			desc.Documentation, err = p.checkUrl(key, value)
-			return err
+			if err != nil {
+				return err
+			}
+			p.pc.Description[k] = desc
 		}
 		if attr == "apiDocumentation" {
 			desc.APIDocumentation, err = p.checkUrl(key, value)
-			return err
+			if err != nil {
+				return err
+			}
+			p.pc.Description[k] = desc
 		}
 		if attr == "shortDescription" {
 			if len(value) > 150 {
 				return newErrorInvalidValue(key, "\"%s\" has an invalid number of characters: %d.  (max 150 chars)", key, len(value))
 			}
 			desc.ShortDescription = value
-			return p.checkLanguageCodes3(key, k)
+			p.pc.Description[k] = desc
 		}
-		return ErrorInvalidKey{key + " : String"}
+		return p.checkLanguageCodes3(key, k)
 	case key == "legal/authorsFile":
 		p.pc.Legal.AuthorsFile, err = p.checkFile(key, value)
 		return err
@@ -237,6 +244,7 @@ func (p *parser) decodeArrString(key string, value []string) error {
 			for _, v := range value {
 				desc.Awards = append(desc.Awards, v)
 			}
+			p.pc.Description[k] = desc
 		}
 		if attr == "featureList" {
 			for _, v := range value {
@@ -246,6 +254,7 @@ func (p *parser) decodeArrString(key string, value []string) error {
 				}
 				desc.FeatureList = append(desc.FeatureList, v)
 			}
+			p.pc.Description[k] = desc
 		}
 		if attr == "screenshots" {
 			for _, v := range value {
@@ -255,6 +264,7 @@ func (p *parser) decodeArrString(key string, value []string) error {
 				}
 				desc.Screenshots = append(desc.Screenshots, i)
 			}
+			p.pc.Description[k] = desc
 		}
 		if attr == "videos" {
 			for _, v := range value {
@@ -264,6 +274,7 @@ func (p *parser) decodeArrString(key string, value []string) error {
 				}
 				desc.Videos = append(desc.Videos, u)
 			}
+			p.pc.Description[k] = desc
 		}
 		return p.checkLanguageCodes3(key, k)
 	case key == "localisation/availableLanguages":
@@ -445,6 +456,11 @@ func (p *parser) decodeArrObj(key string, value map[interface{}]interface{}) err
 }
 
 func (p *parser) finalize() (es ErrorParseMulti) {
+	// // description must have at least one language
+	// if len(p.pc.Description) == 0 {
+	// 	es = append(es, newErrorInvalidValue("description", "must have at least one language."))
+	// }
+
 	// "maintenance/contractors" presence is mandatory (if maintainance/type is contract).
 	if p.pc.Maintenance.Type == "contract" && len(p.pc.Maintenance.Contractors) == 0 {
 		es = append(es, newErrorInvalidValue("maintenance/contractors", "not found, mandatory for a \"contract\" maintenance"))
