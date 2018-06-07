@@ -28,6 +28,9 @@ type PublicCode struct {
 	Logo            string    `yaml:"logo"`
 	MonochromeLogo  string    `yaml:"monochromeLogo"`
 
+	InputTypes  []string `yaml:"inputTypes"`
+	OutputTypes []string `yaml:"outputTypes"`
+
 	Platforms []string `yaml:"platforms"`
 
 	Tags []string `yaml:"tags"`

@@ -11,6 +11,8 @@ var mandatoryKeys = []string{
 	"url",
 	"softwareVersion",
 	"releaseDate",
+	"inputTypes",
+	"outputTypes",
 	"platforms",
 	"tags",
 	"softwareType/type",
@@ -292,6 +294,16 @@ func (p *parser) decodeArrString(key string, value []string) error {
 				return newErrorInvalidValue(key, "unknown ita/ecosistemi: %s", v)
 			}
 			p.pc.Ita.Ecosistemi = append(p.pc.Ita.Ecosistemi, v)
+		}
+
+	case key == "inputTypes":
+		for _, v := range value {
+			p.pc.InputTypes = append(p.pc.InputTypes, v)
+		}
+
+	case key == "outputTypes":
+		for _, v := range value {
+			p.pc.OutputTypes = append(p.pc.OutputTypes, v)
 		}
 
 	default:
