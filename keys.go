@@ -28,30 +28,30 @@ func (p *parser) decodeBool(key string, boolValue bool) (err error) {
 	switch key {
 	case "localisation/localisationReady":
 		p.pc.Localisation.LocalisationReady = boolValue
-	case "ita/spid":
-		p.pc.Ita.Spid = boolValue
-	case "ita/pagopa":
-		p.pc.Ita.Pagopa = boolValue
-	case "ita/cie":
-		p.pc.Ita.Cie = boolValue
-	case "ita/anpr":
-		p.pc.Ita.Anpr = boolValue
-	case "ita/designKit/seo":
-		p.pc.Ita.DesignKit.Seo = boolValue
-	case "ita/designKit/ui":
-		p.pc.Ita.DesignKit.UI = boolValue
-	case "ita/designKit/web":
-		p.pc.Ita.DesignKit.Web = boolValue
-	case "ita/designKit/content":
-		p.pc.Ita.DesignKit.Content = boolValue
-	case "ita/accessibile":
-		p.pc.Ita.Accessibile = boolValue
-	case "ita/interoperabile":
-		p.pc.Ita.Interoperabile = boolValue
-	case "ita/privacy":
-		p.pc.Ita.Privacy = boolValue
-	case "ita/sicurezza":
-		p.pc.Ita.Sicurezza = boolValue
+	case "it/conforme/accessibile":
+		p.pc.It.Conforme.Accessibile = boolValue
+	case "it/conforme/interoperabile":
+		p.pc.It.Conforme.Interoperabile = boolValue
+	case "it/conforme/sicuro":
+		p.pc.It.Conforme.Sicuro = boolValue
+	case "it/conforme/privacy":
+		p.pc.It.Conforme.Privacy = boolValue
+	case "it/spid":
+		p.pc.It.Spid = boolValue
+	case "it/pagopa":
+		p.pc.It.Pagopa = boolValue
+	case "it/cie":
+		p.pc.It.Cie = boolValue
+	case "it/anpr":
+		p.pc.It.Anpr = boolValue
+	case "it/designKit/seo":
+		p.pc.It.DesignKit.Seo = boolValue
+	case "it/designKit/ui":
+		p.pc.It.DesignKit.UI = boolValue
+	case "it/designKit/web":
+		p.pc.It.DesignKit.Web = boolValue
+	case "it/designKit/content":
+		p.pc.It.DesignKit.Content = boolValue
 
 	default:
 		return ErrorInvalidKey{key + " : Boolean"}
@@ -178,9 +178,9 @@ func (p *parser) decodeString(key string, value string) (err error) {
 			}
 		}
 		return newErrorInvalidValue(key, "invalid value: %s", value)
-	case key == "ita/riuso/codiceIPA":
+	case key == "it/riuso/codiceIPA":
 		// TODO: check valid codiceIPA
-		p.pc.Ita.Riuso.CodiceIPA = value
+		p.pc.It.Riuso.CodiceIPA = value
 	default:
 		return ErrorInvalidKey{key + " : String"}
 	}
@@ -292,16 +292,16 @@ func (p *parser) decodeArrString(key string, value []string) error {
 			p.pc.Localisation.AvailableLanguages = append(p.pc.Localisation.AvailableLanguages, v)
 		}
 
-	case key == "ita/ecosistemi":
+	case key == "it/ecosistemi":
 		for _, v := range value {
 			ecosistemi := []string{"sanita", "welfare", "finanza-pubblica", "scuola", "istruzione-superiore-ricerca",
 				"difesa-sicurezza-soccorso-legalita", "giustizia", "infrastruttura-logistica", "sviluppo-sostenibilita",
 				"beni-culturali-turismo", "agricoltura", "italia-europa-mondo"}
 
 			if !contains(ecosistemi, v) {
-				return newErrorInvalidValue(key, "unknown ita/ecosistemi: %s", v)
+				return newErrorInvalidValue(key, "unknown it/ecosistemi: %s", v)
 			}
-			p.pc.Ita.Ecosistemi = append(p.pc.Ita.Ecosistemi, v)
+			p.pc.It.Ecosistemi = append(p.pc.It.Ecosistemi, v)
 		}
 
 	case key == "inputTypes":

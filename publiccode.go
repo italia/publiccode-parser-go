@@ -77,7 +77,7 @@ type PublicCode struct {
 		Hardware    []Dependency `yaml:"hardware"`
 	} `yaml:"dependencies"`
 
-	Ita ExtensionITA `yaml:"ita"`
+	It ExtensionIT `yaml:"it"`
 }
 
 type Desc struct {

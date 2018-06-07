@@ -16,20 +16,24 @@ package publiccode
 
 // ExtensionITA is the country-specific extension for Italy.
 // Reference: https://github.com/publiccodenet/publiccode.yml/blob/develop/schema.it.md
-type ExtensionITA struct {
-	Accessibile    bool     `yaml:"accessibile"`
-	Interoperabile bool     `yaml:"interoperabile"`
-	Privacy        bool     `yaml:"privacy"`
-	Sicurezza      bool     `yaml:"sicurezza"`
-	Spid           bool     `yaml:"spid"`
-	Cie            bool     `yaml:"cie"`
-	Anpr           bool     `yaml:"anpr"`
-	Pagopa         bool     `yaml:"pagopa"`
-	Ecosistemi     []string `yaml:"ecosistemi"`
+type ExtensionIT struct {
+	Conforme struct {
+		Accessibile    bool `yaml:"accessibile"`
+		Interoperabile bool `yaml:"interoperabile"`
+		Sicuro         bool `yaml:"sicuro"`
+		Privacy        bool `yaml:"privacy"`
+	} `yaml:"conforme"`
 
 	Riuso struct {
 		CodiceIPA string `yaml:"codiceIPA"`
 	} `yaml:"riuso"`
+
+	Spid   bool `yaml:"spid"`
+	Pagopa bool `yaml:"pagopa"`
+	Cie    bool `yaml:"cie"`
+	Anpr   bool `yaml:"anpr"`
+
+	Ecosistemi []string `yaml:"ecosistemi"`
 
 	DesignKit struct {
 		Seo     bool `yaml:"seo"`

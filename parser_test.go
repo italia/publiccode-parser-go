@@ -18,21 +18,21 @@ func TestDecodeValueErrors(t *testing.T) {
 		// A complete and valid yml.
 		{"tests/valid.yml", ""},
 
-		//		Missing mandatory fields.
-		// {"tests/missing_publiccode-yaml-version.yml", "publiccode-yaml-version"},                 // Missing version.
-		// {"tests/missing_name.yml", "name"},                                                       // Missing name.
-		// {"tests/missing_legal_license.yml", "legal/license"},                                     // Missing legal/license.
-		// {"tests/missing_legal_repoOwner.yml", "legal/repoOwner"},                                 // Missing legal/repoOwner.
-		// {"tests/missing_localisation_availableLanguages.yml", "localisation/availableLanguages"}, // Missing localisation/availableLanguages.
-		// {"tests/missing_localisation_localisationReady.yml", "localisation/localisationReady"},   // Missing localisation/localisationReady.
-		// {"tests/missing_maintenance_contacts.yml", "maintenance/contacts"},                       // Missing maintenance/contacts.
-		// {"tests/missing_maintenance_type.yml", "maintenance/type"},                               // Missing maintenance/type.
-		// {"tests/missing_platforms.yml", "platforms"},                                             // Missing platforms.
-		// {"tests/missing_releaseDate.yml", "releaseDate"},                                         // Missing releaseDate.
-		// {"tests/missing_softwareType.yml", "softwareType"},                                       // Missing softwareType/type.
-		// {"tests/missing_softwareVersion.yml", "softwareVersion"},                                 // Missing softwareVersion.
-		// {"tests/missing_tags.yml", "tags"},                                                       // Missing tags.
-		// {"tests/missing_url.yml", "url"},                                                         // Missing url.
+		// Missing mandatory fields.
+		{"tests/missing_publiccode-yaml-version.yml", "publiccode-yaml-version"},                 // Missing version.
+		{"tests/missing_name.yml", "name"},                                                       // Missing name.
+		{"tests/missing_legal_license.yml", "legal/license"},                                     // Missing legal/license.
+		{"tests/missing_legal_repoOwner.yml", "legal/repoOwner"},                                 // Missing legal/repoOwner.
+		{"tests/missing_localisation_availableLanguages.yml", "localisation/availableLanguages"}, // Missing localisation/availableLanguages.
+		{"tests/missing_localisation_localisationReady.yml", "localisation/localisationReady"},   // Missing localisation/localisationReady.
+		{"tests/missing_maintenance_contacts.yml", "maintenance/contacts"},                       // Missing maintenance/contacts.
+		{"tests/missing_maintenance_type.yml", "maintenance/type"},                               // Missing maintenance/type.
+		{"tests/missing_platforms.yml", "platforms"},                                             // Missing platforms.
+		{"tests/missing_releaseDate.yml", "releaseDate"},                                         // Missing releaseDate.
+		{"tests/missing_softwareType.yml", "softwareType"},                                       // Missing softwareType/type.
+		{"tests/missing_softwareVersion.yml", "softwareVersion"},                                 // Missing softwareVersion.
+		{"tests/missing_tags.yml", "tags"},                                                       // Missing tags.
+		{"tests/missing_url.yml", "url"},                                                         // Missing url.
 	}
 
 	for _, test := range testFiles {

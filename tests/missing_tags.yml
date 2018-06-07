@@ -139,12 +139,13 @@ dependencies:             # List of dependencies. The only mandatory list is the
     - name: NFC Reader
       optional: yes
 
-# ITA: Italian extension.
-ita:
-  accessibile: yes
-  interoperabile: yes
-  privacy: yes
-  sicurezza: yes
+# IT: Italian extension.
+it:
+  conforme:
+    accessibile: yes
+    interoperabile: yes
+    sicuro: yes
+    privacy: yes
 
   riuso:
     # Codice IPA della PA che ha pubblicato questo repo (repo-owner)
