@@ -50,6 +50,7 @@ intendedAudience:
 description:
   eng:
     localisedName: Medusa
+    genericName: "Text Editor"
     shortDescription: "A really interesting software."
     longDescription: >
           Very long description of this software, also split

@@ -124,6 +124,13 @@ func (p *parser) decodeString(key string, value string) (err error) {
 			desc.LocalisedName = value
 			p.pc.Description[k] = desc
 		}
+		if attr == "genericName" {
+			if len(value) == 0 || len(value) > 35 {
+				return newErrorInvalidValue(key, "\"%s\" has an invalid number of characters: %d.  (mandatory and max 35 chars)", key, len(value))
+			}
+			desc.GenericName = value
+			p.pc.Description[k] = desc
+		}
 		if attr == "longDescription" {
 			if len(value) < 500 || len(value) > 10000 {
 				return newErrorInvalidValue(key, "\"%s\" has an invalid number of characters: %d.  (min 500 chars, max 10.000 chars)", key, len(value))
@@ -456,10 +463,17 @@ func (p *parser) decodeArrObj(key string, value map[interface{}]interface{}) err
 }
 
 func (p *parser) finalize() (es ErrorParseMulti) {
-	// // description must have at least one language
-	// if len(p.pc.Description) == 0 {
-	// 	es = append(es, newErrorInvalidValue("description", "must have at least one language."))
-	// }
+	// description must have at least one language
+	if len(p.pc.Description) == 0 {
+		es = append(es, newErrorInvalidValue("description", "must have at least one language."))
+	}
+
+	// description/[lang]/genericName is mandatory
+	for lang, description := range p.pc.Description {
+		if description.GenericName == "" {
+			es = append(es, newErrorInvalidValue("description/"+lang+"/genericName", "must have GenericName key."))
+		}
+	}
 
 	// "maintenance/contractors" presence is mandatory (if maintainance/type is contract).
 	if p.pc.Maintenance.Type == "contract" && len(p.pc.Maintenance.Contractors) == 0 {

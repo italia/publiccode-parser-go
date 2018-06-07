@@ -82,6 +82,7 @@ type PublicCode struct {
 
 type Desc struct {
 	LocalisedName    string     `yaml:"localisedName"`
+	GenericName      string     `yaml:"genericName"`
 	ShortDescription string     `yaml:"shortDescription"`
 	LongDescription  string     `yaml:"longDescription"`
 	Documentation    *url.URL   `yaml:"documentation"`
