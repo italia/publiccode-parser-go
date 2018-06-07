@@ -15,7 +15,7 @@ var mandatoryKeys = []string{
 	"outputTypes",
 	"platforms",
 	"tags",
-	"softwareType/type",
+	"softwareType",
 	"legal/license",
 	"legal/repoOwner",
 	"maintenance/type",
@@ -104,12 +104,10 @@ func (p *parser) decodeString(key string, value string) (err error) {
 			}
 		}
 		return newErrorInvalidValue(key, "invalid value: %s", value)
-	case key == "softwareType/isRelatedTo":
-		return p.decodeArrString(key, []string{value})
-	case key == "softwareType/type":
+	case key == "softwareType":
 		for _, v := range []string{"standalone", "addon", "library", "configurationFiles"} {
 			if v == value {
-				p.pc.SoftwareType.Type = value
+				p.pc.SoftwareType = value
 				return nil
 			}
 		}
@@ -205,14 +203,6 @@ func (p *parser) decodeArrString(key string, value []string) error {
 	case key == "usedBy":
 		for _, v := range value {
 			p.pc.UsedBy = append(p.pc.UsedBy, v)
-		}
-	case key == "softwareType/isRelatedTo":
-		for _, v := range value {
-			u, err := p.checkUrl(key, v)
-			if err != nil {
-				return err
-			}
-			p.pc.SoftwareType.IsRelatedTo = append(p.pc.SoftwareType.IsRelatedTo, u)
 		}
 	case key == "intendedAudience/countries":
 		for _, v := range value {

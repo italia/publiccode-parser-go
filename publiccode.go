@@ -43,10 +43,7 @@ type PublicCode struct {
 
 	DevelopmentStatus string `yaml:"developmentStatus"`
 
-	SoftwareType struct {
-		Type        string     `yaml:"type"`
-		IsRelatedTo []*url.URL `yaml:"isRelatedTo"`
-	} `yaml:"softwareType"`
+	SoftwareType string `yaml:"softwareType"`
 
 	IntendedAudience struct {
 		OnlyFor              []string `yaml:"onlyFor"`
