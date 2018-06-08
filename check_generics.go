@@ -221,6 +221,19 @@ func (p *parser) checkMonochromeLogo(key string, value string) (string, error) {
 	return file, nil
 }
 
+// checkMIME tells whether the string in input is a well formatted MIME or not.
+func (p *parser) checkMIME(key string, value string) error {
+	// Regex for MIME.
+	// Reference: https://github.com/jshttp/media-typer/
+	re := regexp.MustCompile("^ *([A-Za-z0-9][A-Za-z0-9!#$&^_-]{0,126})/([A-Za-z0-9][A-Za-z0-9!#$&^_.+-]{0,126}) *$")
+
+	if !re.MatchString(value) {
+		return newErrorInvalidValue(key, " %s is not a valid MIME.", value)
+	}
+
+	return nil
+}
+
 // contains returns true if the slice of strings contains the searched string.
 func contains(slice []string, item string) bool {
 	for _, s := range slice {

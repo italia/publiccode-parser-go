@@ -306,11 +306,17 @@ func (p *parser) decodeArrString(key string, value []string) error {
 
 	case key == "inputTypes":
 		for _, v := range value {
+			if err := p.checkMIME(key, v); err != nil {
+				return err
+			}
 			p.pc.InputTypes = append(p.pc.InputTypes, v)
 		}
 
 	case key == "outputTypes":
 		for _, v := range value {
+			if err := p.checkMIME(key, v); err != nil {
+				return err
+			}
 			p.pc.OutputTypes = append(p.pc.OutputTypes, v)
 		}
 
