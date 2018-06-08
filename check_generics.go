@@ -81,7 +81,7 @@ func (p *parser) checkDate(key string, value string) (time.Time, error) {
 // checkImage tells whether the string in a valid image. It also checks if the file exists.
 // Reference: https://github.com/publiccodenet/publiccode.yml/blob/develop/schema.md
 func (p *parser) checkImage(key string, value string) (string, error) {
-	validExt := []string{".svg", ".svgz", ".png"}
+	validExt := []string{".jpg", ".png"}
 	ext := strings.ToLower(filepath.Ext(value))
 
 	// Check for valid extension.
@@ -192,7 +192,6 @@ func (p *parser) checkMonochromeLogo(key string, value string) (string, error) {
 		}
 
 		for _, color := range re.FindAllString(string(data), -1) {
-			fmt.Println(color)
 			if color != "#000" && color != "#000000" {
 				return file, newErrorInvalidValue(key, "the monochromeLogo is not monochrome (black): %s", value)
 			}
