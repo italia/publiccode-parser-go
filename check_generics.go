@@ -1,6 +1,8 @@
 package publiccode
 
 import (
+	"image"
+	"image/png"
 	"net/http"
 	"net/url"
 	"os"
@@ -72,8 +74,7 @@ func (p *parser) checkDate(key string, value string) (time.Time, error) {
 }
 
 // checkImage tells whether the string in a valid image. It also checks if the file exists.
-// Reference: https://github.com/publiccodenet/publiccode.yml/blob/develop/schema.mdù
-// TODO: check image size.
+// Reference: https://github.com/publiccodenet/publiccode.yml/blob/develop/schema.md
 func (p *parser) checkImage(key string, value string) (string, error) {
 	validExt := []string{".svg", ".svgz", ".png"}
 	ext := strings.ToLower(filepath.Ext(value))
@@ -87,6 +88,94 @@ func (p *parser) checkImage(key string, value string) (string, error) {
 	file, err := p.checkFile(key, value)
 	if err != nil {
 		return file, err
+	}
+
+	return file, nil
+}
+
+// checkLogo tells whether the string in a valid logo. It also checks if the file exists.
+// Reference: https://github.com/publiccodenet/publiccode.yml/blob/develop/schema.md
+func (p *parser) checkLogo(key string, value string) (string, error) {
+	validExt := []string{".svg", ".svgz", ".png"}
+	ext := strings.ToLower(filepath.Ext(value))
+
+	// Check for valid extension.
+	if !contains(validExt, ext) {
+		return value, newErrorInvalidValue(key, "invalid file extension for: %s", value)
+	}
+
+	// Check existence of file.
+	file, err := p.checkFile(key, value)
+	if err != nil {
+		return value, err
+	}
+
+	// Check for image size if .png.
+	if ext == ".png" {
+		f, err := os.Open(value)
+		if err != nil {
+			return file, err
+		}
+		image, _, err := image.DecodeConfig(f)
+		if err != nil {
+			return file, err
+		}
+		if image.Width < 1000 {
+			return value, newErrorInvalidValue(key, "invalid image size of %d (min 1000px of width): %s", image.Width, value)
+		}
+	}
+	return file, nil
+}
+
+// checkLogo tells whether the string in a valid logo. It also checks if the file exists.
+// Reference: https://github.com/publiccodenet/publiccode.yml/blob/develop/schema.md
+func (p *parser) checkMonochromeLogo(key string, value string) (string, error) {
+	validExt := []string{".svg", ".svgz", ".png"}
+	ext := strings.ToLower(filepath.Ext(value))
+
+	// Check for valid extension.
+	if !contains(validExt, ext) {
+		return value, newErrorInvalidValue(key, "invalid file extension for: %s", value)
+	}
+
+	// Check existence of file.
+	file, err := p.checkFile(key, value)
+	if err != nil {
+		return value, err
+	}
+
+	// Check for image size if .png.
+	if ext == ".png" {
+		image.RegisterFormat("png", "png", png.Decode, png.DecodeConfig)
+
+		f, err := os.Open(value)
+		if err != nil {
+			return file, err
+		}
+		defer f.Close()
+
+		imgCfg, _, err := image.DecodeConfig(f)
+		if err != nil {
+			return file, err
+		}
+		width := imgCfg.Width
+		height := imgCfg.Height
+
+		if width < 1000 {
+			return value, newErrorInvalidValue(key, "invalid image size of %d (min 1000px of width): %s", width, value)
+		}
+
+		// Check if monochrome (black). Pixel by pixel.
+		f.Seek(0, 0)
+		img, _, err := image.Decode(f)
+		for y := 0; y < width; y++ {
+			for x := 0; x < height; x++ {
+				r, g, b, _ := img.At(x, y).RGBA()
+				if r != 0 || g != 0 || b != 0 {
+					return file, newErrorInvalidValue(key, "the monochromeLogo is not monochrome (black): %s", value)
+				}
+			}
+		}
 	}
 
 	return file, nil

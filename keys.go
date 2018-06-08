@@ -84,10 +84,10 @@ func (p *parser) decodeString(key string, value string) (err error) {
 		p.pc.ReleaseDate, err = p.checkDate(key, value)
 		return err
 	case key == "logo":
-		p.pc.Logo, err = p.checkImage(key, value)
+		p.pc.Logo, err = p.checkLogo(key, value)
 		return err
 	case key == "monochromeLogo":
-		p.pc.MonochromeLogo, err = p.checkImage(key, value)
+		p.pc.MonochromeLogo, err = p.checkMonochromeLogo(key, value)
 		return err
 	case key == "platforms":
 		return p.decodeArrString(key, []string{value})
