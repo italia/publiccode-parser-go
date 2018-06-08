@@ -28,10 +28,10 @@ func (p *parser) checkEmail(key string, fn string) error {
 	return nil
 }
 
-// checkUrl tells whether the URL resource is well formatted and reachable and return it as *url.URL.
+// checkURL tells whether the URL resource is well formatted and reachable and return it as *url.URL.
 // An URL resource is well formatted if it's' a valid URL and the scheme is not empty.
 // An URL resource is reachable if returns an http Status = 200 OK.
-func (p *parser) checkUrl(key string, value string) (*url.URL, error) {
+func (p *parser) checkURL(key string, value string) (*url.URL, error) {
 	u, err := url.Parse(value)
 	if err != nil {
 		return nil, newErrorInvalidValue(key, "not a valid URL: %s", value)
@@ -58,9 +58,9 @@ func (p *parser) checkFile(key string, fn string) (string, error) {
 		}
 	} else {
 		//Remote bitbucket
-		_, err := p.checkUrl(key, BaseDir+fn)
+		_, err := p.checkURL(key, BaseDir+fn)
 
-		//_, err := p.checkUrl(key, "https://bitbucket.org/marco-capobussi/publiccode-example/raw/master/"+fn)
+		//_, err := p.checkURL(key, "https://bitbucket.org/marco-capobussi/publiccode-example/raw/master/"+fn)
 		if err != nil {
 			return "", newErrorInvalidValue(key, "file does not exist on remote: %v", BaseDir+fn)
 		}
@@ -91,11 +91,8 @@ func (p *parser) checkImage(key string, value string) (string, error) {
 
 	// Check existence of file.
 	file, err := p.checkFile(key, value)
-	if err != nil {
-		return file, err
-	}
 
-	return file, nil
+	return file, err
 }
 
 // checkLogo tells whether the string in a valid logo. It also checks if the file exists.
@@ -173,6 +170,9 @@ func (p *parser) checkMonochromeLogo(key string, value string) (string, error) {
 		// Check if monochrome (black). Pixel by pixel.
 		f.Seek(0, 0)
 		img, _, err := image.Decode(f)
+		if err != nil {
+			return file, err
+		}
 		for y := 0; y < width; y++ {
 			for x := 0; x < height; x++ {
 				r, g, b, _ := img.At(x, y).RGBA()

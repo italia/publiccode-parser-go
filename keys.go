@@ -71,10 +71,10 @@ func (p *parser) decodeString(key string, value string) (err error) {
 	case key == "applicationSuite":
 		p.pc.ApplicationSuite = value
 	case key == "url":
-		p.pc.URL, err = p.checkUrl(key, value)
+		p.pc.URL, err = p.checkURL(key, value)
 		return err
 	case key == "landingURL":
-		p.pc.LandingURL, err = p.checkUrl(key, value)
+		p.pc.LandingURL, err = p.checkURL(key, value)
 		return err
 	case key == "isBasedOn":
 		return p.decodeArrString(key, []string{value})
@@ -94,7 +94,7 @@ func (p *parser) decodeString(key string, value string) (err error) {
 	case key == "tags":
 		return p.decodeArrString(key, []string{value})
 	case key == "roadmap":
-		p.pc.Roadmap, err = p.checkUrl(key, value)
+		p.pc.Roadmap, err = p.checkURL(key, value)
 		return err
 	case key == "developmentStatus":
 		for _, v := range []string{"concept", "development", "beta", "stable", "obsolete"} {
@@ -112,7 +112,6 @@ func (p *parser) decodeString(key string, value string) (err error) {
 			}
 		}
 		return newErrorInvalidValue(key, "invalid value: %s", value)
-
 	case regexp.MustCompile(`^description/[a-z]{3}`).MatchString(key):
 		if p.pc.Description == nil {
 			p.pc.Description = make(map[string]Desc)
@@ -139,14 +138,14 @@ func (p *parser) decodeString(key string, value string) (err error) {
 			p.pc.Description[k] = desc
 		}
 		if attr == "documentation" {
-			desc.Documentation, err = p.checkUrl(key, value)
+			desc.Documentation, err = p.checkURL(key, value)
 			if err != nil {
 				return err
 			}
 			p.pc.Description[k] = desc
 		}
 		if attr == "apiDocumentation" {
-			desc.APIDocumentation, err = p.checkUrl(key, value)
+			desc.APIDocumentation, err = p.checkURL(key, value)
 			if err != nil {
 				return err
 			}
@@ -190,13 +189,11 @@ func (p *parser) decodeString(key string, value string) (err error) {
 func (p *parser) decodeArrString(key string, value []string) error {
 	switch {
 	case key == "isBasedOn":
-		for _, v := range value {
-			p.pc.IsBasedOn = append(p.pc.IsBasedOn, v)
-		}
+		p.pc.IsBasedOn = append(p.pc.IsBasedOn, value...)
+
 	case key == "platforms":
-		for _, v := range value {
-			p.pc.Platforms = append(p.pc.Platforms, v)
-		}
+		p.pc.Platforms = append(p.pc.Platforms, value...)
+
 	case key == "tags":
 		for _, v := range value {
 			v, err := p.checkTag(key, v)
@@ -205,19 +202,18 @@ func (p *parser) decodeArrString(key string, value []string) error {
 			}
 			p.pc.Tags = append(p.pc.Tags, v)
 		}
+
 	case regexp.MustCompile(`^freeTags/`).MatchString(key):
 		if p.pc.FreeTags == nil {
 			p.pc.FreeTags = make(map[string][]string)
 		}
 		k := strings.Split(key, "/")[1]
-		for _, v := range value {
-			p.pc.FreeTags[k] = append(p.pc.FreeTags[k], v)
-		}
+		p.pc.FreeTags[k] = append(p.pc.FreeTags[k], value...)
 		return p.checkLanguageCodes3(key, k)
+
 	case key == "usedBy":
-		for _, v := range value {
-			p.pc.UsedBy = append(p.pc.UsedBy, v)
-		}
+		p.pc.UsedBy = append(p.pc.UsedBy, value...)
+
 	case key == "intendedAudience/countries":
 		for _, v := range value {
 			if err := p.checkCountryCodes2(key, v); err != nil {
@@ -225,6 +221,7 @@ func (p *parser) decodeArrString(key string, value []string) error {
 			}
 			p.pc.IntendedAudience.Countries = append(p.pc.IntendedAudience.Countries, v)
 		}
+
 	case key == "intendedAudience/unsupportedCountries":
 		for _, v := range value {
 			if err := p.checkCountryCodes2(key, v); err != nil {
@@ -232,6 +229,7 @@ func (p *parser) decodeArrString(key string, value []string) error {
 			}
 			p.pc.IntendedAudience.UnsupportedCountries = append(p.pc.IntendedAudience.UnsupportedCountries, v)
 		}
+
 	case key == "intendedAudience/onlyFor":
 		for _, v := range value {
 			v, err := p.checkPaTypes(key, v)
@@ -240,6 +238,7 @@ func (p *parser) decodeArrString(key string, value []string) error {
 			}
 			p.pc.IntendedAudience.OnlyFor = append(p.pc.IntendedAudience.OnlyFor, v)
 		}
+
 	case regexp.MustCompile(`^description/[a-z]{3}`).MatchString(key):
 		if p.pc.Description == nil {
 			p.pc.Description = make(map[string]Desc)
@@ -248,9 +247,7 @@ func (p *parser) decodeArrString(key string, value []string) error {
 		attr := strings.Split(key, "/")[2]
 		var desc = p.pc.Description[k]
 		if attr == "awards" {
-			for _, v := range value {
-				desc.Awards = append(desc.Awards, v)
-			}
+			desc.Awards = append(desc.Awards, value...)
 			p.pc.Description[k] = desc
 		}
 		if attr == "featureList" {
@@ -275,7 +272,7 @@ func (p *parser) decodeArrString(key string, value []string) error {
 		}
 		if attr == "videos" {
 			for _, v := range value {
-				u, err := p.checkUrl(key, v)
+				u, err := p.checkURL(key, v)
 				if err != nil {
 					return err
 				}
@@ -284,6 +281,7 @@ func (p *parser) decodeArrString(key string, value []string) error {
 			p.pc.Description[k] = desc
 		}
 		return p.checkLanguageCodes3(key, k)
+
 	case key == "localisation/availableLanguages":
 		for _, v := range value {
 			if err := p.checkLanguageCodes3(key, v); err != nil {
@@ -343,7 +341,7 @@ func (p *parser) decodeArrObj(key string, value map[interface{}]interface{}) err
 					}
 					contractor.Until = date
 				} else if k.(string) == "website" {
-					u, err := p.checkUrl(key, val.(string))
+					u, err := p.checkURL(key, val.(string))
 					if err != nil {
 						return err
 					}
@@ -360,6 +358,7 @@ func (p *parser) decodeArrObj(key string, value map[interface{}]interface{}) err
 			}
 			p.pc.Maintenance.Contractors = append(p.pc.Maintenance.Contractors, contractor)
 		}
+
 	case "maintenance/contacts":
 		for _, v := range value {
 			var contact Contact
@@ -387,6 +386,7 @@ func (p *parser) decodeArrObj(key string, value map[interface{}]interface{}) err
 
 			p.pc.Maintenance.Contacts = append(p.pc.Maintenance.Contacts, contact)
 		}
+
 	case "dependencies/open":
 		for _, v := range value {
 			var dep Dependency
@@ -412,6 +412,7 @@ func (p *parser) decodeArrObj(key string, value map[interface{}]interface{}) err
 
 			p.pc.Dependencies.Open = append(p.pc.Dependencies.Open, dep)
 		}
+
 	case "dependencies/proprietary":
 		for _, v := range value {
 			var dep Dependency
@@ -437,6 +438,7 @@ func (p *parser) decodeArrObj(key string, value map[interface{}]interface{}) err
 
 			p.pc.Dependencies.Proprietary = append(p.pc.Dependencies.Proprietary, dep)
 		}
+
 	case "dependencies/hardware":
 		for _, v := range value {
 			var dep Dependency
@@ -462,12 +464,14 @@ func (p *parser) decodeArrObj(key string, value map[interface{}]interface{}) err
 
 			p.pc.Dependencies.Hardware = append(p.pc.Dependencies.Hardware, dep)
 		}
+
 	default:
 		return ErrorInvalidKey{key + " : Array of Objects"}
 	}
 	return nil
 }
 
+// finalize do the cross-validation checks.
 func (p *parser) finalize() (es ErrorParseMulti) {
 	// description must have at least one language
 	if len(p.pc.Description) == 0 {

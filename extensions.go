@@ -14,7 +14,7 @@ package publiccode
 // the software is integrated with the Italian Public Identification System.
 // Reference: https://github.com/publiccodenet/publiccode.yml/blob/develop/schema.md
 
-// ExtensionITA is the country-specific extension for Italy.
+// ExtensionIT is the country-specific extension for Italy.
 // Reference: https://github.com/publiccodenet/publiccode.yml/blob/develop/schema.it.md
 type ExtensionIT struct {
 	Conforme struct {

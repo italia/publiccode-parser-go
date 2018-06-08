@@ -14,6 +14,8 @@ var BaseDir = ""
 // Source https://github.com/publiccodenet/publiccode.yml
 const Version = "http://w3id.org/publiccode/version/0.1"
 
+// Publiccode is a publiccode.yml file definition.
+// Reference: https://github.com/publiccodenet/publiccode.yml
 type PublicCode struct {
 	PubliccodeYamlVersion string `yaml:"publiccode-yaml-version"`
 
@@ -80,6 +82,8 @@ type PublicCode struct {
 	It ExtensionIT `yaml:"it"`
 }
 
+// Desc is a general description of the software.
+// Reference: https://github.com/publiccodenet/publiccode.yml/blob/develop/schema.md#section-description
 type Desc struct {
 	LocalisedName    string     `yaml:"localisedName"`
 	GenericName      string     `yaml:"genericName"`
@@ -93,12 +97,16 @@ type Desc struct {
 	Awards           []string   `yaml:"awards"`
 }
 
+// Contractor is an entity or entities, if any, that are currently contracted for maintaining the software.
+// Reference: https://github.com/publiccodenet/publiccode.yml/blob/develop/schema.md#contractor
 type Contractor struct {
 	Name    string    `yaml:"name"`
 	Website *url.URL  `yaml:"website"`
 	Until   time.Time `yaml:"until"`
 }
 
+// Contact is a contact info maintaining the software.
+// Reference: https://github.com/publiccodenet/publiccode.yml/blob/develop/schema.md#contact
 type Contact struct {
 	Name        string `yaml:"name"`
 	Email       string `yaml:"email"`
@@ -106,6 +114,8 @@ type Contact struct {
 	Phone       string `yaml:"phone"`
 }
 
+// Dependency describe system-level dependencies required to install and use this software.
+// Reference: https://github.com/publiccodenet/publiccode.yml/blob/develop/schema.md#section-dependencies
 type Dependency struct {
 	Name       string `yaml:"name"`
 	VersionMin string `yaml:"versionMin"`
