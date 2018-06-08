@@ -1,9 +1,12 @@
 package publiccode
 
 import (
+	"bytes"
+	"compress/gzip"
 	"fmt"
 	"image"
 	"image/png"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -194,6 +197,26 @@ func (p *parser) checkMonochromeLogo(key string, value string) (string, error) {
 				return file, newErrorInvalidValue(key, "the monochromeLogo is not monochrome (black): %s", value)
 			}
 		}
+	} else if ext == ".svgz" {
+		// Regex for every hex color.
+		re := regexp.MustCompile("#(?:[0-9a-fA-F]{3}){1,2}")
+
+		// Read file data.
+		data, err := ioutil.ReadFile(value)
+		if err != nil {
+			return file, err
+		}
+		data, err = gUnzipData(data)
+		if err != nil {
+			return file, err
+		}
+
+		for _, color := range re.FindAllString(string(data), -1) {
+			fmt.Println(color)
+			if color != "#000" && color != "#000000" {
+				return file, newErrorInvalidValue(key, "the monochromeLogo is not monochrome (black): %s", value)
+			}
+		}
 	}
 
 	return file, nil
@@ -207,4 +230,25 @@ func contains(slice []string, item string) bool {
 		}
 	}
 	return false
+}
+
+// gUnzipData g-unzip a list of bytes. (used for svgz unzip)
+func gUnzipData(data []byte) (resData []byte, err error) {
+	b := bytes.NewBuffer(data)
+
+	var r io.Reader
+	r, err = gzip.NewReader(b)
+	if err != nil {
+		return
+	}
+
+	var resB bytes.Buffer
+	_, err = resB.ReadFrom(r)
+	if err != nil {
+		return
+	}
+
+	resData = resB.Bytes()
+
+	return
 }

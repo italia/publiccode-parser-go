@@ -9,7 +9,7 @@ isBasedOn: "https://github.com/italia/developers.italia.it.git"   # The original
 softwareVersion: "1.0"                                        # Last stable version
 releaseDate: 2017-04-15                     # Date of last stable software release
 logo: tests/img/logo.png
-monochromeLogo: tests/img/logo-mono.png
+monochromeLogo: tests/img/logo-mono.svg
 
 inputTypes:
   - text/plain
