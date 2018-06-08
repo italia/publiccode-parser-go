@@ -1,8 +1,10 @@
 package publiccode
 
 import (
+	"fmt"
 	"image"
 	"image/png"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 	"os"
@@ -174,6 +176,22 @@ func (p *parser) checkMonochromeLogo(key string, value string) (string, error) {
 				if r != 0 || g != 0 || b != 0 {
 					return file, newErrorInvalidValue(key, "the monochromeLogo is not monochrome (black): %s", value)
 				}
+			}
+		}
+	} else if ext == ".svg" {
+		// Regex for every hex color.
+		re := regexp.MustCompile("#(?:[0-9a-fA-F]{3}){1,2}")
+
+		// Read file data.
+		data, err := ioutil.ReadFile(value)
+		if err != nil {
+			return file, err
+		}
+
+		for _, color := range re.FindAllString(string(data), -1) {
+			fmt.Println(color)
+			if color != "#000" && color != "#000000" {
+				return file, newErrorInvalidValue(key, "the monochromeLogo is not monochrome (black): %s", value)
 			}
 		}
 	}
