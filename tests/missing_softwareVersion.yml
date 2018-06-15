@@ -6,9 +6,8 @@ url: "https://github.com/italia/developers.italia.it.git"        # URL of this r
 landingURL: "https://developers.italia.it"
 
 isBasedOn: "https://github.com/italia/developers.italia.it.git"   # The original repository, "Otello"
-softwareVersion: "1.0"                                        # Last stable version
 releaseDate: 2017-04-15                     # Date of last stable software release
-logo: tests/img/logo.png
+logo: tests/img/logo.svg
 monochromeLogo: tests/img/logo-mono.svg
 
 inputTypes:
@@ -172,7 +171,6 @@ it:
   anpr: yes
   ecosistemi:
     - scuola
-
 
   designKit:
     seo: no

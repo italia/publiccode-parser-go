@@ -8,7 +8,7 @@ landingURL: "https://developers.italia.it"
 isBasedOn: "https://github.com/italia/developers.italia.it.git"   # The original repository, "Otello"
 softwareVersion: "1.0"                                        # Last stable version
 releaseDate: 2017-04-15                     # Date of last stable software release
-logo: tests/img/logo.png
+logo: tests/img/logo.svg
 monochromeLogo: tests/img/logo-mono.svg
 
 inputTypes:
@@ -101,7 +101,6 @@ description:
 legal:
   license: AGPL-3.0-or-later        # SPDX expression of license
   mainCopyrightOwner: City of Chicago
-  repoOwner: City of Chicago
   authorsFile: tests/AUTHORS              # file listing copyright information
 
 maintenance:
@@ -172,7 +171,6 @@ it:
   anpr: yes
   ecosistemi:
     - scuola
-
 
   designKit:
     seo: no

@@ -8,7 +8,7 @@ landingURL: "https://developers.italia.it"
 isBasedOn: "https://github.com/italia/developers.italia.it.git"   # The original repository, "Otello"
 softwareVersion: "1.0"                                        # Last stable version
 releaseDate: 2017-04-15                     # Date of last stable software release
-logo: tests/img/logo.png
+logo: tests/img/logo.svg
 monochromeLogo: tests/img/logo-mono.svg
 
 inputTypes:
@@ -112,20 +112,6 @@ maintenance:
       website: "https://developers.italia.it"
       until: "2019-01-01"
 
-  contacts:
-    - name: Francesco Rossi
-      email: "francesco.rossi@comune.reggioemilia.it"
-      affiliation: Comune di Reggio Emilia
-      phone: +39 231 13215112
-    - name: Dario Bianchi
-      email: "dario.bianchi@fornitore.it"
-      affiliation: Fornitore Privato S.P.A.
-      phone: +39 16 24231322
-    - name: Giancarlo Verdi
-      email: "dario.bianchi@fornitore.it"
-      affiliation: Fornitore Privato S.P.A.
-      phone: +39 16 24231322
-
 localisation:
   # Does the software support, at least by design, multiple languages?
   localisationReady: yes
@@ -172,7 +158,6 @@ it:
   anpr: yes
   ecosistemi:
     - scuola
-
 
   designKit:
     seo: no
