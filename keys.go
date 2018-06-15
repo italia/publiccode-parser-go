@@ -17,7 +17,6 @@ var mandatoryKeys = []string{
 	"tags",
 	"softwareType",
 	"legal/license",
-	"legal/repoOwner",
 	"maintenance/type",
 	"maintenance/contacts",
 	"localisation/localisationReady",
