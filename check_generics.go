@@ -57,10 +57,8 @@ func (p *parser) checkFile(key string, fn string) (string, error) {
 			return "", newErrorInvalidValue(key, "file does not exist: %v", fn)
 		}
 	} else {
-		//Remote bitbucket
+		//Remote
 		_, err := p.checkURL(key, BaseDir+fn)
-
-		//_, err := p.checkURL(key, "https://bitbucket.org/marco-capobussi/publiccode-example/raw/master/"+fn)
 		if err != nil {
 			return "", newErrorInvalidValue(key, "file does not exist on remote: %v", BaseDir+fn)
 		}
@@ -112,6 +110,15 @@ func (p *parser) checkLogo(key string, value string) (string, error) {
 		return value, err
 	}
 
+	if BaseDir != "" {
+		// TODO:
+		// save file in tmp
+		// value = tmp/file
+		// defer remove tmp/file
+
+		return file, nil
+	}
+
 	// Check for image size if .png.
 	if ext == ".png" {
 		f, err := os.Open(value)
@@ -144,6 +151,15 @@ func (p *parser) checkMonochromeLogo(key string, value string) (string, error) {
 	file, err := p.checkFile(key, value)
 	if err != nil {
 		return value, err
+	}
+
+	if BaseDir != "" {
+		// TODO:
+		// save file in tmp
+		// value = tmp/file
+		// defer remove tmp/file
+
+		return file, nil
 	}
 
 	// Check for image size if .png.
