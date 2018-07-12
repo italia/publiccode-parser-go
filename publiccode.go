@@ -73,11 +73,11 @@ type PublicCode struct {
 		AvailableLanguages []string `yaml:"availableLanguages"`
 	} `yaml:"localisation"`
 
-	Dependencies struct {
+	DependsOn struct {
 		Open        []Dependency `yaml:"open"`
 		Proprietary []Dependency `yaml:"proprietary"`
 		Hardware    []Dependency `yaml:"hardware"`
-	} `yaml:"dependencies"`
+	} `yaml:"dependsOn"`
 
 	It ExtensionIT `yaml:"it"`
 }

@@ -392,7 +392,7 @@ func (p *parser) decodeArrObj(key string, value map[interface{}]interface{}) err
 			p.pc.Maintenance.Contacts = append(p.pc.Maintenance.Contacts, contact)
 		}
 
-	case "dependencies/open":
+	case "dependsOn/open":
 		for _, v := range value {
 			var dep Dependency
 
@@ -415,10 +415,10 @@ func (p *parser) decodeArrObj(key string, value map[interface{}]interface{}) err
 				return newErrorInvalidValue(key, " name field is mandatory.")
 			}
 
-			p.pc.Dependencies.Open = append(p.pc.Dependencies.Open, dep)
+			p.pc.DependsOn.Open = append(p.pc.DependsOn.Open, dep)
 		}
 
-	case "dependencies/proprietary":
+	case "dependsOn/proprietary":
 		for _, v := range value {
 			var dep Dependency
 
@@ -441,10 +441,10 @@ func (p *parser) decodeArrObj(key string, value map[interface{}]interface{}) err
 				return newErrorInvalidValue(key, " name field is mandatory.")
 			}
 
-			p.pc.Dependencies.Proprietary = append(p.pc.Dependencies.Proprietary, dep)
+			p.pc.DependsOn.Proprietary = append(p.pc.DependsOn.Proprietary, dep)
 		}
 
-	case "dependencies/hardware":
+	case "dependsOn/hardware":
 		for _, v := range value {
 			var dep Dependency
 
@@ -467,7 +467,7 @@ func (p *parser) decodeArrObj(key string, value map[interface{}]interface{}) err
 				return newErrorInvalidValue(key, " name field is mandatory.")
 			}
 
-			p.pc.Dependencies.Hardware = append(p.pc.Dependencies.Hardware, dep)
+			p.pc.DependsOn.Hardware = append(p.pc.DependsOn.Hardware, dep)
 		}
 
 	default:
