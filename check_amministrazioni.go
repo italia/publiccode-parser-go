@@ -50,8 +50,8 @@ func (p *parser) checkCodiceIPA(key string, codiceiPA string) (string, error) {
 	}
 
 	// Load adminisrations data from amministrazoni.txt
-	file := "./data/amministrazioni.txt"
-	dataFile, err := ioutil.ReadFile(file)
+	fileAmm := "data/amministrazioni.txt"
+	dataFile, err := ioutil.ReadFile(fileAmm)
 	if err != nil {
 		return "", err
 	}
