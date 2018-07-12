@@ -28,4 +28,4 @@ If you want to know how to "add a new field" into publiccode parser, check out C
 
 ## License
 
-© 2018 Foundation For Public Code and all contributors – Licensed under the EUPL
+© 2018 Presidenza del consiglio dei Minstri – Licensed under the EUPL The version control system provides attribution for specific lines of code.
