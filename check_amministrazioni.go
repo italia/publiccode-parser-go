@@ -62,7 +62,7 @@ func (p *parser) checkCodiceIPA(key string, codiceiPA string) (string, error) {
 	for scanner.Scan() {
 		amm := manageLine(scanner.Text())
 		if amm.CodAmm == codiceiPA {
-			return amm.DesAmm, nil
+			return codiceiPA, nil
 		}
 	}
 	if err := scanner.Err(); err != nil {
