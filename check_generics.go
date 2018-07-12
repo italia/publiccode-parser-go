@@ -3,7 +3,6 @@ package publiccode
 import (
 	"bytes"
 	"compress/gzip"
-	"fmt"
 	"image"
 	"image/png"
 	"io"
@@ -249,7 +248,6 @@ func (p *parser) checkMonochromeLogo(key string, value string) (string, error) {
 		}
 
 		for _, color := range re.FindAllString(string(data), -1) {
-			fmt.Println(color)
 			if color != "#000" && color != "#000000" {
 				return file, newErrorInvalidValue(key, "the monochromeLogo is not monochrome (black): %s", value)
 			}
