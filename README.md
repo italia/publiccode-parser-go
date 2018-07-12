@@ -4,8 +4,19 @@ A Go parser for publiccode.yml files
 
 **Features**
 
-* Parse and validate a standard international publiccode.yml
-* Includes italian extension.
+- Parse and validate a standard international publiccode.yml with italian extension
+
+- Check ISO 3166-1 alpha-2 and alpha-3 country code
+- Validate emails, URLs (http scheme, valid status code), local and remote files, dates as "YYYY-MM-DD", images (colors, mimes)
+- Check pa-types
+- Validate oembed video links
+- Validate SPDX licenses
+- Check tags
+- And more, as described in publiccode.yml standard.
+
+**ToDO**
+
+- SPDX support for WITH keyword.
 
 **Contributing**
 
@@ -13,7 +24,7 @@ Contributing is always appreciated.
 
 Feel free to open issues, fork and submit a Pull Request.
 
-If you want to know more, like "add a new field", check out CONTRIBUTING.md
+If you want to know how to "add a new field" into publiccode parser, check out CONTRIBUTING.md
 
 ## License
 

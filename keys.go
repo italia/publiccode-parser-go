@@ -275,6 +275,10 @@ func (p *parser) decodeArrString(key string, value []string) error {
 				if err != nil {
 					return err
 				}
+				u, err = p.checkOembed(key, u)
+				if err != nil {
+					return err
+				}
 				desc.Videos = append(desc.Videos, u)
 			}
 			p.pc.Description[k] = desc
