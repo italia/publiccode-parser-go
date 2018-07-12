@@ -2,7 +2,6 @@ package publiccode
 
 import (
 	"bytes"
-	"io/ioutil"
 	"net/url"
 
 	"github.com/dyatlov/go-oembed/oembed"
@@ -17,8 +16,7 @@ func (p *parser) checkOembed(key string, link *url.URL) (*url.URL, error) {
 
 	// Load oembed library and providers.js on from base64 variable
 	oe := oembed.NewOembed()
-	fileProviders := "data/oembed_providers.json"
-	dataFile, err := ioutil.ReadFile(fileProviders)
+	dataFile, err := Asset("data/oembed_providers.json")
 	if err != nil {
 		return nil, newErrorInvalidValue(key, "error reading oembed providers list")
 	}

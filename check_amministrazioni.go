@@ -2,7 +2,6 @@ package publiccode
 
 import (
 	"bufio"
-	"io/ioutil"
 	"strings"
 )
 
@@ -50,8 +49,7 @@ func (p *parser) checkCodiceIPA(key string, codiceiPA string) (string, error) {
 	}
 
 	// Load adminisrations data from amministrazoni.txt
-	fileAmm := "data/amministrazioni.txt"
-	dataFile, err := ioutil.ReadFile(fileAmm)
+	dataFile, err := Asset("data/amministrazioni.txt")
 	if err != nil {
 		return "", err
 	}

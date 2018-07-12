@@ -10,13 +10,14 @@ A Go parser for publiccode.yml files
 - Validate emails, URLs (http scheme, valid status code), local and remote files, dates as "YYYY-MM-DD", images (colors, mimes)
 - Check pa-types
 - Validate oembed video links
-- Validate SPDX licenses
+- Validate SPDX licenses. Without WITH keyword.
 - Check tags
 - And more, as described in publiccode.yml standard.
 
-**ToDO**
+**Assets**
 
-- SPDX support for WITH keyword.
+- amministrazioni.txt updated on: _12/07/2018_.
+- oembed_providers.json updated on: _12/07/2018_.
 
 **Contributing**
 
