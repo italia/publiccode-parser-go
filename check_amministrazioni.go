@@ -42,55 +42,8 @@ type Amministrazione struct {
 	LivAccessibili    string
 }
 
-// // UpdateFile download the amministrazioni.txt file if it's older than 2 days.
-// func UpdateFile(fileName, fileURL string) error {
-// 	info, err := os.Stat(fileName)
-// 	if err != nil {
-// 		return err
-// 	}
-// 	today := time.Now()
-// 	older := today.AddDate(0, 0, -2)
-//
-// 	downloadTime := info.ModTime()
-//
-// 	// If amministrazioni.txt is older that 2 days.
-// 	if downloadTime.Before(older) {
-// 		fmt.Println("download a new amministrazioni.txt ...")
-//
-// 		err := downloadFile(fileName, fileURL)
-// 		if err != nil {
-// 			return err
-// 		}
-// 	}
-//
-// 	return err
-// }
-
-// // GetAdministrationName return the administration name associated to the "codice iPA" asssociated.
-// func GetAdministrationName(codiceiPA string) string {
-// 	file := "./data/amministrazioni.txt"
-// 	dataFile, err := ioutil.ReadFile(file)
-// 	if err != nil {
-// 		log.Error(err)
-// 		return ""
-// 	}
-// 	input := string(dataFile)
-//
-// 	// Scan the file, line by line.
-// 	scanner := bufio.NewScanner(strings.NewReader(input))
-// 	for scanner.Scan() {
-// 		amm := manageLine(scanner.Text())
-// 		if amm.CodAmm == codiceiPA {
-// 			return amm.DesAmm
-// 		}
-// 	}
-// 	if err := scanner.Err(); err != nil {
-// 		log.Errorf("error reading standard input %v:", err)
-// 	}
-//
-// 	return ""
-// }
-
+// checkCodiceIPA tells whether the codiceIPA is registered into amministrazioni.txt
+// Reference: http://www.indicepa.gov.it/documentale/n-opendata.php.
 func (p *parser) checkCodiceIPA(key string, codiceiPA string) (string, error) {
 	if codiceiPA == "" {
 		return codiceiPA, newErrorInvalidValue(key, "empty codiceIPA key")
@@ -158,33 +111,3 @@ func manageLine(line string) Amministrazione {
 
 	return amm
 }
-
-//
-// func downloadFile(filepath string, url string) error {
-// 	// Create the file
-// 	out, err := os.Create(filepath)
-// 	if err != nil {
-// 		return err
-// 	}
-// 	defer func() {
-// 		if err := out.Close(); err != nil {
-// 			log.Error(err)
-// 		}
-// 	}()
-//
-// 	// Get the data from the url.
-// 	resp, err := http.Get(url)
-// 	if err != nil {
-// 		return err
-// 	}
-// 	defer func() {
-// 		if err := resp.Body.Close(); err != nil {
-// 			log.Error(err)
-// 		}
-// 	}()
-//
-// 	// Write the body to file.
-// 	_, err = io.Copy(out, resp.Body)
-//
-// 	return err
-// }

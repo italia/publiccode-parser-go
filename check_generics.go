@@ -8,6 +8,7 @@ import (
 	"image/png"
 	"io"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"net/url"
 	"os"
@@ -53,11 +54,12 @@ func (p *parser) checkURL(key string, value string) (*url.URL, error) {
 // checkFile tells whether the file resource exists and return it.
 func (p *parser) checkFile(key string, fn string) (string, error) {
 	if BaseDir == "" {
+		// Local.
 		if _, err := os.Stat(fn); err != nil {
 			return "", newErrorInvalidValue(key, "file does not exist: %v", fn)
 		}
 	} else {
-		//Remote
+		// Remote.
 		_, err := p.checkURL(key, BaseDir+fn)
 		if err != nil {
 			return "", newErrorInvalidValue(key, "file does not exist on remote: %v", BaseDir+fn)
@@ -110,13 +112,23 @@ func (p *parser) checkLogo(key string, value string) (string, error) {
 		return value, err
 	}
 
+	// Remote. Create a temp dir, download and check the file. Remove the temp dir.
 	if BaseDir != "" {
-		// TODO:
-		// save file in tmp
-		// value = tmp/file
-		// defer remove tmp/file
-
-		return file, nil
+		// Create a temp dir and delete after use.
+		dir, err := ioutil.TempDir("", "publiccode.yml-parser-go")
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer os.RemoveAll(dir)
+		// Download the file in the temp dir.
+		fileName := filepath.Base(value)
+		tmpFile := filepath.Join(dir, fileName)
+		err = downloadFile(tmpFile, BaseDir+value)
+		if err != nil {
+			return file, err
+		}
+		// Update file.
+		value = tmpFile
 	}
 
 	// Check for image size if .png.
@@ -153,13 +165,23 @@ func (p *parser) checkMonochromeLogo(key string, value string) (string, error) {
 		return value, err
 	}
 
+	// Remote. Create a temp dir, download and check the file. Remove the temp dir.
 	if BaseDir != "" {
-		// TODO:
-		// save file in tmp
-		// value = tmp/file
-		// defer remove tmp/file
-
-		return file, nil
+		// Create a temp dir and delete after use.
+		dir, err := ioutil.TempDir("", "publiccode.yml-parser-go")
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer os.RemoveAll(dir)
+		// Download the file in the temp dir.
+		fileName := filepath.Base(value)
+		tmpFile := filepath.Join(dir, fileName)
+		err = downloadFile(tmpFile, BaseDir+value)
+		if err != nil {
+			return file, err
+		}
+		// Update file.
+		value = tmpFile
 	}
 
 	// Check for image size if .png.

@@ -10,6 +10,9 @@ type ErrorInvalidKey struct {
 }
 
 func (e ErrorInvalidKey) Error() string {
+	if BaseDir != "" {
+		return fmt.Sprintf("invalid remote key: %s", e.Key)
+	}
 	return fmt.Sprintf("invalid key: %s", e.Key)
 }
 
@@ -19,6 +22,9 @@ type ErrorInvalidValue struct {
 }
 
 func (e ErrorInvalidValue) Error() string {
+	if BaseDir != "" {
+		return fmt.Sprintf("wrong value on remote for key %s: %s", e.Key, e.Reason)
+	}
 	return fmt.Sprintf("wrong value for key %s: %s", e.Key, e.Reason)
 }
 
