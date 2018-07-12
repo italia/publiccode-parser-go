@@ -82,11 +82,8 @@ func TestDecodeValueErrorsRemote(t *testing.T) {
 		file   string
 		errkey string
 	}{
-		// // A complete and valid REMOTE yml
-		//{"https://raw.githubusercontent.com/gith002/Medusa/master/publiccode.yml", ""}, // Valid remote publiccode.yml.
-		// //
-		// // // A complete but invalid REMOTE yml
-		// {"https://bitbucket.org/marco-capobussi/publiccode-example/raw/master/publiccode.yml-invalid", "publiccode-yaml-version"}, // Invalid remote publiccode.yml.
+		// A complete and valid REMOTE yml
+		{"https://raw.githubusercontent.com/gith002/Medusa/master/publiccode.yml", ""}, // Valid remote publiccode.yml.
 	}
 
 	for _, test := range testRemoteFiles {
