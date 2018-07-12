@@ -8,7 +8,7 @@ landingURL: "https://developers.italia.it"
 isBasedOn: "https://github.com/italia/developers.italia.it.git"   # The original repository, "Otello"
 softwareVersion: "1.0"                                        # Last stable version
 releaseDate: 2017-04-15                     # Date of last stable software release
-logo: tests/img/logo.svg
+logo: tests/img/logo.png
 monochromeLogo: tests/img/logo-mono.svg
 
 inputTypes:
@@ -34,12 +34,6 @@ tags:
   - scanning
   - security
   - sports
-
-freeTags:
-  eng:
-    - english-free-tag
-  ita:
-    - tag-libero-italiano
 
 usedBy:
   - Comune di Firenze
@@ -97,6 +91,9 @@ description:
        - https://www.youtube.com/watch?v=RaHmGbBOP84
     awards:
        - 1st Price Software of the year
+    freeTags:
+      - freeTag
+      - FreeoloTag
 
 legal:
   license: AGPL-3.0-or-later        # SPDX expression of license
@@ -135,7 +132,7 @@ localisation:
     - fra
     - deu
 
-dependencies:             # List of dependencies. The only mandatory list is the proprietary one
+dependsOn:             # List of dependencies. The only mandatory list is the proprietary one
   open:                 # List of open dependencies. Optional
     - name: MySQL
       versionMin: "1.1"
@@ -171,6 +168,7 @@ it:
   anpr: yes
   ecosistemi:
     - scuola
+
 
   designKit:
     seo: no
