@@ -37,8 +37,6 @@ type PublicCode struct {
 
 	Tags []string `yaml:"tags"`
 
-	FreeTags map[string][]string `yaml:"freeTags"`
-
 	UsedBy []string `yaml:"usedBy"`
 
 	Roadmap *url.URL `yaml:"roadmap"`
@@ -95,6 +93,7 @@ type Desc struct {
 	Screenshots      []string   `yaml:"screenshots"`
 	Videos           []*url.URL `yaml:"videos"`
 	Awards           []string   `yaml:"awards"`
+	FreeTags         []string   `yaml:"freeTags"`
 }
 
 // Contractor is an entity or entities, if any, that are currently contracted for maintaining the software.

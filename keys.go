@@ -204,14 +204,6 @@ func (p *parser) decodeArrString(key string, value []string) error {
 			p.pc.Tags = append(p.pc.Tags, v)
 		}
 
-	case regexp.MustCompile(`^freeTags/`).MatchString(key):
-		if p.pc.FreeTags == nil {
-			p.pc.FreeTags = make(map[string][]string)
-		}
-		k := strings.Split(key, "/")[1]
-		p.pc.FreeTags[k] = append(p.pc.FreeTags[k], value...)
-		return p.checkLanguageCodes3(key, k)
-
 	case key == "usedBy":
 		p.pc.UsedBy = append(p.pc.UsedBy, value...)
 
@@ -249,6 +241,10 @@ func (p *parser) decodeArrString(key string, value []string) error {
 		var desc = p.pc.Description[k]
 		if attr == "awards" {
 			desc.Awards = append(desc.Awards, value...)
+			p.pc.Description[k] = desc
+		}
+		if attr == "freeTags" {
+			desc.FreeTags = append(desc.FreeTags, value...)
 			p.pc.Description[k] = desc
 		}
 		if attr == "featureList" {
