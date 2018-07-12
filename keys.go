@@ -177,8 +177,10 @@ func (p *parser) decodeString(key string, value string) (err error) {
 		}
 		return newErrorInvalidValue(key, "invalid value: %s", value)
 	case key == "it/riuso/codiceIPA":
-		// TODO: check valid codiceIPA
-		p.pc.It.Riuso.CodiceIPA = value
+		p.pc.It.Riuso.CodiceIPA, err = p.checkCodiceIPA(key, value)
+		if err != nil {
+			return err
+		}
 	default:
 		return ErrorInvalidKey{key + " : String"}
 	}

@@ -5,9 +5,9 @@ import (
 	"time"
 )
 
-// BaseDir is the Base Directory of the PublicCode file.
+// BaseDir is the RAW Base Directory of the PublicCode file.
 // If local will be empty: ""
-// If remote will be the url of the repository
+// If remote will be the url of the RAW repository (eg: https://raw.githubusercontent.com/gith002/Medusa/master)
 var BaseDir = ""
 
 // Version of the PublicCode specs.
