@@ -19,6 +19,12 @@ A Go parser for publiccode.yml files
 - amministrazioni.txt updated on: _12/07/2018_.
 - oembed_providers.json updated on: _12/07/2018_.
 
+In order to update the assets, run this command:
+
+`go-bindata -o assets.go data/`
+
+And change the package name into `publiccode`
+
 **Contributing**
 
 Contributing is always appreciated.
