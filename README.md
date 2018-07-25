@@ -25,7 +25,7 @@ Contributing is always appreciated.
 
 Feel free to open issues, fork and submit a Pull Request.
 
-If you want to know how to "add a new field" into publiccode parser, check out CONTRIBUTING.md
+If you want to know more, like "add a new field", check out CONTRIBUTING.md
 
 ## License
 
