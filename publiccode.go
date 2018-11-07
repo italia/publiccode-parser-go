@@ -5,9 +5,9 @@ import (
 	"time"
 )
 
-// BaseDir is the Base Directory of the PublicCode file.
+// BaseDir is the RAW Base Directory of the PublicCode file.
 // If local will be empty: ""
-// If remote will be the url of the repository
+// If remote will be the url of the RAW repository (eg: https://raw.githubusercontent.com/gith002/Medusa/master)
 var BaseDir = ""
 
 // Version of the PublicCode specs.
@@ -36,8 +36,6 @@ type PublicCode struct {
 	Platforms []string `yaml:"platforms"`
 
 	Tags []string `yaml:"tags"`
-
-	FreeTags map[string][]string `yaml:"freeTags"`
 
 	UsedBy []string `yaml:"usedBy"`
 
@@ -73,11 +71,11 @@ type PublicCode struct {
 		AvailableLanguages []string `yaml:"availableLanguages"`
 	} `yaml:"localisation"`
 
-	Dependencies struct {
+	DependsOn struct {
 		Open        []Dependency `yaml:"open"`
 		Proprietary []Dependency `yaml:"proprietary"`
 		Hardware    []Dependency `yaml:"hardware"`
-	} `yaml:"dependencies"`
+	} `yaml:"dependsOn"`
 
 	It ExtensionIT `yaml:"it"`
 }
@@ -95,6 +93,7 @@ type Desc struct {
 	Screenshots      []string   `yaml:"screenshots"`
 	Videos           []*url.URL `yaml:"videos"`
 	Awards           []string   `yaml:"awards"`
+	FreeTags         []string   `yaml:"freeTags"`
 }
 
 // Contractor is an entity or entities, if any, that are currently contracted for maintaining the software.

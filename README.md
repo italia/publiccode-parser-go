@@ -4,8 +4,26 @@ A Go parser for publiccode.yml files
 
 **Features**
 
-* Parse and validate a standard international publiccode.yml
-* Includes italian extension.
+- Parse and validate a standard international publiccode.yml with italian extension
+
+- Check ISO 3166-1 alpha-2 and alpha-3 country code
+- Validate emails, URLs (http scheme, valid status code), local and remote files, dates as "YYYY-MM-DD", images (colors, mimes)
+- Check pa-types
+- Validate oembed video links
+- Validate SPDX licenses. Without WITH keyword.
+- Check tags
+- And more, as described in publiccode.yml standard.
+
+**Assets**
+
+- amministrazioni.txt updated on: _12/07/2018_.
+- oembed_providers.json updated on: _12/07/2018_.
+
+In order to update the assets, run this command:
+
+`go-bindata -o assets.go data/`
+
+And change the package name into `publiccode`
 
 **Contributing**
 

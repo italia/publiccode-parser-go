@@ -17,12 +17,13 @@ func TestDecodeValueErrors(t *testing.T) {
 	}{
 		// A complete and valid yml.
 		{"tests/valid.yml", ""},
+		//A complete and valid minimal yml.
+		{"tests/valid.minimal.yml", ""},
 
-		// Missing mandatory fields.
+		//Missing mandatory fields.
 		{"tests/missing_publiccode-yaml-version.yml", "publiccode-yaml-version"},                 // Missing version.
 		{"tests/missing_name.yml", "name"},                                                       // Missing name.
 		{"tests/missing_legal_license.yml", "legal/license"},                                     // Missing legal/license.
-		{"tests/missing_legal_repoOwner.yml", "legal/repoOwner"},                                 // Missing legal/repoOwner.
 		{"tests/missing_localisation_availableLanguages.yml", "localisation/availableLanguages"}, // Missing localisation/availableLanguages.
 		{"tests/missing_localisation_localisationReady.yml", "localisation/localisationReady"},   // Missing localisation/localisationReady.
 		{"tests/missing_maintenance_contacts.yml", "maintenance/contacts"},                       // Missing maintenance/contacts.
@@ -33,13 +34,14 @@ func TestDecodeValueErrors(t *testing.T) {
 		{"tests/missing_softwareVersion.yml", "softwareVersion"},                                 // Missing softwareVersion.
 		{"tests/missing_tags.yml", "tags"},                                                       // Missing tags.
 		{"tests/missing_url.yml", "url"},                                                         // Missing url.
+
+		// Invalid fields.
+		{"tests/invalid_legal_license.yml", "legal/license"}, // Invalid legal/license.
 	}
 
 	for _, test := range testFiles {
 
 		t.Run(test.errkey, func(t *testing.T) {
-			// All tests are run in parallel with each other.
-			t.Parallel()
 			// Read data.
 			data, err := ioutil.ReadFile(test.file)
 			if err != nil {
@@ -74,17 +76,14 @@ func TestDecodeValueErrors(t *testing.T) {
 
 // Test publiccode.yml remote files for key errors.
 func TestDecodeValueErrorsRemote(t *testing.T) {
-	BaseDir = "https://bitbucket.org/marco-capobussi/publiccode-example/raw/master/"
+	BaseDir = "https://raw.githubusercontent.com/gith002/Medusa/master/"
 
 	testRemoteFiles := []struct {
 		file   string
 		errkey string
 	}{
-		// // A complete and valid REMOTE yml
-		// {"https://bitbucket.org/marco-capobussi/publiccode-example/raw/master/publiccode.yml", ""}, // Valid remote publiccode.yml.
-		// //
-		// // // A complete but invalid REMOTE yml
-		// {"https://bitbucket.org/marco-capobussi/publiccode-example/raw/master/publiccode.yml-invalid", "publiccode-yaml-version"}, // Invalid remote publiccode.yml.
+		// A complete and valid REMOTE yml
+		{"https://raw.githubusercontent.com/gith002/Medusa/master/publiccode.yml", ""}, // Valid remote publiccode.yml.
 	}
 
 	for _, test := range testRemoteFiles {

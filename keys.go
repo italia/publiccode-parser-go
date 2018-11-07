@@ -177,8 +177,10 @@ func (p *parser) decodeString(key string, value string) (err error) {
 		}
 		return newErrorInvalidValue(key, "invalid value: %s", value)
 	case key == "it/riuso/codiceIPA":
-		// TODO: check valid codiceIPA
-		p.pc.It.Riuso.CodiceIPA = value
+		p.pc.It.Riuso.CodiceIPA, err = p.checkCodiceIPA(key, value)
+		if err != nil {
+			return err
+		}
 	default:
 		return ErrorInvalidKey{key + " : String"}
 	}
@@ -201,14 +203,6 @@ func (p *parser) decodeArrString(key string, value []string) error {
 			}
 			p.pc.Tags = append(p.pc.Tags, v)
 		}
-
-	case regexp.MustCompile(`^freeTags/`).MatchString(key):
-		if p.pc.FreeTags == nil {
-			p.pc.FreeTags = make(map[string][]string)
-		}
-		k := strings.Split(key, "/")[1]
-		p.pc.FreeTags[k] = append(p.pc.FreeTags[k], value...)
-		return p.checkLanguageCodes3(key, k)
 
 	case key == "usedBy":
 		p.pc.UsedBy = append(p.pc.UsedBy, value...)
@@ -249,6 +243,10 @@ func (p *parser) decodeArrString(key string, value []string) error {
 			desc.Awards = append(desc.Awards, value...)
 			p.pc.Description[k] = desc
 		}
+		if attr == "freeTags" {
+			desc.FreeTags = append(desc.FreeTags, value...)
+			p.pc.Description[k] = desc
+		}
 		if attr == "featureList" {
 			for _, v := range value {
 				if len(v) > 100 {
@@ -272,6 +270,10 @@ func (p *parser) decodeArrString(key string, value []string) error {
 		if attr == "videos" {
 			for _, v := range value {
 				u, err := p.checkURL(key, v)
+				if err != nil {
+					return err
+				}
+				u, err = p.checkOembed(key, u)
 				if err != nil {
 					return err
 				}
@@ -386,7 +388,7 @@ func (p *parser) decodeArrObj(key string, value map[interface{}]interface{}) err
 			p.pc.Maintenance.Contacts = append(p.pc.Maintenance.Contacts, contact)
 		}
 
-	case "dependencies/open":
+	case "dependsOn/open":
 		for _, v := range value {
 			var dep Dependency
 
@@ -409,10 +411,10 @@ func (p *parser) decodeArrObj(key string, value map[interface{}]interface{}) err
 				return newErrorInvalidValue(key, " name field is mandatory.")
 			}
 
-			p.pc.Dependencies.Open = append(p.pc.Dependencies.Open, dep)
+			p.pc.DependsOn.Open = append(p.pc.DependsOn.Open, dep)
 		}
 
-	case "dependencies/proprietary":
+	case "dependsOn/proprietary":
 		for _, v := range value {
 			var dep Dependency
 
@@ -435,10 +437,10 @@ func (p *parser) decodeArrObj(key string, value map[interface{}]interface{}) err
 				return newErrorInvalidValue(key, " name field is mandatory.")
 			}
 
-			p.pc.Dependencies.Proprietary = append(p.pc.Dependencies.Proprietary, dep)
+			p.pc.DependsOn.Proprietary = append(p.pc.DependsOn.Proprietary, dep)
 		}
 
-	case "dependencies/hardware":
+	case "dependsOn/hardware":
 		for _, v := range value {
 			var dep Dependency
 
@@ -461,7 +463,7 @@ func (p *parser) decodeArrObj(key string, value map[interface{}]interface{}) err
 				return newErrorInvalidValue(key, " name field is mandatory.")
 			}
 
-			p.pc.Dependencies.Hardware = append(p.pc.Dependencies.Hardware, dep)
+			p.pc.DependsOn.Hardware = append(p.pc.DependsOn.Hardware, dep)
 		}
 
 	default:

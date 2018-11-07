@@ -3,11 +3,11 @@ package publiccode
 import (
 	"bytes"
 	"compress/gzip"
-	"fmt"
 	"image"
 	"image/png"
 	"io"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"net/url"
 	"os"
@@ -53,14 +53,13 @@ func (p *parser) checkURL(key string, value string) (*url.URL, error) {
 // checkFile tells whether the file resource exists and return it.
 func (p *parser) checkFile(key string, fn string) (string, error) {
 	if BaseDir == "" {
+		// Local.
 		if _, err := os.Stat(fn); err != nil {
 			return "", newErrorInvalidValue(key, "file does not exist: %v", fn)
 		}
 	} else {
-		//Remote bitbucket
+		// Remote.
 		_, err := p.checkURL(key, BaseDir+fn)
-
-		//_, err := p.checkURL(key, "https://bitbucket.org/marco-capobussi/publiccode-example/raw/master/"+fn)
 		if err != nil {
 			return "", newErrorInvalidValue(key, "file does not exist on remote: %v", BaseDir+fn)
 		}
@@ -112,6 +111,25 @@ func (p *parser) checkLogo(key string, value string) (string, error) {
 		return value, err
 	}
 
+	// Remote. Create a temp dir, download and check the file. Remove the temp dir.
+	if BaseDir != "" {
+		// Create a temp dir and delete after use.
+		dir, err := ioutil.TempDir("", "publiccode.yml-parser-go")
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer os.RemoveAll(dir)
+		// Download the file in the temp dir.
+		fileName := filepath.Base(value)
+		tmpFile := filepath.Join(dir, fileName)
+		err = downloadFile(tmpFile, BaseDir+value)
+		if err != nil {
+			return file, err
+		}
+		// Update file.
+		value = tmpFile
+	}
+
 	// Check for image size if .png.
 	if ext == ".png" {
 		f, err := os.Open(value)
@@ -144,6 +162,25 @@ func (p *parser) checkMonochromeLogo(key string, value string) (string, error) {
 	file, err := p.checkFile(key, value)
 	if err != nil {
 		return value, err
+	}
+
+	// Remote. Create a temp dir, download and check the file. Remove the temp dir.
+	if BaseDir != "" {
+		// Create a temp dir and delete after use.
+		dir, err := ioutil.TempDir("", "publiccode.yml-parser-go")
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer os.RemoveAll(dir)
+		// Download the file in the temp dir.
+		fileName := filepath.Base(value)
+		tmpFile := filepath.Join(dir, fileName)
+		err = downloadFile(tmpFile, BaseDir+value)
+		if err != nil {
+			return file, err
+		}
+		// Update file.
+		value = tmpFile
 	}
 
 	// Check for image size if .png.
@@ -211,7 +248,6 @@ func (p *parser) checkMonochromeLogo(key string, value string) (string, error) {
 		}
 
 		for _, color := range re.FindAllString(string(data), -1) {
-			fmt.Println(color)
 			if color != "#000" && color != "#000000" {
 				return file, newErrorInvalidValue(key, "the monochromeLogo is not monochrome (black): %s", value)
 			}
