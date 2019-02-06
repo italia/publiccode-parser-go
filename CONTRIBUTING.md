@@ -7,7 +7,7 @@ Example steps in order to add a key-val to parse: add `nickname` field.
 * Add `nickname` in `tests/valid.yml`
 
 ```
-publiccode-yaml-version: "http://w3id.org/publiccode/version/0.1"
+publiccodeYmlVersion: "0.1"
 name: Medusa
 
 nickname: Meds
@@ -22,7 +22,7 @@ landingURL: "https://developers.italia.it"
 
 ```
 type PublicCode struct {
-	PubliccodeYamlVersion string `yaml:"publiccode-yaml-version"`
+	PubliccodeYamlVersion string `yaml:"publiccodeYmlVersion"`
 	...
 
   Nickname         string   `yaml:"nickname"`

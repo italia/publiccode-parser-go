@@ -12,12 +12,12 @@ var BaseDir = ""
 
 // Version of the PublicCode specs.
 // Source https://github.com/publiccodenet/publiccode.yml
-const Version = "http://w3id.org/publiccode/version/0.1"
+const Version = "0.1"
 
 // PublicCode is a publiccode.yml file definition.
 // Reference: https://github.com/publiccodenet/publiccode.yml
 type PublicCode struct {
-	PubliccodeYamlVersion string `yaml:"publiccode-yaml-version"`
+	PubliccodeYamlVersion string `yaml:"publiccodeYmlVersion"`
 
 	Name             string   `yaml:"name"`
 	ApplicationSuite string   `yaml:"applicationSuite"`

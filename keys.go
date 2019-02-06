@@ -6,7 +6,7 @@ import (
 )
 
 var mandatoryKeys = []string{
-	"publiccode-yaml-version",
+	"publiccodeYmlVersion",
 	"name",
 	"url",
 	"softwareVersion",
@@ -60,7 +60,7 @@ func (p *parser) decodeBool(key string, boolValue bool) (err error) {
 
 func (p *parser) decodeString(key string, value string) (err error) {
 	switch {
-	case key == "publiccode-yaml-version":
+	case key == "publiccodeYmlVersion":
 		p.pc.PubliccodeYamlVersion = value
 		if p.pc.PubliccodeYamlVersion != Version {
 			return newErrorInvalidValue(key, "version %s not supported", p.pc.PubliccodeYamlVersion)

@@ -1,4 +1,4 @@
-publiccode-yaml-version: "http://w3id.org/publiccode/version/0.1"
+publiccodeYmlVersion: "0.1"
 
 name: Medusa
 applicationSuite: MegaProductivitySuite
