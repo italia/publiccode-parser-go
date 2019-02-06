@@ -247,13 +247,13 @@ func (p *parser) decodeArrString(key string, value []string) error {
 			desc.FreeTags = append(desc.FreeTags, value...)
 			p.pc.Description[k] = desc
 		}
-		if attr == "featureList" {
+		if attr == "features" {
 			for _, v := range value {
 				if len(v) > 100 {
 					return newErrorInvalidValue(key, " %s is too long.  (max 100 chars)", key)
 
 				}
-				desc.FeatureList = append(desc.FeatureList, v)
+				desc.Features = append(desc.Features, v)
 			}
 			p.pc.Description[k] = desc
 		}

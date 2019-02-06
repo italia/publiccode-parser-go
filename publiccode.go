@@ -89,7 +89,7 @@ type Desc struct {
 	LongDescription  string     `yaml:"longDescription"`
 	Documentation    *url.URL   `yaml:"documentation"`
 	APIDocumentation *url.URL   `yaml:"apiDocumentation"`
-	FeatureList      []string   `yaml:"featureList"`
+	Features         []string   `yaml:"features"`
 	Screenshots      []string   `yaml:"screenshots"`
 	Videos           []*url.URL `yaml:"videos"`
 	Awards           []string   `yaml:"awards"`

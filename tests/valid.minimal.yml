@@ -40,7 +40,7 @@ description:
           Very long description of this software, also split
           on multiple rows. You should note what the software
           is and why one should need it. This is 632 characters.
-    featureList:
+    features:
        - Just one feature
 
 legal:
