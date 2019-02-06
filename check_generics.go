@@ -70,11 +70,11 @@ func (p *parser) checkFile(key string, fn string) (string, error) {
 // checkDate tells whether the string in input is a date in the
 // format "YYYY-MM-DD", which is one of the ISO8601 allowed encoding, and return it as time.Time.
 func (p *parser) checkDate(key string, value string) (time.Time, error) {
-	if t, err := time.Parse("2006-01-02", value); err != nil {
+	t, err := time.Parse("2006-01-02", value)
+	if err != nil {
 		return t, newErrorInvalidValue(key, "cannot parse date: %v", err)
-	} else {
-		return t, nil
 	}
+	return t, nil
 }
 
 // checkImage tells whether the string in a valid image. It also checks if the file exists.

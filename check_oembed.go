@@ -29,13 +29,11 @@ func (p *parser) checkOembed(key string, link *url.URL) (*url.URL, error) {
 		info, err := item.FetchOembed(oembed.Options{URL: link.String()})
 		if err != nil {
 			return link, newErrorInvalidValue(key, "invalid oembed link: %s", err)
-		} else {
-			if info.Status >= 300 {
-				return link, newErrorInvalidValue(key, "invalid oembed link Status: %d", info.Status)
-			} else {
-				return link, nil
-			}
 		}
+		if info.Status >= 300 {
+			return link, newErrorInvalidValue(key, "invalid oembed link Status: %d", info.Status)
+		}
+		return link, nil
 	}
 
 	return link, newErrorInvalidValue(key, "invalid oembed link: %s", link)

@@ -14,7 +14,7 @@ var BaseDir = ""
 // Source https://github.com/publiccodenet/publiccode.yml
 const Version = "http://w3id.org/publiccode/version/0.1"
 
-// Publiccode is a publiccode.yml file definition.
+// PublicCode is a publiccode.yml file definition.
 // Reference: https://github.com/publiccodenet/publiccode.yml
 type PublicCode struct {
 	PubliccodeYamlVersion string `yaml:"publiccode-yaml-version"`

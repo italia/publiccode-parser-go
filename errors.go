@@ -5,6 +5,7 @@ import (
 	"strings"
 )
 
+// ErrorInvalidKey represents an error caused by an invalid key.
 type ErrorInvalidKey struct {
 	Key string
 }
@@ -16,6 +17,7 @@ func (e ErrorInvalidKey) Error() string {
 	return fmt.Sprintf("invalid key: %s", e.Key)
 }
 
+// ErrorInvalidValue represents an error caused by an invalid value.
 type ErrorInvalidValue struct {
 	Key    string
 	Reason string
@@ -32,6 +34,7 @@ func newErrorInvalidValue(key string, reason string, args ...interface{}) ErrorI
 	return ErrorInvalidValue{Key: key, Reason: fmt.Sprintf(reason, args...)}
 }
 
+// ErrorParseMulti represents an error caused by a multivalue key.
 type ErrorParseMulti []error
 
 func (es ErrorParseMulti) Error() string {
