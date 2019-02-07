@@ -15,7 +15,6 @@ var mandatoryKeys = []string{
 	"softwareType",
 	"legal/license",
 	"maintenance/type",
-	"maintenance/contacts",
 	"localisation/localisationReady",
 	"localisation/availableLanguages",
 }
@@ -485,7 +484,12 @@ func (p *parser) finalize() (es ErrorParseMulti) {
 
 	// "maintenance/contractors" presence is mandatory (if maintainance/type is contract).
 	if p.pc.Maintenance.Type == "contract" && len(p.pc.Maintenance.Contractors) == 0 {
-		es = append(es, newErrorInvalidValue("maintenance/contractors", "not found, mandatory for a \"contract\" maintenance"))
+		es = append(es, newErrorInvalidValue("maintenance/contractors", "not found, mandatory for \"contract\" maintenance"))
+	}
+
+	// "maintenance/contractors" presence is mandatory (if maintainance/type is internal or community).
+	if (p.pc.Maintenance.Type == "internal" || p.pc.Maintenance.Type == "community") && len(p.pc.Maintenance.Contacts) == 0 {
+		es = append(es, newErrorInvalidValue("maintenance/contacts", "not found, mandatory for \"internal\" or \"community\" maintenance"))
 	}
 
 	// maintenance/contacts/name is always mandatory
