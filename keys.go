@@ -10,8 +10,6 @@ var mandatoryKeys = []string{
 	"name",
 	"url",
 	"releaseDate",
-	"inputTypes",
-	"outputTypes",
 	"platforms",
 	"tags",
 	"softwareType",
