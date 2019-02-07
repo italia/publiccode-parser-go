@@ -140,8 +140,10 @@ func (p *parser) checkLogo(key string, value string) (string, error) {
 		if err != nil {
 			return file, err
 		}
-		if image.Width < 1000 {
-			return value, newErrorInvalidValue(key, "invalid image size of %d (min 1000px of width): %s", image.Width, value)
+
+		// Despite the spec requires at least 1000px, we temporarily release this constraint to 120px.
+		if image.Width < 120 {
+			return value, newErrorInvalidValue(key, "invalid image size of %d (min 120px of width): %s", image.Width, value)
 		}
 	}
 	return file, nil
