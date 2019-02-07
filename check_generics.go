@@ -17,6 +17,9 @@ import (
 	"time"
 )
 
+// Despite the spec requires at least 1000px, we temporarily release this constraint to 120px.
+const minLogoWidth = 120
+
 // checkEmail tells whether email is well formatted.
 // In general an email is valid if compile the regex: ^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,4}$
 func (p *parser) checkEmail(key string, fn string) error {
@@ -141,9 +144,8 @@ func (p *parser) checkLogo(key string, value string) (string, error) {
 			return file, err
 		}
 
-		// Despite the spec requires at least 1000px, we temporarily release this constraint to 120px.
-		if image.Width < 120 {
-			return value, newErrorInvalidValue(key, "invalid image size of %d (min 120px of width): %s", image.Width, value)
+		if image.Width < minLogoWidth {
+			return value, newErrorInvalidValue(key, "invalid image size of %d (min %dpx of width): %s", image.Width, minLogoWidth, value)
 		}
 	}
 	return file, nil
@@ -202,8 +204,8 @@ func (p *parser) checkMonochromeLogo(key string, value string) (string, error) {
 		width := imgCfg.Width
 		height := imgCfg.Height
 
-		if width < 1000 {
-			return value, newErrorInvalidValue(key, "invalid image size of %d (min 1000px of width): %s", width, value)
+		if width < minLogoWidth {
+			return value, newErrorInvalidValue(key, "invalid image size of %d (min %dpx of width): %s", width, minLogoWidth, value)
 		}
 
 		// Check if monochrome (black). Pixel by pixel.
