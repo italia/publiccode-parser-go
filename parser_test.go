@@ -7,14 +7,16 @@ import (
 	"testing"
 )
 
+type testType struct {
+	file   string
+	errkey string
+}
+
 // Test publiccode.yml local files for key errors.
 func TestDecodeValueErrors(t *testing.T) {
 	BaseDir = ""
 
-	testFiles := []struct {
-		file   string
-		errkey string
-	}{
+	testFiles := []testType{
 		// A complete and valid yml.
 		{"tests/valid.yml", ""},
 		//A complete and valid minimal yml.
@@ -54,20 +56,7 @@ func TestDecodeValueErrors(t *testing.T) {
 
 			//spew.Dump(pc.Description["eng"])
 
-			if test.errkey == "" && err != nil {
-				t.Error("unexpected error:\n", err)
-			} else if test.errkey != "" && err == nil {
-				t.Error("error not generated:\n", test.file)
-			} else if test.errkey != "" && err != nil {
-				if multi, ok := err.(ErrorParseMulti); !ok {
-					panic(err)
-				} else if len(multi) != 1 {
-					t.Errorf("too many errors generated: %#v", multi)
-				} else if e, ok := multi[0].(ErrorInvalidValue); !ok || e.Key != test.errkey {
-					t.Errorf("wrong error generated: %#v - instead of %s", e.Key, test.errkey)
-				}
-			}
-
+			checkParseErrors(t, err, test)
 		})
 	}
 
@@ -77,12 +66,9 @@ func TestDecodeValueErrors(t *testing.T) {
 func TestDecodeValueErrorsRemote(t *testing.T) {
 	BaseDir = "https://raw.githubusercontent.com/gith002/Medusa/master/"
 
-	testRemoteFiles := []struct {
-		file   string
-		errkey string
-	}{
-		// A complete and valid REMOTE yml
-		{"https://raw.githubusercontent.com/gith002/Medusa/master/publiccode.yml", ""}, // Valid remote publiccode.yml.
+	testRemoteFiles := []testType{
+		// A complete and valid REMOTE yml, except for publiccode-yaml-version instea of
+		{"https://raw.githubusercontent.com/gith002/Medusa/master/publiccode.yml", "publiccode-yaml-version : String"},
 	}
 
 	for _, test := range testRemoteFiles {
@@ -105,19 +91,25 @@ func TestDecodeValueErrorsRemote(t *testing.T) {
 			var pc PublicCode
 			err = Parse(data, &pc)
 
-			if test.errkey == "" && err != nil {
-				t.Error("unexpected error:\n", err)
-			} else if test.errkey != "" && err == nil {
-				t.Error("error not generated:\n", test.file)
-			} else if test.errkey != "" && err != nil {
-				if multi, ok := err.(ErrorParseMulti); !ok {
-					panic(err)
-				} else if len(multi) != 1 {
-					t.Errorf("too many errors generated: %#v", multi)
-				} else if e, ok := multi[0].(ErrorInvalidValue); !ok || e.Key != test.errkey {
-					t.Errorf("wrong error generated: %#v - instead of %s", e, test.errkey)
-				}
-			}
+			checkParseErrors(t, err, test)
 		})
+	}
+}
+
+func checkParseErrors(t *testing.T, err error, test testType) {
+	if test.errkey == "" && err != nil {
+		t.Error("unexpected error:\n", err)
+	} else if test.errkey != "" && err == nil {
+		t.Error("error not generated:\n", test.file)
+	} else if test.errkey != "" && err != nil {
+		if multi, ok := err.(ErrorParseMulti); !ok {
+			panic(err)
+		} else if len(multi) != 1 {
+			t.Errorf("too many errors generated: %#v", multi)
+		} else if e, ok := multi[0].(ErrorInvalidValue); ok && (e.Key != test.errkey) {
+			t.Errorf("wrong error generated: %s - key: %#v - instead of %s", e, e.Key, test.errkey)
+		} else if e, ok := multi[0].(ErrorInvalidKey); ok && (e.Key != test.errkey) {
+			t.Errorf("wrong error generated: %s - key: %#v - instead of %s", e, e.Key, test.errkey)
+		}
 	}
 }

@@ -102,12 +102,7 @@ legal:
   authorsFile: tests/AUTHORS              # file listing copyright information
 
 maintenance:
-  type: "contract"
-
-  contractors:
-    - name: "Fornitore Privato SPA" # if maintainance is a contract
-      website: "https://developers.italia.it"
-      until: "2019-01-01"
+  type: "internal"
 
 localisation:
   # Does the software support, at least by design, multiple languages?
