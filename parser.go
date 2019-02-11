@@ -103,6 +103,12 @@ func (p *Parser) decoderec(prefix string, s map[interface{}]interface{}) (es Err
 			es = append(es, ErrorInvalidKey{Key: fmt.Sprint(ki)})
 			continue
 		}
+
+		// convert legacy keys
+		if k2, ok := legacyKeys[k]; ok {
+			k = k2
+		}
+
 		if prefix != "" {
 			k = prefix + "/" + k
 		}

@@ -58,8 +58,7 @@ func TestDecodeValueErrors(t *testing.T) {
 // Test publiccode.yml remote files for key errors.
 func TestDecodeValueErrorsRemote(t *testing.T) {
 	testRemoteFiles := []testType{
-		// A complete and valid REMOTE yml, except for publiccode-yaml-version instead of
-		{"https://raw.githubusercontent.com/gith002/Medusa/master/publiccode.yml", "publiccode-yaml-version : String"},
+		{"https://raw.githubusercontent.com/gith002/Medusa/master/publiccode.yml", ""},
 	}
 
 	for _, test := range testRemoteFiles {

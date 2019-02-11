@@ -4,6 +4,11 @@ import (
 	"time"
 )
 
+var legacyKeys = map[string]string{
+	"publiccode-yaml-version": "publiccodeYmlVersion",
+	"featureList":             "features",
+}
+
 // Version of the PublicCode specs.
 // Source https://github.com/publiccodenet/publiccode.yml
 const Version = "0.1"

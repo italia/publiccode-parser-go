@@ -59,6 +59,9 @@ func (p *Parser) decodeBool(key string, boolValue bool) (err error) {
 func (p *Parser) decodeString(key string, value string) (err error) {
 	switch {
 	case key == "publiccodeYmlVersion":
+		// strip legacy URI prefix
+		value = strings.Replace(value, "http://w3id.org/publiccode/version/", "", 1)
+
 		p.PublicCode.PubliccodeYamlVersion = value
 		if p.PublicCode.PubliccodeYamlVersion != Version {
 			return newErrorInvalidValue(key, "version %s not supported", p.PublicCode.PubliccodeYamlVersion)
