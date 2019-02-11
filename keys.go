@@ -71,10 +71,10 @@ func (p *Parser) decodeString(key string, value string) (err error) {
 	case key == "applicationSuite":
 		p.PublicCode.ApplicationSuite = value
 	case key == "url":
-		p.PublicCode.URL, err = p.checkURL(key, value)
+		p.PublicCode.URLString, p.PublicCode.URL, err = p.checkURL(key, value)
 		return err
 	case key == "landingURL":
-		p.PublicCode.LandingURL, err = p.checkURL(key, value)
+		p.PublicCode.LandingURLString, p.PublicCode.LandingURL, err = p.checkURL(key, value)
 		return err
 	case key == "isBasedOn":
 		return p.decodeArrString(key, []string{value})
@@ -94,7 +94,7 @@ func (p *Parser) decodeString(key string, value string) (err error) {
 	case key == "tags":
 		return p.decodeArrString(key, []string{value})
 	case key == "roadmap":
-		p.PublicCode.Roadmap, err = p.checkURL(key, value)
+		p.PublicCode.RoadmapString, p.PublicCode.Roadmap, err = p.checkURL(key, value)
 		return err
 	case key == "developmentStatus":
 		for _, v := range []string{"concept", "development", "beta", "stable", "obsolete"} {
@@ -138,14 +138,14 @@ func (p *Parser) decodeString(key string, value string) (err error) {
 			p.PublicCode.Description[k] = desc
 		}
 		if attr == "documentation" {
-			desc.Documentation, err = p.checkURL(key, value)
+			desc.DocumentationString, desc.Documentation, err = p.checkURL(key, value)
 			if err != nil {
 				return err
 			}
 			p.PublicCode.Description[k] = desc
 		}
 		if attr == "apiDocumentation" {
-			desc.APIDocumentation, err = p.checkURL(key, value)
+			desc.APIDocumentationString, desc.APIDocumentation, err = p.checkURL(key, value)
 			if err != nil {
 				return err
 			}
@@ -270,11 +270,12 @@ func (p *Parser) decodeArrString(key string, value []string) error {
 		}
 		if attr == "videos" {
 			for _, v := range value {
-				v, err := p.checkOembed(key, v)
+				v, u, err := p.checkOembed(key, v)
 				if err != nil {
 					return err
 				}
-				desc.Videos = append(desc.Videos, v)
+				desc.Videos = append(desc.Videos, u)
+				desc.VideosStrings = append(desc.VideosStrings, v)
 			}
 			p.PublicCode.Description[k] = desc
 		}
@@ -339,11 +340,11 @@ func (p *Parser) decodeArrObj(key string, value map[interface{}]interface{}) err
 					}
 					contractor.Until = date
 				} else if k.(string) == "website" {
-					u, err := p.checkURL(key, val.(string))
+					var err error
+					contractor.WebsiteString, contractor.Website, err = p.checkURL(key, val.(string))
 					if err != nil {
 						return err
 					}
-					contractor.Website = u
 				} else {
 					return newErrorInvalidValue(key, " %s contains an invalid value", k)
 				}
