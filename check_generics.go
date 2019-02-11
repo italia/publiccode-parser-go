@@ -36,28 +36,28 @@ func (p *Parser) checkEmail(key string, fn string) error {
 // checkURL tells whether the URL resource is well formatted and reachable and return it as *url.URL.
 // An URL resource is well formatted if it's a valid URL and the scheme is not empty.
 // An URL resource is reachable if returns an http Status = 200 OK.
-func (p *Parser) checkURL(key string, value string) (string, error) {
+func (p *Parser) checkURL(key string, value string) (*url.URL, error) {
 	//fmt.Printf("checking URL: %s\n", value)
 
 	// Check if URL is well formatted
 	u, err := url.Parse(value)
 	if err != nil {
-		return "", newErrorInvalidValue(key, "not a valid URL: %s: %v", value, err)
+		return nil, newErrorInvalidValue(key, "not a valid URL: %s: %v", value, err)
 	}
 	if u.Scheme == "" {
-		return "", newErrorInvalidValue(key, "missing URL scheme: %s", value)
+		return nil, newErrorInvalidValue(key, "missing URL scheme: %s", value)
 	}
 
 	// Check whether URL is reachable
 	r, err := http.Get(value)
 	if err != nil {
-		return "", newErrorInvalidValue(key, "HTTP GET failed for %s: %v", value, err)
+		return nil, newErrorInvalidValue(key, "HTTP GET failed for %s: %v", value, err)
 	}
 	if r.StatusCode != 200 {
-		return "", newErrorInvalidValue(key, "HTTP GET returned %d for %s; 200 was expected", r.StatusCode, value)
+		return nil, newErrorInvalidValue(key, "HTTP GET returned %d for %s; 200 was expected", r.StatusCode, value)
 	}
 
-	return value, nil
+	return u, nil
 }
 
 // getAbsolutePaths tries to compute both a local absolute path and a remote

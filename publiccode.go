@@ -1,6 +1,7 @@
 package publiccode
 
 import (
+	"net/url"
 	"time"
 )
 
@@ -18,10 +19,10 @@ const Version = "0.1"
 type PublicCode struct {
 	PubliccodeYamlVersion string `yaml:"publiccodeYmlVersion"`
 
-	Name             string `yaml:"name"`
-	ApplicationSuite string `yaml:"applicationSuite"`
-	URL              string `yaml:"url"`
-	LandingURL       string `yaml:"landingURL"`
+	Name             string   `yaml:"name"`
+	ApplicationSuite string   `yaml:"applicationSuite"`
+	URL              *url.URL `yaml:"url"`
+	LandingURL       *url.URL `yaml:"landingURL"`
 
 	IsBasedOn       []string  `yaml:"isBasedOn"`
 	SoftwareVersion string    `yaml:"softwareVersion"`
@@ -38,7 +39,7 @@ type PublicCode struct {
 
 	UsedBy []string `yaml:"usedBy"`
 
-	Roadmap string `yaml:"roadmap"`
+	Roadmap *url.URL `yaml:"roadmap"`
 
 	DevelopmentStatus string `yaml:"developmentStatus"`
 
@@ -82,24 +83,24 @@ type PublicCode struct {
 // Desc is a general description of the software.
 // Reference: https://github.com/publiccodenet/publiccode.yml/blob/develop/schema.md#section-description
 type Desc struct {
-	LocalisedName    string   `yaml:"localisedName"`
-	GenericName      string   `yaml:"genericName"`
-	ShortDescription string   `yaml:"shortDescription"`
-	LongDescription  string   `yaml:"longDescription"`
-	Documentation    string   `yaml:"documentation"`
-	APIDocumentation string   `yaml:"apiDocumentation"`
-	Features         []string `yaml:"features"`
-	Screenshots      []string `yaml:"screenshots"`
-	Videos           []string `yaml:"videos"`
-	Awards           []string `yaml:"awards"`
-	FreeTags         []string `yaml:"freeTags"`
+	LocalisedName    string     `yaml:"localisedName"`
+	GenericName      string     `yaml:"genericName"`
+	ShortDescription string     `yaml:"shortDescription"`
+	LongDescription  string     `yaml:"longDescription"`
+	Documentation    *url.URL   `yaml:"documentation"`
+	APIDocumentation *url.URL   `yaml:"apiDocumentation"`
+	Features         []string   `yaml:"features"`
+	Screenshots      []string   `yaml:"screenshots"`
+	Videos           []*url.URL `yaml:"videos"`
+	Awards           []string   `yaml:"awards"`
+	FreeTags         []string   `yaml:"freeTags"`
 }
 
 // Contractor is an entity or entities, if any, that are currently contracted for maintaining the software.
 // Reference: https://github.com/publiccodenet/publiccode.yml/blob/develop/schema.md#contractor
 type Contractor struct {
 	Name    string    `yaml:"name"`
-	Website string    `yaml:"website"`
+	Website *url.URL  `yaml:"website"`
 	Until   time.Time `yaml:"until"`
 }
 
