@@ -155,3 +155,8 @@ func (p *Parser) decoderec(prefix string, s map[interface{}]interface{}) (es Err
 	}
 	return
 }
+
+// ToYAML converts parser.PublicCode into YAML again.
+func (p *Parser) ToYAML() ([]byte, error) {
+	return yaml.Marshal(p.PublicCode)
+}
