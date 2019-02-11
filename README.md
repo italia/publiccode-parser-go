@@ -10,7 +10,7 @@ publiccode.yml is an international standard for describing public software. It i
 - Check ISO 3166-1 alpha-2 and alpha-3 country codes
 - Validate emails, URLs (http scheme, valid status code), local and remote files, dates as "YYYY-MM-DD", images (colors, mimes)
 - Check pa-types
-- Validate oembed video links
+- Validate oembed video links and retrieve HTML for easy embedding
 - Validate SPDX licenses. Without WITH keyword.
 - Check tags
 

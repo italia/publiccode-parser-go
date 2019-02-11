@@ -267,15 +267,11 @@ func (p *Parser) decodeArrString(key string, value []string) error {
 		}
 		if attr == "videos" {
 			for _, v := range value {
-				u, err := p.checkURL(key, v)
+				v, err := p.checkOembed(key, v)
 				if err != nil {
 					return err
 				}
-				u, err = p.checkOembed(key, u)
-				if err != nil {
-					return err
-				}
-				desc.Videos = append(desc.Videos, u)
+				desc.Videos = append(desc.Videos, v)
 			}
 			p.PublicCode.Description[k] = desc
 		}

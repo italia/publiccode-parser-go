@@ -79,12 +79,14 @@ func (p *Parser) ParseRemoteFile(url string) error {
 // Parser is a helper class for parsing publiccode.yml files.
 type Parser struct {
 	PublicCode PublicCode
+	Oembed     map[string]string
 	missing    map[string]bool
 }
 
 // NewParser initializes a new Parser object and returns it.
 func NewParser() *Parser {
 	var p Parser
+	p.Oembed = make(map[string]string)
 	p.missing = make(map[string]bool)
 	for _, k := range mandatoryKeys {
 		p.missing[k] = true
