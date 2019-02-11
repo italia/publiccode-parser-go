@@ -37,7 +37,7 @@ func (p *Parser) checkOembed(key string, link string) (*url.URL, error) {
 	}
 
 	// save the Oembed HTML
-	p.Oembed[link] = info.HTML
+	p.OEmbed[link] = info.HTML
 
 	return u, nil
 }

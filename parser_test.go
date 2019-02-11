@@ -47,7 +47,7 @@ func TestDecodeValueErrors(t *testing.T) {
 			checkParseErrors(t, err, test)
 
 			if test.file == "tests/valid.yml" {
-				if !strings.Contains(p.Oembed["https://www.youtube.com/watch?v=RaHmGbBOP84"], "<iframe ") {
+				if !strings.Contains(p.OEmbed["https://www.youtube.com/watch?v=RaHmGbBOP84"], "<iframe ") {
 					t.Errorf("Missing Oembed info")
 				}
 			}
