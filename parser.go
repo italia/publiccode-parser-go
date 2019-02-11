@@ -10,19 +10,27 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-// LocalBasePath is a filesystem path pointing to the directory where the
-// publiccode.yml is located. It's used as a base for relative paths. If
-// left empty, RemoteBaseURL will be used.
-var LocalBasePath = ""
+// Parser is a helper class for parsing publiccode.yml files.
+type Parser struct {
+	PublicCode PublicCode
 
-// RemoteBaseURL is the URL pointing to the directory where the publiccode.yml
-// file is located. It's used for validating abolute URLs and as a base for
-// relative paths. If left empty, absolute URLs will not be validated and
-// no remote validation of files with relative paths will be performed. If
-// not left empty, publiccode.yml keys with relative paths will be turned
-// into absolute URLs.
-// (eg: https://raw.githubusercontent.com/gith002/Medusa/master)
-var RemoteBaseURL = ""
+	// LocalBasePath is a filesystem path pointing to the directory where the
+	// publiccode.yml is located. It's used as a base for relative paths. If
+	// left empty, RemoteBaseURL will be used.
+	LocalBasePath string
+
+	// RemoteBaseURL is the URL pointing to the directory where the publiccode.yml
+	// file is located. It's used for validating abolute URLs and as a base for
+	// relative paths. If left empty, absolute URLs will not be validated and
+	// no remote validation of files with relative paths will be performed. If
+	// not left empty, publiccode.yml keys with relative paths will be turned
+	// into absolute URLs.
+	// (eg: https://raw.githubusercontent.com/gith002/Medusa/master)
+	RemoteBaseURL string
+
+	OEmbed  map[string]string
+	missing map[string]bool
+}
 
 // Lock uses sync.Mutex lock/unlock for goroutines.
 var Lock sync.Mutex
@@ -74,13 +82,6 @@ func (p *Parser) ParseRemoteFile(url string) error {
 	}
 
 	return p.Parse(data)
-}
-
-// Parser is a helper class for parsing publiccode.yml files.
-type Parser struct {
-	PublicCode PublicCode
-	OEmbed     map[string]string
-	missing    map[string]bool
 }
 
 // NewParser initializes a new Parser object and returns it.

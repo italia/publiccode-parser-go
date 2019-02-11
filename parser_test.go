@@ -12,8 +12,6 @@ type testType struct {
 
 // Test publiccode.yml local files for key errors.
 func TestDecodeValueErrors(t *testing.T) {
-	RemoteBaseURL = ""
-
 	testFiles := []testType{
 		// A complete and valid yml.
 		{"tests/valid.yml", ""},
@@ -42,6 +40,7 @@ func TestDecodeValueErrors(t *testing.T) {
 		t.Run(test.errkey, func(t *testing.T) {
 			// Parse file into pc struct.
 			p := NewParser()
+			p.RemoteBaseURL = ""
 			err := p.ParseFile(test.file)
 
 			checkParseErrors(t, err, test)
@@ -58,8 +57,6 @@ func TestDecodeValueErrors(t *testing.T) {
 
 // Test publiccode.yml remote files for key errors.
 func TestDecodeValueErrorsRemote(t *testing.T) {
-	RemoteBaseURL = "https://raw.githubusercontent.com/gith002/Medusa/master/"
-
 	testRemoteFiles := []testType{
 		// A complete and valid REMOTE yml, except for publiccode-yaml-version instead of
 		{"https://raw.githubusercontent.com/gith002/Medusa/master/publiccode.yml", "publiccode-yaml-version : String"},
@@ -69,6 +66,7 @@ func TestDecodeValueErrorsRemote(t *testing.T) {
 		t.Run(test.errkey, func(t *testing.T) {
 			// Parse data into pc struct.
 			p := NewParser()
+			p.RemoteBaseURL = "https://raw.githubusercontent.com/gith002/Medusa/master/"
 			err := p.ParseRemoteFile(test.file)
 
 			checkParseErrors(t, err, test)
@@ -100,15 +98,15 @@ func checkParseErrors(t *testing.T, err error, test testType) {
 // Test that relative paths are turned into absolute paths.
 func TestRelativePaths(t *testing.T) {
 	// Parse file into pc struct.
-	RemoteBaseURL = "https://raw.githubusercontent.com/italia/18app/master"
 	const url = "https://raw.githubusercontent.com/italia/18app/master/publiccode.yml"
 	p := NewParser()
+	p.RemoteBaseURL = "https://raw.githubusercontent.com/italia/18app/master"
 	err := p.ParseRemoteFile(url)
 	if err != nil {
 		t.Errorf("Failed to parse remote file from %v: %v", url, err)
 	}
 
-	if strings.Index(p.PublicCode.Description["ita"].Screenshots[0], RemoteBaseURL) != 0 {
+	if strings.Index(p.PublicCode.Description["ita"].Screenshots[0], p.RemoteBaseURL) != 0 {
 		t.Errorf("Relative path was not turned into absolute URL: %v", p.PublicCode.Description["ita"].Screenshots[0])
 	}
 }

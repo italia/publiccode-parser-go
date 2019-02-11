@@ -68,28 +68,28 @@ func (p *Parser) getAbsolutePaths(key, file string) (string, string, error) {
 	// Check if file is an absolute URL
 	if _, err := url.ParseRequestURI(file); err == nil {
 		// If the base URL is set, we can perform validation and try to compute the local path
-		if RemoteBaseURL != "" {
+		if p.RemoteBaseURL != "" {
 			// Check if the URL matches the base URL.
 			// We don't allow absolute URLs not pointing to the same repository as the
 			// publiccode.yml file
-			if strings.Index(file, RemoteBaseURL) != 0 {
-				return "", "", newErrorInvalidValue(key, "Absolute URL (%s) is outside the repository (%s)", file, RemoteBaseURL)
+			if strings.Index(file, p.RemoteBaseURL) != 0 {
+				return "", "", newErrorInvalidValue(key, "Absolute URL (%s) is outside the repository (%s)", file, p.RemoteBaseURL)
 			}
 
 			// We can compute the local path by stripping the base URL.
-			if LocalBasePath != "" {
-				LocalPath = path.Join(LocalBasePath, strings.Replace(file, RemoteBaseURL, "", 1))
+			if p.LocalBasePath != "" {
+				LocalPath = path.Join(p.LocalBasePath, strings.Replace(file, p.RemoteBaseURL, "", 1))
 			}
 		}
 		RemoteURL = file
 	} else {
 		// If file is a relative path, let's try to compute its absolute filesystem path
 		// and remote URL by prepending the base paths, if provided.
-		if LocalBasePath != "" {
-			LocalPath = path.Join(LocalBasePath, file)
+		if p.LocalBasePath != "" {
+			LocalPath = path.Join(p.LocalBasePath, file)
 		}
-		if RemoteBaseURL != "" {
-			u, err := url.Parse(RemoteBaseURL)
+		if p.RemoteBaseURL != "" {
+			u, err := url.Parse(p.RemoteBaseURL)
 			if err != nil {
 				return "", "", err
 			}
