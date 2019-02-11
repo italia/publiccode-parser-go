@@ -28,66 +28,18 @@ var RemoteBaseURL = ""
 var Lock sync.Mutex
 
 // Parse loads the yaml bytes and tries to parse it. Return an error if fails.
-func Parse(in []byte) (*PublicCode, error) {
+func (p *Parser) Parse(in []byte) error {
 	var s map[interface{}]interface{}
 	// Lock for goroutines.
 	Lock.Lock()
 
 	d := yaml.NewDecoder(bytes.NewReader(in))
 	if err := d.Decode(&s); err != nil {
-		return nil, err
+		return err
 	}
 	// Unlock for goroutines.
 	Lock.Unlock()
 
-	var pc PublicCode
-	err := newParser(&pc).parse(s)
-	return &pc, err
-}
-
-// ParseFile loads a publiccode.yml file from a given file path.
-func ParseFile(file string) (*PublicCode, error) {
-	// Read data.
-	data, err := ioutil.ReadFile(file)
-	if err != nil {
-		return nil, err
-	}
-
-	return Parse(data)
-}
-
-// ParseRemoteFile loads a publiccode.yml file from its raw URL.
-func ParseRemoteFile(url string) (*PublicCode, error) {
-	// Read data.
-	resp, err := http.Get(url)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-	data, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	return Parse(data)
-}
-
-type parser struct {
-	pc      *PublicCode
-	missing map[string]bool
-}
-
-func newParser(pc *PublicCode) *parser {
-	var p parser
-	p.pc = pc
-	p.missing = make(map[string]bool)
-	for _, k := range mandatoryKeys {
-		p.missing[k] = true
-	}
-	return &p
-}
-
-func (p *parser) parse(s map[interface{}]interface{}) error {
 	if err := p.decoderec("", s); err != nil {
 		return err
 	}
@@ -97,7 +49,50 @@ func (p *parser) parse(s map[interface{}]interface{}) error {
 	return nil
 }
 
-func (p *parser) decoderec(prefix string, s map[interface{}]interface{}) (es ErrorParseMulti) {
+// ParseFile loads a publiccode.yml file from a given file path.
+func (p *Parser) ParseFile(file string) error {
+	// Read data.
+	data, err := ioutil.ReadFile(file)
+	if err != nil {
+		return err
+	}
+
+	return p.Parse(data)
+}
+
+// ParseRemoteFile loads a publiccode.yml file from its raw URL.
+func (p *Parser) ParseRemoteFile(url string) error {
+	// Read data.
+	resp, err := http.Get(url)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	data, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
+
+	return p.Parse(data)
+}
+
+// Parser is a helper class for parsing publiccode.yml files.
+type Parser struct {
+	PublicCode PublicCode
+	missing    map[string]bool
+}
+
+// NewParser initializes a new Parser object and returns it.
+func NewParser() *Parser {
+	var p Parser
+	p.missing = make(map[string]bool)
+	for _, k := range mandatoryKeys {
+		p.missing[k] = true
+	}
+	return &p
+}
+
+func (p *Parser) decoderec(prefix string, s map[interface{}]interface{}) (es ErrorParseMulti) {
 
 	for ki, v := range s {
 		k, ok := ki.(string)

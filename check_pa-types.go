@@ -1,7 +1,7 @@
 package publiccode
 
 // checkPaTypes tells whether the pa-type is a valid type or not and returns it.
-func (p *parser) checkPaTypes(key, paType string) (string, error) {
+func (p *Parser) checkPaTypes(key, paType string) (string, error) {
 	for _, t := range paTypes {
 		if t == paType {
 			return paType, nil

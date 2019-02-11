@@ -14,6 +14,14 @@ publiccode.yml is an international standard for describing public software. It i
 - Validate SPDX licenses. Without WITH keyword.
 - Check tags
 
+## Example
+
+```go
+parser := publiccode.NewParser()
+err := parser.ParseRemoteFile(url)
+pc := parser.PublicCode
+```
+
 ## Assets
 
 - [data/amministrazioni.txt](data/amministrazioni.txt) updated on: _2018-07-12_.

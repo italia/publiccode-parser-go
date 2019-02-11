@@ -41,7 +41,8 @@ func TestDecodeValueErrors(t *testing.T) {
 	for _, test := range testFiles {
 		t.Run(test.errkey, func(t *testing.T) {
 			// Parse file into pc struct.
-			_, err := ParseFile(test.file)
+			p := NewParser()
+			err := p.ParseFile(test.file)
 
 			checkParseErrors(t, err, test)
 		})
@@ -61,7 +62,8 @@ func TestDecodeValueErrorsRemote(t *testing.T) {
 	for _, test := range testRemoteFiles {
 		t.Run(test.errkey, func(t *testing.T) {
 			// Parse data into pc struct.
-			_, err := ParseRemoteFile(test.file)
+			p := NewParser()
+			err := p.ParseRemoteFile(test.file)
 
 			checkParseErrors(t, err, test)
 		})
@@ -94,12 +96,13 @@ func TestRelativePaths(t *testing.T) {
 	// Parse file into pc struct.
 	RemoteBaseURL = "https://raw.githubusercontent.com/italia/18app/master"
 	const url = "https://raw.githubusercontent.com/italia/18app/master/publiccode.yml"
-	pc, err := ParseRemoteFile(url)
+	p := NewParser()
+	err := p.ParseRemoteFile(url)
 	if err != nil {
 		t.Errorf("Failed to parse remote file from %v: %v", url, err)
 	}
 
-	if strings.Index(pc.Description["ita"].Screenshots[0], RemoteBaseURL) != 0 {
-		t.Errorf("Relative path was not turned into absolute URL: %v", pc.Description["ita"].Screenshots[0])
+	if strings.Index(p.PublicCode.Description["ita"].Screenshots[0], RemoteBaseURL) != 0 {
+		t.Errorf("Relative path was not turned into absolute URL: %v", p.PublicCode.Description["ita"].Screenshots[0])
 	}
 }

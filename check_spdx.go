@@ -3,7 +3,7 @@ package publiccode
 import spdxValidator "github.com/r3vit/go-spdx/spdx"
 
 // checkPaTypes tells whether the pa-type is a valid type or not and returns it.
-func (p *parser) checkSpdx(key, spdx string) error {
+func (p *Parser) checkSpdx(key, spdx string) error {
 	_, err := spdxValidator.Parse(spdx)
 	if err != nil {
 		return newErrorInvalidValue(key, "error: %v - invalid value: %s", err, spdx)

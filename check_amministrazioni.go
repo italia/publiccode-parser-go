@@ -43,7 +43,7 @@ type Amministrazione struct {
 
 // checkCodiceIPA tells whether the codiceIPA is registered into amministrazioni.txt
 // Reference: http://www.indicepa.gov.it/documentale/n-opendata.php.
-func (p *parser) checkCodiceIPA(key string, codiceiPA string) (string, error) {
+func (p *Parser) checkCodiceIPA(key string, codiceiPA string) (string, error) {
 	if codiceiPA == "" {
 		return codiceiPA, newErrorInvalidValue(key, "empty codiceIPA key")
 	}

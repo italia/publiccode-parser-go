@@ -3,7 +3,7 @@ package publiccode
 import "github.com/thoas/go-funk"
 
 // checkTag tells whether the tag is a valid tag or not and returns it.
-func (p *parser) checkTag(key, tag string) (string, error) {
+func (p *Parser) checkTag(key, tag string) (string, error) {
 	if funk.Contains(tagList, tag) {
 		return tag, nil
 	}

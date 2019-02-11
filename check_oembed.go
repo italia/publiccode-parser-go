@@ -9,7 +9,7 @@ import (
 
 // checkOembed tells whether the link is hosted on a valid oembed provider.
 // Reference: https://oembed.com/providers.json
-func (p *parser) checkOembed(key string, link *url.URL) (*url.URL, error) {
+func (p *Parser) checkOembed(key string, link *url.URL) (*url.URL, error) {
 	if link.String() == "" {
 		return link, newErrorInvalidValue(key, "empty oembed link")
 	}

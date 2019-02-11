@@ -50,11 +50,11 @@ FAIL	publiccode.yml-parser-go	5.255s
   When found it, you can add the right key to the switch case.
 
 ```
-func (p *parser) decodeString(key string, value string) (err error) {
+func (p *Parser) decodeString(key string, value string) (err error) {
 	switch {
   ...
   case key == "nickname":
-    p.pc.Nickname = value
+    p.PublicCode.Nickname = value
   ...
   }
 }

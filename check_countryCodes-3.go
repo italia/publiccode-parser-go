@@ -3,7 +3,7 @@ package publiccode
 import "strings"
 
 // checkCountryCodes3 tells whether the 3-letter country code is valid (ISO 3166-1 alpha-3 code) or not and returns it.
-func (p *parser) checkCountryCodes3(key, code string) error {
+func (p *Parser) checkCountryCodes3(key, code string) error {
 	// If it's not a valid 3 letters code.
 	if len(code) != 3 {
 		return newErrorInvalidValue(key, "invalid ISO 3166-1 alpha-3 country code: %s", code)

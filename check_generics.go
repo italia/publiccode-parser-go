@@ -24,7 +24,7 @@ const minLogoWidth = 120
 
 // checkEmail tells whether email is well formatted.
 // In general an email is valid if compile the regex: ^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,4}$
-func (p *parser) checkEmail(key string, fn string) error {
+func (p *Parser) checkEmail(key string, fn string) error {
 	re := regexp.MustCompile(`^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,4}$`)
 	if !re.MatchString(fn) {
 		return newErrorInvalidValue(key, "invalid email: %v", fn)
@@ -36,7 +36,7 @@ func (p *parser) checkEmail(key string, fn string) error {
 // checkURL tells whether the URL resource is well formatted and reachable and return it as *url.URL.
 // An URL resource is well formatted if it's a valid URL and the scheme is not empty.
 // An URL resource is reachable if returns an http Status = 200 OK.
-func (p *parser) checkURL(key string, value string) (*url.URL, error) {
+func (p *Parser) checkURL(key string, value string) (*url.URL, error) {
 	//fmt.Printf("checking URL: %s\n", value)
 
 	// Check if URL is well formatted
@@ -62,7 +62,7 @@ func (p *parser) checkURL(key string, value string) (*url.URL, error) {
 
 // getAbsolutePaths tries to compute both a local absolute path and a remote
 // URL pointing to the given file, if we have enough information.
-func (p *parser) getAbsolutePaths(key, file string) (string, string, error) {
+func (p *Parser) getAbsolutePaths(key, file string) (string, string, error) {
 	var LocalPath, RemoteURL string
 
 	// Check if file is an absolute URL
@@ -106,7 +106,7 @@ func (p *parser) getAbsolutePaths(key, file string) (string, string, error) {
 }
 
 // checkFile tells whether the file resource exists and return it.
-func (p *parser) checkFile(key, file string) (string, error) {
+func (p *Parser) checkFile(key, file string) (string, error) {
 	// Try to compute both a local absolute path and a remote URL pointing
 	// to this file, if we have enough information.
 	LocalPath, RemoteURL, err := p.getAbsolutePaths(key, file)
@@ -138,7 +138,7 @@ func (p *parser) checkFile(key, file string) (string, error) {
 
 // checkDate tells whether the string in input is a date in the
 // format "YYYY-MM-DD", which is one of the ISO8601 allowed encoding, and return it as time.Time.
-func (p *parser) checkDate(key string, value string) (time.Time, error) {
+func (p *Parser) checkDate(key string, value string) (time.Time, error) {
 	t, err := time.Parse("2006-01-02", value)
 	if err != nil {
 		return t, newErrorInvalidValue(key, "cannot parse date: %v", err)
@@ -148,7 +148,7 @@ func (p *parser) checkDate(key string, value string) (time.Time, error) {
 
 // checkImage tells whether the string in a valid image. It also checks if the file exists.
 // Reference: https://github.com/publiccodenet/publiccode.yml/blob/develop/schema.md
-func (p *parser) checkImage(key string, value string) (string, error) {
+func (p *Parser) checkImage(key string, value string) (string, error) {
 	validExt := []string{".jpg", ".png"}
 	ext := strings.ToLower(filepath.Ext(value))
 
@@ -165,7 +165,7 @@ func (p *parser) checkImage(key string, value string) (string, error) {
 
 // checkLogo tells whether the string in a valid logo. It also checks if the file exists.
 // Reference: https://github.com/publiccodenet/publiccode.yml/blob/develop/schema.md
-func (p *parser) checkLogo(key string, value string) (string, error) {
+func (p *Parser) checkLogo(key string, value string) (string, error) {
 	validExt := []string{".svg", ".svgz", ".png"}
 	ext := strings.ToLower(filepath.Ext(value))
 
@@ -219,7 +219,7 @@ func (p *parser) checkLogo(key string, value string) (string, error) {
 
 // checkLogo tells whether the string in a valid logo. It also checks if the file exists.
 // Reference: https://github.com/publiccodenet/publiccode.yml/blob/develop/schema.md
-func (p *parser) checkMonochromeLogo(key string, value string) (string, error) {
+func (p *Parser) checkMonochromeLogo(key string, value string) (string, error) {
 	validExt := []string{".svg", ".svgz", ".png"}
 	ext := strings.ToLower(filepath.Ext(value))
 
@@ -327,7 +327,7 @@ func (p *parser) checkMonochromeLogo(key string, value string) (string, error) {
 }
 
 // checkMIME tells whether the string in input is a well formatted MIME or not.
-func (p *parser) checkMIME(key string, value string) error {
+func (p *Parser) checkMIME(key string, value string) error {
 	// Regex for MIME.
 	// Reference: https://github.com/jshttp/media-typer/
 	re := regexp.MustCompile("^ *([A-Za-z0-9][A-Za-z0-9!#$&^_-]{0,126})/([A-Za-z0-9][A-Za-z0-9!#$&^_.+-]{0,126}) *$")
