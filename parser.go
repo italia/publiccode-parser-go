@@ -3,28 +3,73 @@ package publiccode
 import (
 	"bytes"
 	"fmt"
+	"io/ioutil"
+	"net/http"
 	"sync"
 
 	"gopkg.in/yaml.v2"
 )
 
+// LocalBasePath is a filesystem path pointing to the directory where the
+// publiccode.yml is located. It's used as a base for relative paths. If
+// left empty, RemoteBaseURL will be used.
+var LocalBasePath = ""
+
+// RemoteBaseURL is the URL pointing to the directory where the publiccode.yml
+// file is located. It's used for validating abolute URLs and as a base for
+// relative paths. If left empty, absolute URLs will not be validated and
+// no remote validation of files with relative paths will be performed. If
+// not left empty, publiccode.yml keys with relative paths will be turned
+// into absolute URLs.
+// (eg: https://raw.githubusercontent.com/gith002/Medusa/master)
+var RemoteBaseURL = ""
+
 // Lock uses sync.Mutex lock/unlock for goroutines.
 var Lock sync.Mutex
 
 // Parse loads the yaml bytes and tries to parse it. Return an error if fails.
-func Parse(in []byte, pc *PublicCode) error {
+func Parse(in []byte) (*PublicCode, error) {
 	var s map[interface{}]interface{}
 	// Lock for goroutines.
 	Lock.Lock()
 
 	d := yaml.NewDecoder(bytes.NewReader(in))
 	if err := d.Decode(&s); err != nil {
-		return err
+		return nil, err
 	}
 	// Unlock for goroutines.
 	Lock.Unlock()
 
-	return newParser(pc).parse(s)
+	var pc PublicCode
+	err := newParser(&pc).parse(s)
+	return &pc, err
+}
+
+// ParseFile loads a publiccode.yml file from a given file path.
+func ParseFile(file string) (*PublicCode, error) {
+	// Read data.
+	data, err := ioutil.ReadFile(file)
+	if err != nil {
+		return nil, err
+	}
+
+	return Parse(data)
+}
+
+// ParseRemoteFile loads a publiccode.yml file from its raw URL.
+func ParseRemoteFile(url string) (*PublicCode, error) {
+	// Read data.
+	resp, err := http.Get(url)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+	data, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	return Parse(data)
 }
 
 type parser struct {

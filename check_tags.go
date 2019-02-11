@@ -1,24 +1,25 @@
 package publiccode
 
+import "github.com/thoas/go-funk"
+
 // checkTag tells whether the tag is a valid tag or not and returns it.
 func (p *parser) checkTag(key, tag string) (string, error) {
-	for _, t := range tagList {
-		if t == tag {
-			return tag, nil
-		}
+	if funk.Contains(tagList, tag) {
+		return tag, nil
 	}
+
 	return tag, newErrorInvalidValue(key, "unknown tag: %s", tag)
 }
 
 // A tagList represents a list of the possible tags.
 var tagList = []string{
 	// International tags.
-	"3dgraphics",    // application for viewing, creating, or processing 3-d graphics
-	"accessibility", // accessibility
-	"accounting",    // accounting software
-	"amusement",     // a simple amusement
-	"archiving",     // a tool to archive/backup data
-	"art",           // software to teach arts
+	"3dgraphics",              // application for viewing, creating, or processing 3-d graphics
+	"accessibility",           // accessibility
+	"accounting",              // accounting software
+	"amusement",               // a simple amusement
+	"archiving",               // a tool to archive/backup data
+	"art",                     // software to teach arts
 	"artificial-intelligence", // artificial intelligence software
 	"backend",                 // software not meant for end users
 	"calculator",              // a calculator

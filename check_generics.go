@@ -7,14 +7,16 @@ import (
 	"image/png"
 	"io"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"net/url"
 	"os"
+	"path"
 	"path/filepath"
 	"regexp"
 	"strings"
 	"time"
+
+	"github.com/thoas/go-funk"
 )
 
 // Despite the spec requires at least 1000px, we temporarily release this constraint to 120px.
@@ -32,42 +34,106 @@ func (p *parser) checkEmail(key string, fn string) error {
 }
 
 // checkURL tells whether the URL resource is well formatted and reachable and return it as *url.URL.
-// An URL resource is well formatted if it's' a valid URL and the scheme is not empty.
+// An URL resource is well formatted if it's a valid URL and the scheme is not empty.
 // An URL resource is reachable if returns an http Status = 200 OK.
 func (p *parser) checkURL(key string, value string) (*url.URL, error) {
+	//fmt.Printf("checking URL: %s\n", value)
+
+	// Check if URL is well formatted
 	u, err := url.Parse(value)
 	if err != nil {
-		return nil, newErrorInvalidValue(key, "not a valid URL: %s", value)
+		return nil, newErrorInvalidValue(key, "not a valid URL: %s: %v", value, err)
 	}
 	if u.Scheme == "" {
 		return nil, newErrorInvalidValue(key, "missing URL scheme: %s", value)
 	}
+
+	// Check whether URL is reachable
 	r, err := http.Get(value)
 	if err != nil {
-		return nil, newErrorInvalidValue(key, "Http.get failed for: %s", value)
+		return nil, newErrorInvalidValue(key, "HTTP GET failed for %s: %v", value, err)
 	}
 	if r.StatusCode != 200 {
-		return nil, newErrorInvalidValue(key, "URL is unreachable: %s", value)
+		return nil, newErrorInvalidValue(key, "HTTP GET returned %d for %s; 200 was expected", r.StatusCode, value)
 	}
 
 	return u, nil
 }
 
-// checkFile tells whether the file resource exists and return it.
-func (p *parser) checkFile(key string, fn string) (string, error) {
-	if BaseDir == "" {
-		// Local.
-		if _, err := os.Stat(fn); err != nil {
-			return "", newErrorInvalidValue(key, "file does not exist: %v", fn)
+// getAbsolutePaths tries to compute both a local absolute path and a remote
+// URL pointing to the given file, if we have enough information.
+func (p *parser) getAbsolutePaths(key, file string) (string, string, error) {
+	var LocalPath, RemoteURL string
+
+	// Check if file is an absolute URL
+	if _, err := url.ParseRequestURI(file); err == nil {
+		// If the base URL is set, we can perform validation and try to compute the local path
+		if RemoteBaseURL != "" {
+			// Check if the URL matches the base URL.
+			// We don't allow absolute URLs not pointing to the same repository as the
+			// publiccode.yml file
+			if strings.Index(file, RemoteBaseURL) != 0 {
+				return "", "", newErrorInvalidValue(key, "Absolute URL (%s) is outside the repository (%s)", file, RemoteBaseURL)
+			}
+
+			// We can compute the local path by stripping the base URL.
+			if LocalBasePath != "" {
+				LocalPath = path.Join(LocalBasePath, strings.Replace(file, RemoteBaseURL, "", 1))
+			}
 		}
+		RemoteURL = file
 	} else {
-		// Remote.
-		_, err := p.checkURL(key, BaseDir+fn)
-		if err != nil {
-			return "", newErrorInvalidValue(key, "file does not exist on remote: %v", BaseDir+fn)
+		// If file is a relative path, let's try to compute its absolute filesystem path
+		// and remote URL by prepending the base paths, if provided.
+		if LocalBasePath != "" {
+			LocalPath = path.Join(LocalBasePath, file)
+		}
+		if RemoteBaseURL != "" {
+			u, err := url.Parse(RemoteBaseURL)
+			if err != nil {
+				return "", "", err
+			}
+			u.Path = path.Join(u.Path, file)
+			RemoteURL = u.String()
 		}
 	}
-	return fn, nil
+
+	//fmt.Printf("file = %s\n", file)
+	//fmt.Printf("  LocalPath = %s\n", LocalPath)
+	//fmt.Printf("  RemoteURL = %s\n", RemoteURL)
+
+	return LocalPath, RemoteURL, nil
+}
+
+// checkFile tells whether the file resource exists and return it.
+func (p *parser) checkFile(key, file string) (string, error) {
+	// Try to compute both a local absolute path and a remote URL pointing
+	// to this file, if we have enough information.
+	LocalPath, RemoteURL, err := p.getAbsolutePaths(key, file)
+	if err != nil {
+		return "", err
+	}
+
+	// If we have an absolute local path, perform validation on it, otherwise do it
+	// on the remote URL if any. If none are available, validation is skipped.
+	if LocalPath != "" {
+		if _, err := os.Stat(LocalPath); err != nil {
+			return "", newErrorInvalidValue(key, "local file does not exist: %v", LocalPath)
+		}
+	} else if RemoteURL != "" {
+		_, err := p.checkURL(key, RemoteURL)
+		if err != nil {
+			return "", err
+		}
+	}
+
+	// Return the absolute remote URL if any, or the original relative path
+	// (returning the local path would be pointless as we assume it's a temporary
+	// working directory)
+	if RemoteURL != "" {
+		return RemoteURL, nil
+	}
+	return file, nil
 }
 
 // checkDate tells whether the string in input is a date in the
@@ -87,7 +153,7 @@ func (p *parser) checkImage(key string, value string) (string, error) {
 	ext := strings.ToLower(filepath.Ext(value))
 
 	// Check for valid extension.
-	if !contains(validExt, ext) {
+	if !funk.Contains(validExt, ext) {
 		return value, newErrorInvalidValue(key, "invalid file extension for: %s", value)
 	}
 
@@ -104,7 +170,7 @@ func (p *parser) checkLogo(key string, value string) (string, error) {
 	ext := strings.ToLower(filepath.Ext(value))
 
 	// Check for valid extension.
-	if !contains(validExt, ext) {
+	if !funk.Contains(validExt, ext) {
 		return value, newErrorInvalidValue(key, "invalid file extension for: %s", value)
 	}
 
@@ -114,40 +180,40 @@ func (p *parser) checkLogo(key string, value string) (string, error) {
 		return value, err
 	}
 
+	// Try to compute both a local absolute path and a remote URL pointing
+	// to this file, if we have enough information.
+	localPath, remoteURL, err := p.getAbsolutePaths(key, file)
+	if err != nil {
+		return "", err
+	}
+
 	// Remote. Create a temp dir, download and check the file. Remove the temp dir.
-	if BaseDir != "" {
-		// Create a temp dir and delete after use.
-		dir, err := ioutil.TempDir("", "publiccode.yml-parser-go")
-		if err != nil {
-			log.Fatal(err)
-		}
-		defer os.RemoveAll(dir)
-		// Download the file in the temp dir.
-		fileName := filepath.Base(value)
-		tmpFile := filepath.Join(dir, fileName)
-		err = downloadFile(tmpFile, BaseDir+value)
+	if localPath == "" && remoteURL != "" {
+		localPath, err = downloadTmpFile(remoteURL)
 		if err != nil {
 			return file, err
 		}
-		// Update file.
-		value = tmpFile
+		defer func() { os.Remove(path.Dir(localPath)) }()
 	}
 
-	// Check for image size if .png.
-	if ext == ".png" {
-		f, err := os.Open(value)
-		if err != nil {
-			return file, err
-		}
-		image, _, err := image.DecodeConfig(f)
-		if err != nil {
-			return file, err
-		}
+	if localPath != "" {
+		// Check for image size if .png.
+		if ext == ".png" {
+			f, err := os.Open(localPath)
+			if err != nil {
+				return file, err
+			}
+			image, _, err := image.DecodeConfig(f)
+			if err != nil {
+				return file, err
+			}
 
-		if image.Width < minLogoWidth {
-			return value, newErrorInvalidValue(key, "invalid image size of %d (min %dpx of width): %s", image.Width, minLogoWidth, value)
+			if image.Width < minLogoWidth {
+				return file, newErrorInvalidValue(key, "invalid image size of %d (min %dpx of width): %s", image.Width, minLogoWidth, value)
+			}
 		}
 	}
+
 	return file, nil
 }
 
@@ -158,7 +224,7 @@ func (p *parser) checkMonochromeLogo(key string, value string) (string, error) {
 	ext := strings.ToLower(filepath.Ext(value))
 
 	// Check for valid extension.
-	if !contains(validExt, ext) {
+	if !funk.Contains(validExt, ext) {
 		return value, newErrorInvalidValue(key, "invalid file extension for: %s", value)
 	}
 
@@ -168,92 +234,91 @@ func (p *parser) checkMonochromeLogo(key string, value string) (string, error) {
 		return value, err
 	}
 
-	// Remote. Create a temp dir, download and check the file. Remove the temp dir.
-	if BaseDir != "" {
-		// Create a temp dir and delete after use.
-		dir, err := ioutil.TempDir("", "publiccode.yml-parser-go")
-		if err != nil {
-			log.Fatal(err)
-		}
-		defer os.RemoveAll(dir)
-		// Download the file in the temp dir.
-		fileName := filepath.Base(value)
-		tmpFile := filepath.Join(dir, fileName)
-		err = downloadFile(tmpFile, BaseDir+value)
-		if err != nil {
-			return file, err
-		}
-		// Update file.
-		value = tmpFile
+	// Try to compute both a local absolute path and a remote URL pointing
+	// to this file, if we have enough information.
+	localPath, remoteURL, err := p.getAbsolutePaths(key, file)
+	if err != nil {
+		return "", err
 	}
 
-	// Check for image size if .png.
-	if ext == ".png" {
-		image.RegisterFormat("png", "png", png.Decode, png.DecodeConfig)
-
-		f, err := os.Open(value)
+	// Remote. Create a temp dir, download and check the file. Remove the temp dir.
+	if localPath == "" && remoteURL != "" {
+		localPath, err = downloadTmpFile(remoteURL)
 		if err != nil {
 			return file, err
 		}
-		defer f.Close()
+		defer func() { os.Remove(path.Dir(localPath)) }()
+	}
 
-		imgCfg, _, err := image.DecodeConfig(f)
-		if err != nil {
-			return file, err
-		}
-		width := imgCfg.Width
-		height := imgCfg.Height
+	if localPath != "" {
+		// Check for image size if .png.
+		if ext == ".png" {
+			image.RegisterFormat("png", "png", png.Decode, png.DecodeConfig)
 
-		if width < minLogoWidth {
-			return value, newErrorInvalidValue(key, "invalid image size of %d (min %dpx of width): %s", width, minLogoWidth, value)
-		}
+			f, err := os.Open(localPath)
+			if err != nil {
+				return file, err
+			}
+			defer f.Close()
 
-		// Check if monochrome (black). Pixel by pixel.
-		f.Seek(0, 0)
-		img, _, err := image.Decode(f)
-		if err != nil {
-			return file, err
-		}
-		for y := 0; y < width; y++ {
-			for x := 0; x < height; x++ {
-				r, g, b, _ := img.At(x, y).RGBA()
-				if r != 0 || g != 0 || b != 0 {
+			imgCfg, _, err := image.DecodeConfig(f)
+			if err != nil {
+				return file, err
+			}
+			width := imgCfg.Width
+			height := imgCfg.Height
+
+			if width < minLogoWidth {
+				return file, newErrorInvalidValue(key, "invalid image size of %d (min %dpx of width): %s", width, minLogoWidth, value)
+			}
+
+			// Check if monochrome (black). Pixel by pixel.
+			f.Seek(0, 0)
+			img, _, err := image.Decode(f)
+			if err != nil {
+				return file, err
+			}
+			for y := 0; y < width; y++ {
+				for x := 0; x < height; x++ {
+					r, g, b, _ := img.At(x, y).RGBA()
+					if r != 0 || g != 0 || b != 0 {
+						return file, newErrorInvalidValue(key, "the monochromeLogo is not monochrome (black): %s", value)
+					}
+				}
+			}
+		} else if ext == ".svg" {
+			// Regex for every hex color.
+			re := regexp.MustCompile("#(?:[0-9a-fA-F]{3}){1,2}")
+
+			// Read file data.
+			data, err := ioutil.ReadFile(localPath)
+			if err != nil {
+				return file, err
+			}
+
+			for _, color := range re.FindAllString(string(data), -1) {
+				if color != "#000" && color != "#000000" {
 					return file, newErrorInvalidValue(key, "the monochromeLogo is not monochrome (black): %s", value)
 				}
 			}
-		}
-	} else if ext == ".svg" {
-		// Regex for every hex color.
-		re := regexp.MustCompile("#(?:[0-9a-fA-F]{3}){1,2}")
+		} else if ext == ".svgz" {
+			// Regex for every hex color.
+			re := regexp.MustCompile("#(?:[0-9a-fA-F]{3}){1,2}")
 
-		// Read file data.
-		data, err := ioutil.ReadFile(value)
-		if err != nil {
-			return file, err
-		}
-
-		for _, color := range re.FindAllString(string(data), -1) {
-			if color != "#000" && color != "#000000" {
-				return file, newErrorInvalidValue(key, "the monochromeLogo is not monochrome (black): %s", value)
+			// Read file data.
+			data, err := ioutil.ReadFile(localPath)
+			if err != nil {
+				return file, err
 			}
-		}
-	} else if ext == ".svgz" {
-		// Regex for every hex color.
-		re := regexp.MustCompile("#(?:[0-9a-fA-F]{3}){1,2}")
+			data, err = gUnzipData(data)
+			if err != nil {
+				return file, err
+			}
 
-		// Read file data.
-		data, err := ioutil.ReadFile(value)
-		if err != nil {
-			return file, err
-		}
-		data, err = gUnzipData(data)
-		if err != nil {
-			return file, err
-		}
-
-		for _, color := range re.FindAllString(string(data), -1) {
-			if color != "#000" && color != "#000000" {
-				return file, newErrorInvalidValue(key, "the monochromeLogo is not monochrome (black): %s", value)
+			for _, color := range re.FindAllString(string(data), -1) {
+				if color != "#000" && color != "#000000" {
+					return file, newErrorInvalidValue(key, "the monochromeLogo is not monochrome (black): %s", value)
+				}
 			}
 		}
 	}
@@ -274,16 +339,6 @@ func (p *parser) checkMIME(key string, value string) error {
 	return nil
 }
 
-// contains returns true if the slice of strings contains the searched string.
-func contains(slice []string, item string) bool {
-	for _, s := range slice {
-		if s == item {
-			return true
-		}
-	}
-	return false
-}
-
 // gUnzipData g-unzip a list of bytes. (used for svgz unzip)
 func gUnzipData(data []byte) (resData []byte, err error) {
 	b := bytes.NewBuffer(data)
@@ -291,16 +346,14 @@ func gUnzipData(data []byte) (resData []byte, err error) {
 	var r io.Reader
 	r, err = gzip.NewReader(b)
 	if err != nil {
-		return
+		return nil, err
 	}
 
 	var resB bytes.Buffer
 	_, err = resB.ReadFrom(r)
 	if err != nil {
-		return
+		return nil, err
 	}
 
-	resData = resB.Bytes()
-
-	return
+	return resB.Bytes(), nil
 }

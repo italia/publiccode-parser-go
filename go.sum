@@ -4,6 +4,8 @@ github.com/dyatlov/go-oembed v0.0.0-20180429203341-4bc5ab7a42e9 h1:cdw1dgA549x0t
 github.com/dyatlov/go-oembed v0.0.0-20180429203341-4bc5ab7a42e9/go.mod h1:3XylPVY2YGcV9RQBie0DspVncA1nsgsYQ8BtIs52fz4=
 github.com/r3vit/go-spdx v0.0.0-20180531140640-34a46ab144b1 h1:MfNJpWm6kIotD9VVRTmJAf7PsWZYQvrsGJpPL1kRV/Y=
 github.com/r3vit/go-spdx v0.0.0-20180531140640-34a46ab144b1/go.mod h1:4UMsmwV0XVOC+SAL+YUHQEPHR2Mv9hvWufXiGO3vjtA=
+github.com/thoas/go-funk v0.0.0-20181020164546-fbae87fb5b5c h1:3sFKuGerP3mGyXo7gDR1dGQ6GdIrI8s5KWmct0R5J6A=
+github.com/thoas/go-funk v0.0.0-20181020164546-fbae87fb5b5c/go.mod h1:mlR+dHGb+4YgXkf13rkQTuzrneeHANxOm6+ZnEV9HsA=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
 gopkg.in/yaml.v2 v2.2.2 h1:ZCJp+EgiOT7lHqUV2J862kp8Qj64Jo6az82+3Td9dZw=
 gopkg.in/yaml.v2 v2.2.2/go.mod h1:hI93XBmqTisBFMUTm0b8Fm+jr3Dg1NNxqwp+5A1VGuI=

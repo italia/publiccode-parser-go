@@ -1,9 +1,7 @@
 package publiccode
 
 import (
-	"fmt"
-	"io/ioutil"
-	"net/http"
+	"strings"
 	"testing"
 )
 
@@ -14,7 +12,7 @@ type testType struct {
 
 // Test publiccode.yml local files for key errors.
 func TestDecodeValueErrors(t *testing.T) {
-	BaseDir = ""
+	RemoteBaseURL = ""
 
 	testFiles := []testType{
 		// A complete and valid yml.
@@ -41,20 +39,9 @@ func TestDecodeValueErrors(t *testing.T) {
 	}
 
 	for _, test := range testFiles {
-
 		t.Run(test.errkey, func(t *testing.T) {
-			// Read data.
-			data, err := ioutil.ReadFile(test.file)
-			if err != nil {
-				fmt.Println(err)
-				return
-			}
-
-			// Parse data into pc struct.
-			var pc PublicCode
-			err = Parse(data, &pc)
-
-			//spew.Dump(pc.Description["eng"])
+			// Parse file into pc struct.
+			_, err := ParseFile(test.file)
 
 			checkParseErrors(t, err, test)
 		})
@@ -64,32 +51,17 @@ func TestDecodeValueErrors(t *testing.T) {
 
 // Test publiccode.yml remote files for key errors.
 func TestDecodeValueErrorsRemote(t *testing.T) {
-	BaseDir = "https://raw.githubusercontent.com/gith002/Medusa/master/"
+	RemoteBaseURL = "https://raw.githubusercontent.com/gith002/Medusa/master/"
 
 	testRemoteFiles := []testType{
-		// A complete and valid REMOTE yml, except for publiccode-yaml-version instea of
+		// A complete and valid REMOTE yml, except for publiccode-yaml-version instead of
 		{"https://raw.githubusercontent.com/gith002/Medusa/master/publiccode.yml", "publiccode-yaml-version : String"},
 	}
 
 	for _, test := range testRemoteFiles {
 		t.Run(test.errkey, func(t *testing.T) {
-
-			// Read data.
-			resp, err := http.Get(test.file)
-			if err != nil {
-				fmt.Println(err)
-				return
-			}
-			defer resp.Body.Close()
-			data, err := ioutil.ReadAll(resp.Body)
-			if err != nil {
-				fmt.Println(err)
-				return
-			}
-
 			// Parse data into pc struct.
-			var pc PublicCode
-			err = Parse(data, &pc)
+			_, err := ParseRemoteFile(test.file)
 
 			checkParseErrors(t, err, test)
 		})
@@ -98,18 +70,36 @@ func TestDecodeValueErrorsRemote(t *testing.T) {
 
 func checkParseErrors(t *testing.T, err error, test testType) {
 	if test.errkey == "" && err != nil {
-		t.Error("unexpected error:\n", err)
+		t.Errorf("[%s] unexpected error: %v\n", test.file, err)
 	} else if test.errkey != "" && err == nil {
-		t.Error("error not generated:\n", test.file)
+		t.Errorf("[%s] no error generated\n", test.file)
 	} else if test.errkey != "" && err != nil {
 		if multi, ok := err.(ErrorParseMulti); !ok {
 			panic(err)
 		} else if len(multi) != 1 {
-			t.Errorf("too many errors generated: %#v", multi)
+			t.Errorf("[%s] too many errors generated; 1 was expected but got:\n", test.file)
+			for _, e := range multi {
+				t.Errorf("  * %s\n", e)
+			}
 		} else if e, ok := multi[0].(ErrorInvalidValue); ok && (e.Key != test.errkey) {
-			t.Errorf("wrong error generated: %s - key: %#v - instead of %s", e, e.Key, test.errkey)
+			t.Errorf("[%s] wrong error generated: %s - key: %#v - instead of %s", test.file, e, e.Key, test.errkey)
 		} else if e, ok := multi[0].(ErrorInvalidKey); ok && (e.Key != test.errkey) {
-			t.Errorf("wrong error generated: %s - key: %#v - instead of %s", e, e.Key, test.errkey)
+			t.Errorf("[%s] wrong error generated: %s - key: %#v - instead of %s", test.file, e, e.Key, test.errkey)
 		}
+	}
+}
+
+// Test that relative paths are turned into absolute paths.
+func TestRelativePaths(t *testing.T) {
+	// Parse file into pc struct.
+	RemoteBaseURL = "https://raw.githubusercontent.com/italia/18app/master"
+	const url = "https://raw.githubusercontent.com/italia/18app/master/publiccode.yml"
+	pc, err := ParseRemoteFile(url)
+	if err != nil {
+		t.Errorf("Failed to parse remote file from %v: %v", url, err)
+	}
+
+	if strings.Index(pc.Description["ita"].Screenshots[0], RemoteBaseURL) != 0 {
+		t.Errorf("Relative path was not turned into absolute URL: %v", pc.Description["ita"].Screenshots[0])
 	}
 }

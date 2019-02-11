@@ -3,6 +3,8 @@ package publiccode
 import (
 	"regexp"
 	"strings"
+
+	"github.com/thoas/go-funk"
 )
 
 var mandatoryKeys = []string{
@@ -293,7 +295,7 @@ func (p *parser) decodeArrString(key string, value []string) error {
 				"difesa-sicurezza-soccorso-legalita", "giustizia", "infrastruttura-logistica", "sviluppo-sostenibilita",
 				"beni-culturali-turismo", "agricoltura", "italia-europa-mondo"}
 
-			if !contains(ecosistemi, v) {
+			if !funk.Contains(ecosistemi, v) {
 				return newErrorInvalidValue(key, "unknown it/ecosistemi: %s", v)
 			}
 			p.pc.It.Ecosistemi = append(p.pc.It.Ecosistemi, v)
