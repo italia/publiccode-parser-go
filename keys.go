@@ -81,7 +81,7 @@ func (p *Parser) decodeString(key string, value string) (err error) {
 	case key == "softwareVersion":
 		p.PublicCode.SoftwareVersion = value
 	case key == "releaseDate":
-		p.PublicCode.ReleaseDate, err = p.checkDate(key, value)
+		p.PublicCode.ReleaseDateString, p.PublicCode.ReleaseDate, err = p.checkDate(key, value)
 		return err
 	case key == "logo":
 		p.PublicCode.Logo, err = p.checkLogo(key, value)
@@ -334,11 +334,11 @@ func (p *Parser) decodeArrObj(key string, value map[interface{}]interface{}) err
 				if k.(string) == "name" {
 					contractor.Name = val.(string)
 				} else if k.(string) == "until" {
-					date, err := p.checkDate(key, val.(string))
+					var err error
+					contractor.UntilString, contractor.Until, err = p.checkDate(key, val.(string))
 					if err != nil {
 						return err
 					}
-					contractor.Until = date
 				} else if k.(string) == "website" {
 					var err error
 					contractor.WebsiteString, contractor.Website, err = p.checkURL(key, val.(string))

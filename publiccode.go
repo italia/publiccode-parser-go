@@ -26,11 +26,12 @@ type PublicCode struct {
 	LandingURL       *url.URL `yaml:"-"`
 	LandingURLString string   `yaml:"landingURL"`
 
-	IsBasedOn       []string  `yaml:"isBasedOn"`
-	SoftwareVersion string    `yaml:"softwareVersion"`
-	ReleaseDate     time.Time `yaml:"releaseDate"`
-	Logo            string    `yaml:"logo"`
-	MonochromeLogo  string    `yaml:"monochromeLogo"`
+	IsBasedOn         []string  `yaml:"isBasedOn"`
+	SoftwareVersion   string    `yaml:"softwareVersion"`
+	ReleaseDate       time.Time `yaml:"-"`
+	ReleaseDateString string    `yaml:"releaseDate"`
+	Logo              string    `yaml:"logo"`
+	MonochromeLogo    string    `yaml:"monochromeLogo"`
 
 	InputTypes  []string `yaml:"inputTypes"`
 	OutputTypes []string `yaml:"outputTypes"`
@@ -108,7 +109,8 @@ type Contractor struct {
 	Name          string    `yaml:"name"`
 	Website       *url.URL  `yaml:"-"`
 	WebsiteString string    `yaml:"website"`
-	Until         time.Time `yaml:"until"`
+	Until         time.Time `yaml:"-"`
+	UntilString   string    `yaml:"until"`
 }
 
 // Contact is a contact info maintaining the software.
