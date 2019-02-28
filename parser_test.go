@@ -49,6 +49,9 @@ func TestDecodeValueErrors(t *testing.T) {
 				if !strings.Contains(p.OEmbed["https://www.youtube.com/watch?v=RaHmGbBOP84"], "<iframe ") {
 					t.Errorf("Missing Oembed info")
 				}
+				if _, ok := p.PublicCode.Description["en"]; !ok {
+					t.Errorf("Missing description/en")
+				}
 			}
 		})
 	}
@@ -105,7 +108,7 @@ func TestRelativePaths(t *testing.T) {
 		t.Errorf("Failed to parse remote file from %v: %v", url, err)
 	}
 
-	if strings.Index(p.PublicCode.Description["ita"].Screenshots[0], p.RemoteBaseURL) != 0 {
-		t.Errorf("Relative path was not turned into absolute URL: %v", p.PublicCode.Description["ita"].Screenshots[0])
+	if strings.Index(p.PublicCode.Description["it"].Screenshots[0], p.RemoteBaseURL) != 0 {
+		t.Errorf("Relative path was not turned into absolute URL: %v", p.PublicCode.Description["it"].Screenshots[0])
 	}
 }

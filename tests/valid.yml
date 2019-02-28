@@ -57,6 +57,9 @@ intendedAudience:
     - us
 
 description:
+  it:
+    localisedName: Medusa
+    genericName: "Text Editor"
   eng:
     localisedName: Medusa
     genericName: "Text Editor"
