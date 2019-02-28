@@ -112,53 +112,55 @@ func (p *Parser) decodeString(key string, value string) (err error) {
 			}
 		}
 		return newErrorInvalidValue(key, "invalid value: %s", value)
-	case regexp.MustCompile(`^description/[a-z]{3}`).MatchString(key):
+	case regexp.MustCompile(`^description/.+/`).MatchString(key):
 		if p.PublicCode.Description == nil {
 			p.PublicCode.Description = make(map[string]Desc)
 		}
-		k := strings.Split(key, "/")[1]
+		lang := strings.Split(key, "/")[1]
 		attr := strings.Split(key, "/")[2]
-		var desc = p.PublicCode.Description[k]
+
+		// check lang validity and canonicalize it
+		lang, err = p.checkLanguageCode(key, lang)
+		if err != nil {
+			return err
+		}
+
+		desc := p.PublicCode.Description[lang]
 		if attr == "localisedName" {
 			desc.LocalisedName = value
-			p.PublicCode.Description[k] = desc
 		}
 		if attr == "genericName" {
 			if len(value) == 0 || len(value) > 35 {
 				return newErrorInvalidValue(key, "\"%s\" has an invalid number of characters: %d.  (mandatory and max 35 chars)", key, len(value))
 			}
 			desc.GenericName = value
-			p.PublicCode.Description[k] = desc
 		}
 		if attr == "longDescription" {
 			if len(value) < 500 || len(value) > 10000 {
 				return newErrorInvalidValue(key, "\"%s\" has an invalid number of characters: %d.  (min 500 chars, max 10.000 chars)", key, len(value))
 			}
 			desc.LongDescription = value
-			p.PublicCode.Description[k] = desc
 		}
 		if attr == "documentation" {
 			desc.DocumentationString, desc.Documentation, err = p.checkURL(key, value)
 			if err != nil {
 				return err
 			}
-			p.PublicCode.Description[k] = desc
 		}
 		if attr == "apiDocumentation" {
 			desc.APIDocumentationString, desc.APIDocumentation, err = p.checkURL(key, value)
 			if err != nil {
 				return err
 			}
-			p.PublicCode.Description[k] = desc
 		}
 		if attr == "shortDescription" {
 			if len(value) > 150 {
 				return newErrorInvalidValue(key, "\"%s\" has an invalid number of characters: %d.  (max 150 chars)", key, len(value))
 			}
 			desc.ShortDescription = value
-			p.PublicCode.Description[k] = desc
 		}
-		return p.checkLanguageCodes3(key, k)
+		p.PublicCode.Description[lang] = desc
+		return nil
 	case key == "legal/authorsFile":
 		p.PublicCode.Legal.AuthorsFile, err = p.checkFile(key, value)
 		return err
@@ -233,20 +235,25 @@ func (p *Parser) decodeArrString(key string, value []string) error {
 			p.PublicCode.IntendedAudience.OnlyFor = append(p.PublicCode.IntendedAudience.OnlyFor, v)
 		}
 
-	case regexp.MustCompile(`^description/[a-z]{3}`).MatchString(key):
+	case regexp.MustCompile(`^description/.+/`).MatchString(key):
 		if p.PublicCode.Description == nil {
 			p.PublicCode.Description = make(map[string]Desc)
 		}
-		k := strings.Split(key, "/")[1]
+		lang := strings.Split(key, "/")[1]
 		attr := strings.Split(key, "/")[2]
-		var desc = p.PublicCode.Description[k]
+
+		// check lang validity and canonicalize it
+		lang, err := p.checkLanguageCode(key, lang)
+		if err != nil {
+			return err
+		}
+
+		desc := p.PublicCode.Description[lang]
 		if attr == "awards" {
 			desc.Awards = append(desc.Awards, value...)
-			p.PublicCode.Description[k] = desc
 		}
 		if attr == "freeTags" {
 			desc.FreeTags = append(desc.FreeTags, value...)
-			p.PublicCode.Description[k] = desc
 		}
 		if attr == "features" {
 			for _, v := range value {
@@ -256,7 +263,6 @@ func (p *Parser) decodeArrString(key string, value []string) error {
 				}
 				desc.Features = append(desc.Features, v)
 			}
-			p.PublicCode.Description[k] = desc
 		}
 		if attr == "screenshots" {
 			for _, v := range value {
@@ -266,7 +272,6 @@ func (p *Parser) decodeArrString(key string, value []string) error {
 				}
 				desc.Screenshots = append(desc.Screenshots, i)
 			}
-			p.PublicCode.Description[k] = desc
 		}
 		if attr == "videos" {
 			for _, v := range value {
@@ -277,16 +282,19 @@ func (p *Parser) decodeArrString(key string, value []string) error {
 				desc.Videos = append(desc.Videos, u)
 				desc.VideosStrings = append(desc.VideosStrings, v)
 			}
-			p.PublicCode.Description[k] = desc
 		}
-		return p.checkLanguageCodes3(key, k)
+
+		p.PublicCode.Description[lang] = desc
+		return nil
 
 	case key == "localisation/availableLanguages":
-		for _, v := range value {
-			if err := p.checkLanguageCodes3(key, v); err != nil {
+		for _, lang := range value {
+			// check language and canonicalize it
+			lang, err := p.checkLanguageCode(key, lang)
+			if err != nil {
 				return err
 			}
-			p.PublicCode.Localisation.AvailableLanguages = append(p.PublicCode.Localisation.AvailableLanguages, v)
+			p.PublicCode.Localisation.AvailableLanguages = append(p.PublicCode.Localisation.AvailableLanguages, lang)
 		}
 
 	case key == "it/ecosistemi":
