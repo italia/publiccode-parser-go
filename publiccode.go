@@ -20,54 +20,54 @@ type PublicCode struct {
 	PubliccodeYamlVersion string `yaml:"publiccodeYmlVersion"`
 
 	Name             string   `yaml:"name"`
-	ApplicationSuite string   `yaml:"applicationSuite"`
+	ApplicationSuite string   `yaml:"applicationSuite,omitempty"`
 	URL              *url.URL `yaml:"-"`
 	URLString        string   `yaml:"url"`
 	LandingURL       *url.URL `yaml:"-"`
-	LandingURLString string   `yaml:"landingURL"`
+	LandingURLString string   `yaml:"landingURL,omitempty"`
 
-	IsBasedOn         []string  `yaml:"isBasedOn"`
-	SoftwareVersion   string    `yaml:"softwareVersion"`
+	IsBasedOn         []string  `yaml:"isBasedOn,omitempty"`
+	SoftwareVersion   string    `yaml:"softwareVersion,omitempty"`
 	ReleaseDate       time.Time `yaml:"-"`
 	ReleaseDateString string    `yaml:"releaseDate"`
-	Logo              string    `yaml:"logo"`
-	MonochromeLogo    string    `yaml:"monochromeLogo"`
+	Logo              string    `yaml:"logo,omitempty"`
+	MonochromeLogo    string    `yaml:"monochromeLogo,omitempty"`
 
-	InputTypes  []string `yaml:"inputTypes"`
-	OutputTypes []string `yaml:"outputTypes"`
+	InputTypes  []string `yaml:"inputTypes,omitempty"`
+	OutputTypes []string `yaml:"outputTypes,omitempty"`
 
 	Platforms []string `yaml:"platforms"`
 
 	Tags []string `yaml:"tags"`
 
-	UsedBy []string `yaml:"usedBy"`
+	UsedBy []string `yaml:"usedBy,omitempty"`
 
 	Roadmap       *url.URL `yaml:"-"`
-	RoadmapString string   `yaml:"roadmap"`
+	RoadmapString string   `yaml:"roadmap,omitempty"`
 
 	DevelopmentStatus string `yaml:"developmentStatus"`
 
 	SoftwareType string `yaml:"softwareType"`
 
 	IntendedAudience struct {
-		OnlyFor              []string `yaml:"onlyFor"`
-		Countries            []string `yaml:"countries"`
-		UnsupportedCountries []string `yaml:"unsupportedCountries"`
+		OnlyFor              []string `yaml:"onlyFor,omitempty"`
+		Countries            []string `yaml:"countries,omitempty"`
+		UnsupportedCountries []string `yaml:"unsupportedCountries,omitempty"`
 	} `yaml:"intendedAudience"`
 
 	Description map[string]Desc `yaml:"description"`
 
 	Legal struct {
 		License            string `yaml:"license"`
-		MainCopyrightOwner string `yaml:"mainCopyrightOwner"`
-		RepoOwner          string `yaml:"repoOwner"`
-		AuthorsFile        string `yaml:"authorsFile"`
+		MainCopyrightOwner string `yaml:"mainCopyrightOwner,omitempty"`
+		RepoOwner          string `yaml:"repoOwner,omitempty"`
+		AuthorsFile        string `yaml:"authorsFile,omitempty"`
 	} `yaml:"legal"`
 
 	Maintenance struct {
 		Type        string       `yaml:"type"`
-		Contractors []Contractor `yaml:"contractors"`
-		Contacts    []Contact    `yaml:"contacts"`
+		Contractors []Contractor `yaml:"contractors,omitempty"`
+		Contacts    []Contact    `yaml:"contacts,omitempty"`
 	} `yaml:"maintenance"`
 
 	Localisation struct {
@@ -76,10 +76,10 @@ type PublicCode struct {
 	} `yaml:"localisation"`
 
 	DependsOn struct {
-		Open        []Dependency `yaml:"open"`
-		Proprietary []Dependency `yaml:"proprietary"`
-		Hardware    []Dependency `yaml:"hardware"`
-	} `yaml:"dependsOn"`
+		Open        []Dependency `yaml:"open,omitempty"`
+		Proprietary []Dependency `yaml:"proprietary,omitempty"`
+		Hardware    []Dependency `yaml:"hardware,omitempty"`
+	} `yaml:"dependsOn,omitempty"`
 
 	It ExtensionIT `yaml:"it"`
 }
@@ -87,20 +87,20 @@ type PublicCode struct {
 // Desc is a general description of the software.
 // Reference: https://github.com/publiccodenet/publiccode.yml/blob/develop/schema.md#section-description
 type Desc struct {
-	LocalisedName          string     `yaml:"localisedName"`
+	LocalisedName          string     `yaml:"localisedName,omitempty"`
 	GenericName            string     `yaml:"genericName"`
 	ShortDescription       string     `yaml:"shortDescription"`
-	LongDescription        string     `yaml:"longDescription"`
+	LongDescription        string     `yaml:"longDescription,omitempty"`
 	Documentation          *url.URL   `yaml:"-"`
-	DocumentationString    string     `yaml:"documentation"`
+	DocumentationString    string     `yaml:"documentation,omitempty"`
 	APIDocumentation       *url.URL   `yaml:"-"`
-	APIDocumentationString string     `yaml:"apiDocumentation"`
-	Features               []string   `yaml:"features"`
-	Screenshots            []string   `yaml:"screenshots"`
+	APIDocumentationString string     `yaml:"apiDocumentation,omitempty"`
+	Features               []string   `yaml:"features,omitempty"`
+	Screenshots            []string   `yaml:"screenshots,omitempty"`
 	Videos                 []*url.URL `yaml:"-"`
-	VideosStrings          []string   `yaml:"videos"`
-	Awards                 []string   `yaml:"awards"`
-	FreeTags               []string   `yaml:"freeTags"`
+	VideosStrings          []string   `yaml:"videos,omitempty"`
+	Awards                 []string   `yaml:"awards,omitempty"`
+	FreeTags               []string   `yaml:"freeTags,omitempty"`
 }
 
 // Contractor is an entity or entities, if any, that are currently contracted for maintaining the software.

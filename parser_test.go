@@ -1,6 +1,7 @@
 package publiccode
 
 import (
+	"bytes"
 	"strings"
 	"testing"
 )
@@ -110,5 +111,35 @@ func TestRelativePaths(t *testing.T) {
 
 	if strings.Index(p.PublicCode.Description["it"].Screenshots[0], p.RemoteBaseURL) != 0 {
 		t.Errorf("Relative path was not turned into absolute URL: %v", p.PublicCode.Description["it"].Screenshots[0])
+	}
+}
+
+// Test that the exported YAML passes validation again, and that re-exporting it
+// matches the first export (lossless roundtrip).
+func TestExport(t *testing.T) {
+	p := NewParser()
+	err := p.ParseFile("tests/valid.yml")
+	if err != nil {
+		t.Errorf("Failed to parse valid file: %v", err)
+	}
+
+	yaml1, err := p.ToYAML()
+	if err != nil {
+		t.Errorf("Failed to export YAML: %v", err)
+	}
+
+	p2 := NewParser()
+	err = p2.Parse(yaml1)
+	if err != nil {
+		t.Errorf("Failed to parse exported file: %v", err)
+	}
+
+	yaml2, err := p2.ToYAML()
+	if err != nil {
+		t.Errorf("Failed to export YAML again: %v", err)
+	}
+
+	if !bytes.Equal(yaml1, yaml2) {
+		t.Errorf("Exported YAML files do not match; roundtrip is not lossless")
 	}
 }

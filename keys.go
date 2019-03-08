@@ -264,7 +264,7 @@ func (p *Parser) decodeArrString(key string, value []string) error {
 		if attr == "features" {
 			for _, v := range value {
 				if len(v) > 100 {
-					return newErrorInvalidValue(key, "too long, max 100 chars", key)
+					return newErrorInvalidValue(key, "too long, max 100 chars")
 
 				}
 				desc.Features = append(desc.Features, v)

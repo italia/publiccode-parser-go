@@ -25,7 +25,7 @@ type ExtensionIT struct {
 	} `yaml:"conforme"`
 
 	Riuso struct {
-		CodiceIPA string `yaml:"codiceIPA"`
+		CodiceIPA string `yaml:"codiceIPA,omitempty"`
 	} `yaml:"riuso"`
 
 	Spid   bool `yaml:"spid"`
