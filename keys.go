@@ -4,6 +4,7 @@ import (
 	"regexp"
 	"strings"
 
+	spdxValidator "github.com/r3vit/go-spdx/spdx"
 	"github.com/thoas/go-funk"
 )
 
@@ -171,8 +172,12 @@ func (p *Parser) decodeString(key string, value string) (err error) {
 		p.PublicCode.Legal.AuthorsFile, err = p.checkFile(key, value)
 		return err
 	case key == "legal/license":
+		_, err := spdxValidator.Parse(value)
+		if err != nil {
+			return newErrorInvalidValue(key, "invalid value %s: %v", value, err)
+		}
 		p.PublicCode.Legal.License = value
-		return p.checkSpdx(key, value)
+		return nil
 	case key == "legal/mainCopyrightOwner":
 		p.PublicCode.Legal.MainCopyrightOwner = value
 	case key == "legal/repoOwner":
