@@ -15,10 +15,14 @@ func (p *Parser) checkOembed(key string, link string) (string, *url.URL, error) 
 		return "", nil, err
 	}
 
+	if p.DisableNetwork {
+		return link, u, nil
+	}
+
 	// Load oembed library and providers.js on from base64 variable
 	providers, err := Asset("data/oembed_providers.json")
 	if err != nil {
-		return "", nil, newErrorInvalidValue(key, "error reading oembed providers list")
+		panic("error reading oembed providers list")
 	}
 	oe := oembed.NewOembed()
 	oe.ParseProviders(bytes.NewReader(providers))

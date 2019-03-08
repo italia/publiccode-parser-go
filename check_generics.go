@@ -48,13 +48,15 @@ func (p *Parser) checkURL(key string, value string) (string, *url.URL, error) {
 		return "", nil, newErrorInvalidValue(key, "missing URL scheme: %s", value)
 	}
 
-	// Check whether URL is reachable
-	r, err := http.Get(value)
-	if err != nil {
-		return "", nil, newErrorInvalidValue(key, "HTTP GET failed for %s: %v", value, err)
-	}
-	if r.StatusCode != 200 {
-		return "", nil, newErrorInvalidValue(key, "HTTP GET returned %d for %s; 200 was expected", r.StatusCode, value)
+	if !p.DisableNetwork {
+		// Check whether URL is reachable
+		r, err := http.Get(value)
+		if err != nil {
+			return "", nil, newErrorInvalidValue(key, "HTTP GET failed for %s: %v", value, err)
+		}
+		if r.StatusCode != 200 {
+			return "", nil, newErrorInvalidValue(key, "HTTP GET returned %d for %s; 200 was expected", r.StatusCode, value)
+		}
 	}
 
 	return u.String(), u, nil
@@ -189,6 +191,10 @@ func (p *Parser) checkLogo(key string, value string) (string, error) {
 
 	// Remote. Create a temp dir, download and check the file. Remove the temp dir.
 	if localPath == "" && remoteURL != "" {
+		if p.DisableNetwork {
+			return file, nil
+		}
+
 		localPath, err = downloadTmpFile(remoteURL)
 		if err != nil {
 			return file, err
@@ -243,6 +249,10 @@ func (p *Parser) checkMonochromeLogo(key string, value string) (string, error) {
 
 	// Remote. Create a temp dir, download and check the file. Remove the temp dir.
 	if localPath == "" && remoteURL != "" {
+		if p.DisableNetwork {
+			return file, nil
+		}
+
 		localPath, err = downloadTmpFile(remoteURL)
 		if err != nil {
 			return file, err

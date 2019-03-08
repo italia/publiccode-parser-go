@@ -28,6 +28,10 @@ type Parser struct {
 	// (eg: https://raw.githubusercontent.com/gith002/Medusa/master)
 	RemoteBaseURL string
 
+	// DisableNetwork disables all network tests (URL existence and Oembed). This
+	// results in much faster parsing.
+	DisableNetwork bool
+
 	OEmbed  map[string]string
 	missing map[string]bool
 }

@@ -118,6 +118,7 @@ func TestRelativePaths(t *testing.T) {
 // matches the first export (lossless roundtrip).
 func TestExport(t *testing.T) {
 	p := NewParser()
+	p.DisableNetwork = true
 	err := p.ParseFile("tests/valid.yml")
 	if err != nil {
 		t.Errorf("Failed to parse valid file: %v", err)
@@ -129,6 +130,7 @@ func TestExport(t *testing.T) {
 	}
 
 	p2 := NewParser()
+	p2.DisableNetwork = true
 	err = p2.Parse(yaml1)
 	if err != nil {
 		t.Errorf("Failed to parse exported file: %v", err)

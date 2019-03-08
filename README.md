@@ -18,8 +18,11 @@ publiccode.yml is an international standard for describing public software. It i
 
 ```go
 parser := publiccode.NewParser()
+
+// all these settings are optional:
 parser.LocalBasePath = "/path/to/local/clone"
 parser.RemoteBaseURL = "https://raw.githubusercontent.com/gith002/Medusa/master"
+parser.DisableNetwork = false
 
 err := parser.ParseRemoteFile(url)
 pc := parser.PublicCode
