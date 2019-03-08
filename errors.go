@@ -21,7 +21,7 @@ type ErrorInvalidValue struct {
 }
 
 func (e ErrorInvalidValue) Error() string {
-	return fmt.Sprintf("wrong value for key %s: %s", e.Key, e.Reason)
+	return fmt.Sprintf("%s: %s", e.Key, e.Reason)
 }
 
 func newErrorInvalidValue(key string, reason string, args ...interface{}) ErrorInvalidValue {

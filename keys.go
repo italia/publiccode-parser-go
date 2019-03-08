@@ -130,14 +130,20 @@ func (p *Parser) decodeString(key string, value string) (err error) {
 			desc.LocalisedName = value
 		}
 		if attr == "genericName" {
-			if len(value) == 0 || len(value) > 35 {
-				return newErrorInvalidValue(key, "\"%s\" has an invalid number of characters: %d.  (mandatory and max 35 chars)", key, len(value))
+			if len(value) == 0 {
+				return newErrorInvalidValue(key, "missing mandatory field")
+			}
+			if len(value) > 35 {
+				return newErrorInvalidValue(key, "too long (%d), max 35 chars", len(value))
 			}
 			desc.GenericName = value
 		}
 		if attr == "longDescription" {
-			if len(value) < 500 || len(value) > 10000 {
-				return newErrorInvalidValue(key, "\"%s\" has an invalid number of characters: %d.  (min 500 chars, max 10.000 chars)", key, len(value))
+			if len(value) < 500 {
+				return newErrorInvalidValue(key, "too short (%d), min 500 chars", len(value))
+			}
+			if len(value) > 10000 {
+				return newErrorInvalidValue(key, "too long (%d), max 10000 chars", len(value))
 			}
 			desc.LongDescription = value
 		}
@@ -155,7 +161,7 @@ func (p *Parser) decodeString(key string, value string) (err error) {
 		}
 		if attr == "shortDescription" {
 			if len(value) > 150 {
-				return newErrorInvalidValue(key, "\"%s\" has an invalid number of characters: %d.  (max 150 chars)", key, len(value))
+				return newErrorInvalidValue(key, "too long (%d), max 150 chars", len(value))
 			}
 			desc.ShortDescription = value
 		}
@@ -258,7 +264,7 @@ func (p *Parser) decodeArrString(key string, value []string) error {
 		if attr == "features" {
 			for _, v := range value {
 				if len(v) > 100 {
-					return newErrorInvalidValue(key, " %s is too long.  (max 100 chars)", key)
+					return newErrorInvalidValue(key, "too long, max 100 chars", key)
 
 				}
 				desc.Features = append(desc.Features, v)
@@ -304,7 +310,7 @@ func (p *Parser) decodeArrString(key string, value []string) error {
 				"beni-culturali-turismo", "agricoltura", "italia-europa-mondo"}
 
 			if !funk.Contains(ecosistemi, v) {
-				return newErrorInvalidValue(key, "unknown it/ecosistemi: %s", v)
+				return newErrorInvalidValue(key, "invalid value: %s", v)
 			}
 			p.PublicCode.It.Ecosistemi = append(p.PublicCode.It.Ecosistemi, v)
 		}
@@ -354,14 +360,14 @@ func (p *Parser) decodeArrObj(key string, value map[interface{}]interface{}) err
 						return err
 					}
 				} else {
-					return newErrorInvalidValue(key, " %s contains an invalid value", k)
+					return newErrorInvalidValue(key, "invalid value for '%s", k)
 				}
 			}
 			if contractor.Name == "" {
-				return newErrorInvalidValue(key, " name field is mandatory.")
+				return newErrorInvalidValue(key, "missing mandatory key 'name'")
 			}
 			if contractor.Until.IsZero() {
-				return newErrorInvalidValue(key, " until field is mandatory.")
+				return newErrorInvalidValue(key, "missing mandatory key 'until'")
 			}
 			p.PublicCode.Maintenance.Contractors = append(p.PublicCode.Maintenance.Contractors, contractor)
 		}
@@ -384,11 +390,11 @@ func (p *Parser) decodeArrObj(key string, value map[interface{}]interface{}) err
 				} else if k.(string) == "affiliation" {
 					contact.Affiliation = val.(string)
 				} else {
-					return newErrorInvalidValue(key, " %s contains an invalid value", k)
+					return newErrorInvalidValue(key, "invalid value for '%s'", k)
 				}
 			}
 			if contact.Name == "" {
-				return newErrorInvalidValue(key, " name field is mandatory.")
+				return newErrorInvalidValue(key, "missing mandatory key 'name'")
 			}
 
 			p.PublicCode.Maintenance.Contacts = append(p.PublicCode.Maintenance.Contacts, contact)
@@ -410,11 +416,11 @@ func (p *Parser) decodeArrObj(key string, value map[interface{}]interface{}) err
 				} else if k.(string) == "versionMax" {
 					dep.VersionMax = val.(string)
 				} else {
-					return newErrorInvalidValue(key, " %s contains an invalid value", k)
+					return newErrorInvalidValue(key, "invalid value for '%s'", k)
 				}
 			}
 			if dep.Name == "" {
-				return newErrorInvalidValue(key, " name field is mandatory.")
+				return newErrorInvalidValue(key, "missing mandatory key 'name'")
 			}
 
 			p.PublicCode.DependsOn.Open = append(p.PublicCode.DependsOn.Open, dep)
@@ -436,11 +442,11 @@ func (p *Parser) decodeArrObj(key string, value map[interface{}]interface{}) err
 				} else if k.(string) == "versionMax" {
 					dep.VersionMax = val.(string)
 				} else {
-					return newErrorInvalidValue(key, " %s contains an invalid value", k)
+					return newErrorInvalidValue(key, "invalid value for '%s'", k)
 				}
 			}
 			if dep.Name == "" {
-				return newErrorInvalidValue(key, " name field is mandatory.")
+				return newErrorInvalidValue(key, "missing mandatory key 'name'")
 			}
 
 			p.PublicCode.DependsOn.Proprietary = append(p.PublicCode.DependsOn.Proprietary, dep)
@@ -462,11 +468,11 @@ func (p *Parser) decodeArrObj(key string, value map[interface{}]interface{}) err
 				} else if k.(string) == "versionMax" {
 					dep.VersionMax = val.(string)
 				} else {
-					return newErrorInvalidValue(key, " %s contains an invalid value", k)
+					return newErrorInvalidValue(key, "invalid value for '%s'", k)
 				}
 			}
 			if dep.Name == "" {
-				return newErrorInvalidValue(key, " name field is mandatory.")
+				return newErrorInvalidValue(key, "missing mandatory key 'name'")
 			}
 
 			p.PublicCode.DependsOn.Hardware = append(p.PublicCode.DependsOn.Hardware, dep)
@@ -482,31 +488,31 @@ func (p *Parser) decodeArrObj(key string, value map[interface{}]interface{}) err
 func (p *Parser) finalize() (es ErrorParseMulti) {
 	// description must have at least one language
 	if len(p.PublicCode.Description) == 0 {
-		es = append(es, newErrorInvalidValue("description", "must have at least one language."))
+		es = append(es, newErrorInvalidValue("description", "at least one language is required"))
 	}
 
 	// description/[lang]/genericName is mandatory
 	for lang, description := range p.PublicCode.Description {
 		if description.GenericName == "" {
-			es = append(es, newErrorInvalidValue("description/"+lang+"/genericName", "must have GenericName key."))
+			es = append(es, newErrorInvalidValue("description/"+lang+"/genericName", "missing mandatory key"))
 		}
 	}
 
 	// "maintenance/contractors" presence is mandatory (if maintainance/type is contract).
 	if p.PublicCode.Maintenance.Type == "contract" && len(p.PublicCode.Maintenance.Contractors) == 0 {
-		es = append(es, newErrorInvalidValue("maintenance/contractors", "not found, mandatory for \"contract\" maintenance"))
+		es = append(es, newErrorInvalidValue("maintenance/contractors", "missing but mandatory for \"contract\" maintenance"))
 	}
 
 	// "maintenance/contractors" presence is mandatory (if maintainance/type is internal or community).
 	if (p.PublicCode.Maintenance.Type == "internal" || p.PublicCode.Maintenance.Type == "community") && len(p.PublicCode.Maintenance.Contacts) == 0 {
-		es = append(es, newErrorInvalidValue("maintenance/contacts", "not found, mandatory for \"internal\" or \"community\" maintenance"))
+		es = append(es, newErrorInvalidValue("maintenance/contacts", "missing but mandatory for \"internal\" or \"community\" maintenance"))
 	}
 
 	// maintenance/contacts/name is always mandatory
 	if len(p.PublicCode.Maintenance.Contacts) > 0 {
 		for _, c := range p.PublicCode.Maintenance.Contacts {
 			if c.Name == "" {
-				es = append(es, newErrorInvalidValue("maintenance/contacts/name", "not found. It's mandatory."))
+				es = append(es, newErrorInvalidValue("maintenance/contacts/name", "missing mandatory key"))
 			}
 		}
 	}
@@ -514,7 +520,7 @@ func (p *Parser) finalize() (es ErrorParseMulti) {
 	if len(p.PublicCode.Maintenance.Contractors) > 0 {
 		for _, c := range p.PublicCode.Maintenance.Contractors {
 			if c.Name == "" {
-				es = append(es, newErrorInvalidValue("maintenance/contractors/name", "not found. It's mandatory."))
+				es = append(es, newErrorInvalidValue("maintenance/contractors/name", "missing mandatory key"))
 			}
 		}
 	}
@@ -522,7 +528,7 @@ func (p *Parser) finalize() (es ErrorParseMulti) {
 	if len(p.PublicCode.Maintenance.Contractors) > 0 {
 		for _, c := range p.PublicCode.Maintenance.Contractors {
 			if c.Until.IsZero() {
-				es = append(es, newErrorInvalidValue("maintenance/contractors/until", "not found. It's mandatory."))
+				es = append(es, newErrorInvalidValue("maintenance/contractors/until", "missing mandatory key"))
 			}
 		}
 	}
@@ -530,7 +536,7 @@ func (p *Parser) finalize() (es ErrorParseMulti) {
 	// mandatoryKeys check
 	for k, v := range p.missing {
 		if v {
-			es = append(es, newErrorInvalidValue(k, k+" is a mandatory key."))
+			es = append(es, newErrorInvalidValue(k, "missing mandatory key"))
 		}
 	}
 
