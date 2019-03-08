@@ -25,6 +25,17 @@ err := parser.ParseRemoteFile(url)
 pc := parser.PublicCode
 ```
 
+## Validation from command line
+
+This repository also contains an executable tool which can be used for validating a publiccode.yml file locally.
+
+```
+$ go get github.com/italia/publiccode-parser-go/pcvalidate
+$ pcvalidate mypubliccode.yml
+```
+
+Run `pcvalidate --help` for the available command line flags.
+
 ## Assets
 
 - [data/amministrazioni.txt](data/amministrazioni.txt) updated on: _2018-07-12_.
