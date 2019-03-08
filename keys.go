@@ -401,82 +401,25 @@ func (p *Parser) decodeArrObj(key string, value map[interface{}]interface{}) err
 		}
 
 	case "dependsOn/open":
-		for _, v := range value {
-			var dep Dependency
-
-			for k, val := range v.(map[interface{}]interface{}) {
-				if k.(string) == "name" {
-					dep.Name = val.(string)
-				} else if k.(string) == "optional" {
-					dep.Optional = val.(bool)
-				} else if k.(string) == "version" {
-					dep.Version = val.(string)
-				} else if k.(string) == "versionMin" {
-					dep.VersionMin = val.(string)
-				} else if k.(string) == "versionMax" {
-					dep.VersionMax = val.(string)
-				} else {
-					return newErrorInvalidValue(key, "invalid value for '%s'", k)
-				}
-			}
-			if dep.Name == "" {
-				return newErrorInvalidValue(key, "missing mandatory key 'name'")
-			}
-
-			p.PublicCode.DependsOn.Open = append(p.PublicCode.DependsOn.Open, dep)
+		deps, err := p.checkDependencies(key, value)
+		if err != nil {
+			return err
 		}
+		p.PublicCode.DependsOn.Open = deps
 
 	case "dependsOn/proprietary":
-		for _, v := range value {
-			var dep Dependency
-
-			for k, val := range v.(map[interface{}]interface{}) {
-				if k.(string) == "name" {
-					dep.Name = val.(string)
-				} else if k.(string) == "optional" {
-					dep.Optional = val.(bool)
-				} else if k.(string) == "version" {
-					dep.Version = val.(string)
-				} else if k.(string) == "versionMin" {
-					dep.VersionMin = val.(string)
-				} else if k.(string) == "versionMax" {
-					dep.VersionMax = val.(string)
-				} else {
-					return newErrorInvalidValue(key, "invalid value for '%s'", k)
-				}
-			}
-			if dep.Name == "" {
-				return newErrorInvalidValue(key, "missing mandatory key 'name'")
-			}
-
-			p.PublicCode.DependsOn.Proprietary = append(p.PublicCode.DependsOn.Proprietary, dep)
+		deps, err := p.checkDependencies(key, value)
+		if err != nil {
+			return err
 		}
+		p.PublicCode.DependsOn.Proprietary = deps
 
 	case "dependsOn/hardware":
-		for _, v := range value {
-			var dep Dependency
-
-			for k, val := range v.(map[interface{}]interface{}) {
-				if k.(string) == "name" {
-					dep.Name = val.(string)
-				} else if k.(string) == "optional" {
-					dep.Optional = val.(bool)
-				} else if k.(string) == "version" {
-					dep.Version = val.(string)
-				} else if k.(string) == "versionMin" {
-					dep.VersionMin = val.(string)
-				} else if k.(string) == "versionMax" {
-					dep.VersionMax = val.(string)
-				} else {
-					return newErrorInvalidValue(key, "invalid value for '%s'", k)
-				}
-			}
-			if dep.Name == "" {
-				return newErrorInvalidValue(key, "missing mandatory key 'name'")
-			}
-
-			p.PublicCode.DependsOn.Hardware = append(p.PublicCode.DependsOn.Hardware, dep)
+		deps, err := p.checkDependencies(key, value)
+		if err != nil {
+			return err
 		}
+		p.PublicCode.DependsOn.Hardware = deps
 
 	default:
 		return ErrorInvalidKey{key + " : Array of Objects"}
