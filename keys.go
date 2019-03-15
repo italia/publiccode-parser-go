@@ -26,30 +26,30 @@ func (p *Parser) decodeBool(key string, boolValue bool) (err error) {
 	switch key {
 	case "localisation/localisationReady":
 		p.PublicCode.Localisation.LocalisationReady = boolValue
-	case "it/conforme/accessibile":
-		p.PublicCode.It.Conforme.Accessibile = boolValue
-	case "it/conforme/interoperabile":
-		p.PublicCode.It.Conforme.Interoperabile = boolValue
-	case "it/conforme/sicuro":
-		p.PublicCode.It.Conforme.Sicuro = boolValue
-	case "it/conforme/privacy":
-		p.PublicCode.It.Conforme.Privacy = boolValue
-	case "it/spid":
-		p.PublicCode.It.Spid = boolValue
-	case "it/pagopa":
-		p.PublicCode.It.Pagopa = boolValue
-	case "it/cie":
-		p.PublicCode.It.Cie = boolValue
-	case "it/anpr":
-		p.PublicCode.It.Anpr = boolValue
+	case "it/conforme/accessibile", "it/conforme/lineeGuidaDesign":
+		p.PublicCode.It.Conforme.LineeGuidaDesign = boolValue
+	case "it/conforme/interoperabile", "it/conforme/modelloInteroperabilita":
+		p.PublicCode.It.Conforme.ModelloInteroperabilita = boolValue
+	case "it/conforme/sicuro", "it/conforme/misureMinimeSicurezza":
+		p.PublicCode.It.Conforme.MisureMinimeSicurezza = boolValue
+	case "it/conforme/privacy", "it/conforme/gdpr":
+		p.PublicCode.It.Conforme.GDPR = boolValue
+	case "it/spid", "it/piattaforme/spid":
+		p.PublicCode.It.Piattaforme.Spid = boolValue
+	case "it/pagopa", "it/piattaforme/pagopa":
+		p.PublicCode.It.Piattaforme.Pagopa = boolValue
+	case "it/cie", "it/piattaforme/cie":
+		p.PublicCode.It.Piattaforme.Cie = boolValue
+	case "it/anpr", "it/piattaforme/anpr":
+		p.PublicCode.It.Piattaforme.Anpr = boolValue
 	case "it/designKit/seo":
-		p.PublicCode.It.DesignKit.Seo = boolValue
+		// Deprecated in it:0.2, ignoring
 	case "it/designKit/ui":
-		p.PublicCode.It.DesignKit.UI = boolValue
+		// Deprecated in it:0.2, ignoring
 	case "it/designKit/web":
-		p.PublicCode.It.DesignKit.Web = boolValue
+		// Deprecated in it:0.2, ignoring
 	case "it/designKit/content":
-		p.PublicCode.It.DesignKit.Content = boolValue
+		// Deprecated in it:0.2, ignoring
 
 	default:
 		return ErrorInvalidKey{key + " : Boolean"}
@@ -321,16 +321,7 @@ func (p *Parser) decodeArrString(key string, value []string) error {
 		}
 
 	case key == "it/ecosistemi":
-		for _, v := range value {
-			ecosistemi := []string{"sanita", "welfare", "finanza-pubblica", "scuola", "istruzione-superiore-ricerca",
-				"difesa-sicurezza-soccorso-legalita", "giustizia", "infrastruttura-logistica", "sviluppo-sostenibilita",
-				"beni-culturali-turismo", "agricoltura", "italia-europa-mondo"}
-
-			if !funk.Contains(ecosistemi, v) {
-				return newErrorInvalidValue(key, "invalid value: %s", v)
-			}
-			p.PublicCode.It.Ecosistemi = append(p.PublicCode.It.Ecosistemi, v)
-		}
+		// Deprecated in it:0.2, ignoring
 
 	case key == "inputTypes":
 		for _, v := range value {

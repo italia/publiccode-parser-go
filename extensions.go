@@ -28,27 +28,20 @@ type ExtensionIT struct {
 	CountryExtensionVersion string `yaml:"countryExtensionVersion"`
 
 	Conforme struct {
-		Accessibile    bool `yaml:"accessibile"`
-		Interoperabile bool `yaml:"interoperabile"`
-		Sicuro         bool `yaml:"sicuro"`
-		Privacy        bool `yaml:"privacy"`
+		LineeGuidaDesign        bool `yaml:"lineeGuidaDesign"`
+		ModelloInteroperabilita bool `yaml:"modelloInteroperabilita"`
+		MisureMinimeSicurezza   bool `yaml:"misureMinimeSicurezza"`
+		GDPR                    bool `yaml:"gdpr"`
 	} `yaml:"conforme"`
 
 	Riuso struct {
 		CodiceIPA string `yaml:"codiceIPA,omitempty"`
 	} `yaml:"riuso"`
 
-	Spid   bool `yaml:"spid"`
-	Pagopa bool `yaml:"pagopa"`
-	Cie    bool `yaml:"cie"`
-	Anpr   bool `yaml:"anpr"`
-
-	Ecosistemi []string `yaml:"ecosistemi"`
-
-	DesignKit struct {
-		Seo     bool `yaml:"seo"`
-		UI      bool `yaml:"ui"`
-		Web     bool `yaml:"web"`
-		Content bool `yaml:"content"`
-	} `yaml:"designKit"`
+	Piattaforme struct {
+		Spid   bool `yaml:"spid"`
+		Pagopa bool `yaml:"pagopa"`
+		Cie    bool `yaml:"cie"`
+		Anpr   bool `yaml:"anpr"`
+	} `yaml:"piattaforme"`
 }
