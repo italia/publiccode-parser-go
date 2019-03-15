@@ -14,7 +14,7 @@ var mandatoryKeys = []string{
 	"url",
 	"releaseDate",
 	"platforms",
-	"tags",
+	"categories",
 	"softwareType",
 	"legal/license",
 	"maintenance/type",
@@ -63,10 +63,10 @@ func (p *Parser) decodeString(key string, value string) (err error) {
 		// strip legacy URI prefix
 		value = strings.Replace(value, "http://w3id.org/publiccode/version/", "", 1)
 
-		p.PublicCode.PubliccodeYamlVersion = value
-		if p.PublicCode.PubliccodeYamlVersion != Version {
-			return newErrorInvalidValue(key, "version %s not supported", p.PublicCode.PubliccodeYamlVersion)
+		if !funk.Contains(SupportedVersions, value) {
+			return newErrorInvalidValue(key, "version %s not supported", value)
 		}
+		p.PublicCode.PubliccodeYamlVersion = value
 	case key == "name":
 		p.PublicCode.Name = value
 	case key == "applicationSuite":
@@ -106,13 +106,17 @@ func (p *Parser) decodeString(key string, value string) (err error) {
 		}
 		return newErrorInvalidValue(key, "invalid value: %s", value)
 	case key == "softwareType":
-		for _, v := range []string{"standalone", "addon", "library", "configurationFiles"} {
-			if v == value {
-				p.PublicCode.SoftwareType = value
-				return nil
-			}
+		// the "standalone" value was deprecated in publiccode.yml 0.2
+		if value == "standalone" {
+			value = "standalone/other"
 		}
-		return newErrorInvalidValue(key, "invalid value: %s", value)
+
+		var supportedTypes = []string{"standalone/mobile", "standalone/iot", "standalone/desktop", "standalone/web", "standalone/backend", "standalone/other", "addon", "library", "configurationFiles"}
+		if !funk.Contains(supportedTypes, value) {
+			return newErrorInvalidValue(key, "invalid value: %s", value)
+		}
+		p.PublicCode.SoftwareType = value
+
 	case regexp.MustCompile(`^description/.+/`).MatchString(key):
 		if p.PublicCode.Description == nil {
 			p.PublicCode.Description = make(map[string]Desc)
@@ -190,6 +194,11 @@ func (p *Parser) decodeString(key string, value string) (err error) {
 			}
 		}
 		return newErrorInvalidValue(key, "invalid value: %s", value)
+	case key == "it/countryExtensionVersion":
+		if !funk.Contains(ExtensionITSupportedVersions, value) {
+			return newErrorInvalidValue(key, "version %s not supported for 'it' extension", value)
+		}
+		p.PublicCode.It.CountryExtensionVersion = value
 	case key == "it/riuso/codiceIPA":
 		p.PublicCode.It.Riuso.CodiceIPA, err = p.checkCodiceIPA(key, value)
 		if err != nil {
@@ -210,12 +219,15 @@ func (p *Parser) decodeArrString(key string, value []string) error {
 		p.PublicCode.Platforms = append(p.PublicCode.Platforms, value...)
 
 	case key == "tags":
+		// Deprecated in 0.2, ignoring
+
+	case key == "categories":
 		for _, v := range value {
-			v, err := p.checkTag(key, v)
+			v, err := p.checkCategory(key, v)
 			if err != nil {
 				return err
 			}
-			p.PublicCode.Tags = append(p.PublicCode.Tags, v)
+			p.PublicCode.Categories = append(p.PublicCode.Categories, v)
 		}
 
 	case key == "usedBy":
@@ -238,12 +250,15 @@ func (p *Parser) decodeArrString(key string, value []string) error {
 		}
 
 	case key == "intendedAudience/onlyFor":
+		// Deprecated in 0.2, ignoring
+
+	case key == "intendedAudience/scope":
 		for _, v := range value {
-			v, err := p.checkPaTypes(key, v)
+			v, err := p.checkScope(key, v)
 			if err != nil {
 				return err
 			}
-			p.PublicCode.IntendedAudience.OnlyFor = append(p.PublicCode.IntendedAudience.OnlyFor, v)
+			p.PublicCode.IntendedAudience.Scope = append(p.PublicCode.IntendedAudience.Scope, v)
 		}
 
 	case regexp.MustCompile(`^description/.+/`).MatchString(key):
@@ -262,9 +277,6 @@ func (p *Parser) decodeArrString(key string, value []string) error {
 		desc := p.PublicCode.Description[lang]
 		if attr == "awards" {
 			desc.Awards = append(desc.Awards, value...)
-		}
-		if attr == "freeTags" {
-			desc.FreeTags = append(desc.FreeTags, value...)
 		}
 		if attr == "features" {
 			for _, v := range value {
@@ -337,7 +349,7 @@ func (p *Parser) decodeArrString(key string, value []string) error {
 		}
 
 	default:
-		return ErrorInvalidKey{key + " : Array of Strings"}
+		return ErrorInvalidKey{"Unexpected key: " + key}
 
 	}
 	return nil
@@ -483,6 +495,11 @@ func (p *Parser) finalize() (es ErrorParseMulti) {
 
 	// mandatoryKeys check
 	for k, v := range p.missing {
+		// If this is not the latest version, skip mandatority check for some keys
+		if p.PublicCode.PubliccodeYamlVersion == "0.1" && k == "categories" {
+			continue
+		}
+
 		if v {
 			es = append(es, newErrorInvalidValue(k, "missing mandatory key"))
 		}

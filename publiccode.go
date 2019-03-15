@@ -10,9 +10,12 @@ var legacyKeys = map[string]string{
 	"featureList":             "features",
 }
 
-// Version of the PublicCode specs.
+// Version of the latest PublicCode specs.
 // Source https://github.com/publiccodenet/publiccode.yml
-const Version = "0.1"
+const Version = "0.2"
+
+// SupportedVersions lists the publiccode.yml versions this parser supports.
+var SupportedVersions = []string{"0.1", "0.2"}
 
 // PublicCode is a publiccode.yml file definition.
 // Reference: https://github.com/publiccodenet/publiccode.yml
@@ -38,7 +41,7 @@ type PublicCode struct {
 
 	Platforms []string `yaml:"platforms"`
 
-	Tags []string `yaml:"tags"`
+	Categories []string `yaml:"categories"`
 
 	UsedBy []string `yaml:"usedBy,omitempty"`
 
@@ -50,7 +53,7 @@ type PublicCode struct {
 	SoftwareType string `yaml:"softwareType"`
 
 	IntendedAudience struct {
-		OnlyFor              []string `yaml:"onlyFor,omitempty"`
+		Scope                []string `yaml:"scope,omitempty"`
 		Countries            []string `yaml:"countries,omitempty"`
 		UnsupportedCountries []string `yaml:"unsupportedCountries,omitempty"`
 	} `yaml:"intendedAudience"`
@@ -100,7 +103,6 @@ type Desc struct {
 	Videos                 []*url.URL `yaml:"-"`
 	VideosStrings          []string   `yaml:"videos,omitempty"`
 	Awards                 []string   `yaml:"awards,omitempty"`
-	FreeTags               []string   `yaml:"freeTags,omitempty"`
 }
 
 // Contractor is an entity or entities, if any, that are currently contracted for maintaining the software.

@@ -1,4 +1,4 @@
-publiccodeYmlVersion: "0.1"
+publiccodeYmlVersion: "0.2"
 
 name: Medusa
 applicationSuite: MegaProductivitySuite
@@ -20,6 +20,7 @@ platforms:                   # or Windows, Mac, Linux, etc.
   - android
   - ios
 
+# legacy 0.1 key
 tags:
   - calendar
   - chat
@@ -34,6 +35,9 @@ tags:
   - scanning
   - security
   - sports
+
+categories:
+  - cloud-management
 
 usedBy:
   - Comune di Firenze

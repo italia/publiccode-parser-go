@@ -19,20 +19,8 @@ platforms:                   # or Windows, Mac, Linux, etc.
   - android
   - ios
 
-tags:
-  - calendar
-  - chat
-  - classroom-management
-  - museum
-  - music
-  - news
-  - ocr
-  - parallel-computing
-  - revision-control
-  - robotics
-  - scanning
-  - security
-  - sports
+categories:
+  - cloud-management
 
 usedBy:
   - Comune di Firenze

@@ -14,9 +14,19 @@ package publiccode
 // the software is integrated with the Italian Public Identification System.
 // Reference: https://github.com/publiccodenet/publiccode.yml/blob/develop/schema.md
 
+// ExtensionITVersion declares the latest supported version of the 'it' extension
+var ExtensionITVersion = "0.2"
+
+// ExtensionITSupportedVersions declares the versions of the 'it' extension
+// supported by this parser. We also support legacy publiccode.yml files
+// which did not contain the it/countryExtensionVersion key.
+var ExtensionITSupportedVersions = []string{"0.2"}
+
 // ExtensionIT is the country-specific extension for Italy.
 // Reference: https://github.com/publiccodenet/publiccode.yml/blob/develop/schema.it.md
 type ExtensionIT struct {
+	CountryExtensionVersion string `yaml:"countryExtensionVersion"`
+
 	Conforme struct {
 		Accessibile    bool `yaml:"accessibile"`
 		Interoperabile bool `yaml:"interoperabile"`

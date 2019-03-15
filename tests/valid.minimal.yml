@@ -13,8 +13,8 @@ outputTypes:
 platforms:
   - web
 
-tags:
-  - texteditor
+categories:
+  - cloud-management
 
 developmentStatus: development
 

@@ -30,7 +30,7 @@ func TestDecodeValueErrors(t *testing.T) {
 		{"tests/missing_platforms.yml", "platforms"},                                             // Missing platforms.
 		{"tests/missing_releaseDate.yml", "releaseDate"},                                         // Missing releaseDate.
 		{"tests/missing_softwareType.yml", "softwareType"},                                       // Missing softwareType/type.
-		{"tests/missing_tags.yml", "tags"},                                                       // Missing tags.
+		{"tests/missing_categories.yml", "categories"},                                           // Missing tags.
 		{"tests/missing_url.yml", "url"},                                                         // Missing url.
 
 		// Invalid fields.
