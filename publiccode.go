@@ -109,6 +109,7 @@ type Desc struct {
 // Reference: https://github.com/publiccodenet/publiccode.yml/blob/develop/schema.md#contractor
 type Contractor struct {
 	Name          string    `yaml:"name"`
+	Email         string    `yaml:"email"`
 	Website       *url.URL  `yaml:"-"`
 	WebsiteString string    `yaml:"website"`
 	Until         time.Time `yaml:"-"`

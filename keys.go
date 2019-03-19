@@ -355,6 +355,12 @@ func (p *Parser) decodeArrObj(key string, value map[interface{}]interface{}) err
 			for k, val := range v.(map[interface{}]interface{}) {
 				if k.(string) == "name" {
 					contractor.Name = val.(string)
+				} else if k.(string) == "email" {
+					err := p.checkEmail(key, val.(string))
+					if err != nil {
+						return err
+					}
+					contractor.Email = val.(string)
 				} else if k.(string) == "until" {
 					var err error
 					contractor.UntilString, contractor.Until, err = p.checkDate(key, val.(string))
