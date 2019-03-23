@@ -19,7 +19,7 @@ type Parser struct {
 	// left empty, RemoteBaseURL will be used.
 	LocalBasePath string
 
-	// RemoteBaseURL is the URL pointing to the directory where the publiccode.yml
+	// RemoteBaseURL is the URL pointing to the raw directory where the publiccode.yml
 	// file is located. It's used for validating abolute URLs and as a base for
 	// relative paths. If left empty, absolute URLs will not be validated and
 	// no remote validation of files with relative paths will be performed. If
