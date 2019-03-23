@@ -73,18 +73,18 @@ func (p *Parser) getAbsolutePaths(key, file string) (string, string, error) {
 		if p.RemoteBaseURL != "" {
 			// Let's be tolerant: turn GitHub non-raw URLs to raw URLs
 			var re = regexp.MustCompile(`^https://github.com/(.+?)/(.+?)/blob/(.+)$`)
-			file2 := re.ReplaceAllString(file, `https://raw.githubusercontent.com/$1/$2/$3`)
+			file = re.ReplaceAllString(file, `https://raw.githubusercontent.com/$1/$2/$3`)
 
 			// Check if the URL matches the base URL.
 			// We don't allow absolute URLs not pointing to the same repository as the
 			// publiccode.yml file
-			if strings.Index(file2, p.RemoteBaseURL) != 0 {
+			if strings.Index(file, p.RemoteBaseURL) != 0 {
 				return "", "", newErrorInvalidValue(key, "Absolute URL (%s) is outside the repository (%s)", file, p.RemoteBaseURL)
 			}
 
 			// We can compute the local path by stripping the base URL.
 			if p.LocalBasePath != "" {
-				LocalPath = path.Join(p.LocalBasePath, strings.Replace(file2, p.RemoteBaseURL, "", 1))
+				LocalPath = path.Join(p.LocalBasePath, strings.Replace(file, p.RemoteBaseURL, "", 1))
 			}
 		}
 		RemoteURL = file
