@@ -5,9 +5,43 @@ import (
 	"time"
 )
 
-var legacyKeys = map[string]string{
-	"publiccode-yaml-version": "publiccodeYmlVersion",
-	"featureList":             "features",
+var mandatoryKeys = []string{
+	"publiccodeYmlVersion",
+	"name",
+	"url",
+	"releaseDate",
+	"platforms",
+	"categories",
+	"softwareType",
+	"legal/license",
+	"maintenance/type",
+	"localisation/localisationReady",
+	"localisation/availableLanguages",
+}
+
+// list of keys that were renamed in the publiccode.yml spec
+var renamedKeys = map[string]string{
+	"publiccode-yaml-version":    "publiccodeYmlVersion",
+	"featureList":                "features",
+	"it/conforme/accessibile":    "it/conforme/lineeGuidaDesign",
+	"it/conforme/interoperabile": "it/conforme/modelloInteroperabilita",
+	"it/conforme/sicuro":         "it/conforme/misureMinimeSicurezza",
+	"it/conforme/privacy":        "it/conforme/gdpr",
+	"it/spid":                    "it/piattaforme/spid",
+	"it/pagopa":                  "it/piattaforme/pagopa",
+	"it/cie":                     "it/piattaforme/cie",
+	"it/anpr":                    "it/piattaforme/anpr",
+}
+
+// list of keys that were removed from the publiccode.yml spec
+var removedKeys = []string{
+	"tags",                     // deprecated in it:0.2
+	"intendedAudience/onlyFor", // deprecated in it:0.2
+	"it/designKit/seo",         // deprecated in it:0.2
+	"it/designKit/ui",          // deprecated in it:0.2
+	"it/designKit/web",         // deprecated in it:0.2
+	"it/designKit/content",     // deprecated in it:0.2
+	"it/ecosistemi",            // deprecated in it:0.2
 }
 
 // Version of the latest PublicCode specs.
@@ -109,20 +143,20 @@ type Desc struct {
 // Reference: https://github.com/publiccodenet/publiccode.yml/blob/develop/schema.md#contractor
 type Contractor struct {
 	Name          string    `yaml:"name"`
-	Email         string    `yaml:"email"`
+	Email         string    `yaml:"email,omitempty"`
 	Website       *url.URL  `yaml:"-"`
-	WebsiteString string    `yaml:"website"`
+	WebsiteString string    `yaml:"website,omitempty"`
 	Until         time.Time `yaml:"-"`
-	UntilString   string    `yaml:"until"`
+	UntilString   string    `yaml:"until,omitempty"`
 }
 
 // Contact is a contact info maintaining the software.
 // Reference: https://github.com/publiccodenet/publiccode.yml/blob/develop/schema.md#contact
 type Contact struct {
 	Name        string `yaml:"name"`
-	Email       string `yaml:"email"`
-	Affiliation string `yaml:"affiliation"`
-	Phone       string `yaml:"phone"`
+	Email       string `yaml:"email,omitempty"`
+	Affiliation string `yaml:"affiliation,omitempty"`
+	Phone       string `yaml:"phone,omitempty"`
 }
 
 // Dependency describe system-level dependencies required to install and use this software.

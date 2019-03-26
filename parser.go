@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"sync"
 
+	funk "github.com/thoas/go-funk"
 	"gopkg.in/yaml.v2"
 )
 
@@ -112,14 +113,20 @@ func (p *Parser) decoderec(prefix string, s map[interface{}]interface{}) (es Err
 			continue
 		}
 
-		// convert legacy keys
-		if k2, ok := legacyKeys[k]; ok {
-			k = k2
-		}
-
 		if prefix != "" {
 			k = prefix + "/" + k
 		}
+
+		// if we are not running in strict mode, support legacy keys
+		if !p.Strict {
+			if k2, ok := renamedKeys[k]; ok {
+				k = k2
+			}
+			if funk.Contains(removedKeys, k) {
+				continue // ignore key
+			}
+		}
+
 		delete(p.missing, k)
 
 		switch v := v.(type) {

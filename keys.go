@@ -8,51 +8,29 @@ import (
 	"github.com/thoas/go-funk"
 )
 
-var mandatoryKeys = []string{
-	"publiccodeYmlVersion",
-	"name",
-	"url",
-	"releaseDate",
-	"platforms",
-	"categories",
-	"softwareType",
-	"legal/license",
-	"maintenance/type",
-	"localisation/localisationReady",
-	"localisation/availableLanguages",
-}
-
 func (p *Parser) decodeBool(key string, boolValue bool) (err error) {
 	switch key {
 	case "localisation/localisationReady":
 		p.PublicCode.Localisation.LocalisationReady = boolValue
-	case "it/conforme/accessibile", "it/conforme/lineeGuidaDesign":
+	case "it/conforme/lineeGuidaDesign":
 		p.PublicCode.It.Conforme.LineeGuidaDesign = boolValue
-	case "it/conforme/interoperabile", "it/conforme/modelloInteroperabilita":
+	case "it/conforme/modelloInteroperabilita":
 		p.PublicCode.It.Conforme.ModelloInteroperabilita = boolValue
-	case "it/conforme/sicuro", "it/conforme/misureMinimeSicurezza":
+	case "it/conforme/misureMinimeSicurezza":
 		p.PublicCode.It.Conforme.MisureMinimeSicurezza = boolValue
-	case "it/conforme/privacy", "it/conforme/gdpr":
+	case "it/conforme/gdpr":
 		p.PublicCode.It.Conforme.GDPR = boolValue
-	case "it/spid", "it/piattaforme/spid":
+	case "it/piattaforme/spid":
 		p.PublicCode.It.Piattaforme.Spid = boolValue
-	case "it/pagopa", "it/piattaforme/pagopa":
+	case "it/piattaforme/pagopa":
 		p.PublicCode.It.Piattaforme.Pagopa = boolValue
-	case "it/cie", "it/piattaforme/cie":
+	case "it/piattaforme/cie":
 		p.PublicCode.It.Piattaforme.Cie = boolValue
-	case "it/anpr", "it/piattaforme/anpr":
+	case "it/piattaforme/anpr":
 		p.PublicCode.It.Piattaforme.Anpr = boolValue
-	case "it/designKit/seo":
-		// Deprecated in it:0.2, ignoring
-	case "it/designKit/ui":
-		// Deprecated in it:0.2, ignoring
-	case "it/designKit/web":
-		// Deprecated in it:0.2, ignoring
-	case "it/designKit/content":
-		// Deprecated in it:0.2, ignoring
 
 	default:
-		return ErrorInvalidKey{key + " : Boolean"}
+		return ErrorInvalidKey{"Unexpected boolean key: " + key}
 	}
 	return
 }
@@ -205,7 +183,7 @@ func (p *Parser) decodeString(key string, value string) (err error) {
 			return err
 		}
 	default:
-		return ErrorInvalidKey{key + " : String"}
+		return ErrorInvalidKey{"Unexpected string key: " + key}
 	}
 	return
 }
@@ -217,9 +195,6 @@ func (p *Parser) decodeArrString(key string, value []string) error {
 
 	case key == "platforms":
 		p.PublicCode.Platforms = append(p.PublicCode.Platforms, value...)
-
-	case key == "tags":
-		// Deprecated in 0.2, ignoring
 
 	case key == "categories":
 		for _, v := range value {
@@ -248,9 +223,6 @@ func (p *Parser) decodeArrString(key string, value []string) error {
 			}
 			p.PublicCode.IntendedAudience.UnsupportedCountries = append(p.PublicCode.IntendedAudience.UnsupportedCountries, v)
 		}
-
-	case key == "intendedAudience/onlyFor":
-		// Deprecated in 0.2, ignoring
 
 	case key == "intendedAudience/scope":
 		for _, v := range value {
@@ -320,9 +292,6 @@ func (p *Parser) decodeArrString(key string, value []string) error {
 			p.PublicCode.Localisation.AvailableLanguages = append(p.PublicCode.Localisation.AvailableLanguages, lang)
 		}
 
-	case key == "it/ecosistemi":
-		// Deprecated in it:0.2, ignoring
-
 	case key == "inputTypes":
 		for _, v := range value {
 			if err := p.checkMIME(key, v); err != nil {
@@ -340,7 +309,7 @@ func (p *Parser) decodeArrString(key string, value []string) error {
 		}
 
 	default:
-		return ErrorInvalidKey{"Unexpected key: " + key}
+		return ErrorInvalidKey{"Unexpected array key: " + key}
 
 	}
 	return nil
@@ -436,7 +405,7 @@ func (p *Parser) decodeArrObj(key string, value map[interface{}]interface{}) err
 		p.PublicCode.DependsOn.Hardware = deps
 
 	default:
-		return ErrorInvalidKey{key + " : Array of Objects"}
+		return ErrorInvalidKey{"Unexpected array key: " + key}
 	}
 	return nil
 }
