@@ -32,6 +32,9 @@ type Parser struct {
 	// results in much faster parsing.
 	DisableNetwork bool
 
+	// Strict makes the parser less tolerant. It is enabled by default.
+	Strict bool
+
 	OEmbed  map[string]string
 	missing map[string]bool
 }
@@ -91,6 +94,7 @@ func (p *Parser) ParseRemoteFile(url string) error {
 // NewParser initializes a new Parser object and returns it.
 func NewParser() *Parser {
 	var p Parser
+	p.Strict = true
 	p.OEmbed = make(map[string]string)
 	p.missing = make(map[string]bool)
 	for _, k := range mandatoryKeys {
