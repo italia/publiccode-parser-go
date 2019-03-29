@@ -19,6 +19,11 @@ var mandatoryKeys = []string{
 	"localisation/availableLanguages",
 }
 
+// mandatory keys whose absence is tolerated when not running under strict mode
+var toleratedMandatoryKeys = []string{
+	"localisation/localisationReady",
+}
+
 // list of keys that were renamed in the publiccode.yml spec
 var renamedKeys = map[string]string{
 	"publiccode-yaml-version":    "publiccodeYmlVersion",
