@@ -152,7 +152,11 @@ func (p *Parser) decodeString(key string, value string) (err error) {
 		return nil
 	case key == "legal/authorsFile":
 		p.PublicCode.Legal.AuthorsFile, err = p.checkFile(key, value)
-		return err
+
+		// If not running in strict mode we can tolerate this absence.
+		if err != nil && p.Strict {
+			return err
+		}
 	case key == "legal/license":
 		_, err := spdxValidator.Parse(value)
 		if err != nil {
