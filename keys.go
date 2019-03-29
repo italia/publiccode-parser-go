@@ -472,7 +472,7 @@ func (p *Parser) finalize() (es ErrorParseMulti) {
 
 		if v {
 			// If we are not running in strict mode and we can tolerate the absence of this key, skip it
-			if !p.Strict && !funk.Contains(toleratedMandatoryKeys, k) {
+			if !p.Strict && funk.Contains(toleratedMandatoryKeys, k) {
 				continue
 			}
 
