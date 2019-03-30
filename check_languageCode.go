@@ -6,12 +6,6 @@ import (
 
 // checkLanguageCode tells whether the supplied language code is valid according to BCP47 or not and returns it in canolical form.
 func (p *Parser) checkLanguageCode(key, code string) (string, error) {
-	if !p.Strict {
-		if code == "italian" {
-			code = "it"
-		}
-	}
-
 	// language.Parse() also accepts three-letter languages so it's highly tolerant
 	t, err := language.Parse(code)
 	if err != nil {
