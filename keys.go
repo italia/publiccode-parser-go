@@ -122,7 +122,7 @@ func (p *Parser) decodeString(key string, value string) (err error) {
 			desc.GenericName = value
 		}
 		if attr == "longDescription" {
-			if len(value) < 500 && p.Strict {
+			if len(value) < 500 {
 				return newErrorInvalidValue(key, "too short (%d), min 500 chars", len(value))
 			}
 			if len(value) > 10000 {
@@ -421,11 +421,21 @@ func (p *Parser) finalize() (es ErrorParseMulti) {
 		es = append(es, newErrorInvalidValue("description", "at least one language is required"))
 	}
 
-	// description/[lang]/genericName is mandatory
+	// description/[lang]/{genericName,shortDescription,longDescription} are mandatory
+	haveLongDescription := false // required for at least one language
 	for lang, description := range p.PublicCode.Description {
 		if description.GenericName == "" {
 			es = append(es, newErrorInvalidValue("description/"+lang+"/genericName", "missing mandatory key"))
 		}
+		if description.ShortDescription == "" {
+			es = append(es, newErrorInvalidValue("description/"+lang+"/shortDescription", "missing mandatory key"))
+		}
+		if description.LongDescription != "" {
+			haveLongDescription = true
+		}
+	}
+	if haveLongDescription == false {
+		es = append(es, newErrorInvalidValue("description/*/longDescription", "missing mandatory key"))
 	}
 
 	// "maintenance/contractors" presence is mandatory (if maintainance/type is contract).

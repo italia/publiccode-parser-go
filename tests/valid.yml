@@ -64,6 +64,7 @@ description:
   it:
     localisedName: Medusa
     genericName: "Text Editor"
+    shortDescription: "Un software veramente interessante."
   eng:
     localisedName: Medusa
     genericName: "Text Editor"

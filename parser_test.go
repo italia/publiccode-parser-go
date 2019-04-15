@@ -29,6 +29,8 @@ func TestDecodeValueErrors(t *testing.T) {
 		{"tests/missing_maintenance_type.yml", "maintenance/type"},                               // Missing maintenance/type.
 		{"tests/missing_platforms.yml", "platforms"},                                             // Missing platforms.
 		{"tests/missing_releaseDate.yml", "releaseDate"},                                         // Missing releaseDate.
+		{"tests/missing_shortDescription.yml", "description/en/shortDescription"},                // Missing shortDescription.
+		{"tests/missing_longDescription.yml", "description/*/longDescription"},                   // Missing longDescription.
 		{"tests/missing_softwareType.yml", "softwareType"},                                       // Missing softwareType/type.
 		{"tests/missing_categories.yml", "categories"},                                           // Missing tags.
 		{"tests/missing_url.yml", "url"},                                                         // Missing url.
