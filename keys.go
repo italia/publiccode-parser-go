@@ -122,7 +122,7 @@ func (p *Parser) decodeString(key string, value string) (err error) {
 			desc.GenericName = value
 		}
 		if attr == "longDescription" {
-			if len(value) < 500 && !p.Strict {
+			if len(value) < 500 && p.Strict {
 				return newErrorInvalidValue(key, "too short (%d), min 500 chars", len(value))
 			}
 			if len(value) > 10000 {
