@@ -59,7 +59,9 @@ func (p *Parser) checkCodiceIPA(key string, codiceiPA string) (string, error) {
 	scanner := bufio.NewScanner(strings.NewReader(input))
 	for scanner.Scan() {
 		amm := manageLine(scanner.Text())
-		if amm.CodAmm == codiceiPA {
+		// The iPA codes should be validated as case-insensitive, according
+		// to the IndicePA guidelines.
+		if strings.EqualFold(amm.CodAmm, codiceiPA) {
 			return codiceiPA, nil
 		}
 	}
