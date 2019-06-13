@@ -16,6 +16,7 @@ publiccode.yml is an international standard for describing public software. It i
 - Validate oembed video links and retrieve HTML for easy embedding
 - Validate SPDX licenses. Without WITH keyword.
 - Check tags
+- Strict and non-strict modes (use non-strict when you want to be tolerant, such as in a crawler, but use strict in editors and validators)
 
 ## Example
 

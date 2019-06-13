@@ -156,6 +156,8 @@ func (p *Parser) decodeString(key string, value string) (err error) {
 		// If not running in strict mode we can tolerate this absence.
 		if err != nil && p.Strict {
 			return err
+		} else {
+			return nil
 		}
 	case key == "legal/license":
 		_, err := spdxValidator.Parse(value)

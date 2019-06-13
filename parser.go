@@ -33,7 +33,8 @@ type Parser struct {
 	// results in much faster parsing.
 	DisableNetwork bool
 
-	// Strict makes the parser less tolerant. It is enabled by default.
+	// Strict makes the parser less tolerant by allowing some errors that do not
+	// affect the rendering of the software catalog. It is enabled by default.
 	Strict bool
 
 	OEmbed  map[string]string
