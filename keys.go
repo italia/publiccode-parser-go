@@ -299,19 +299,23 @@ func (p *Parser) decodeArrString(key string, value []string) error {
 		}
 
 	case key == "inputTypes":
-		for _, v := range value {
-			if err := p.checkMIME(key, v); err != nil {
-				return err
+		if p.Strict {
+			for _, v := range value {
+				if err := p.checkMIME(key, v); err != nil {
+					return err
+				}
+				p.PublicCode.InputTypes = append(p.PublicCode.InputTypes, v)
 			}
-			p.PublicCode.InputTypes = append(p.PublicCode.InputTypes, v)
 		}
 
 	case key == "outputTypes":
-		for _, v := range value {
-			if err := p.checkMIME(key, v); err != nil {
-				return err
+		if p.Strict {
+			for _, v := range value {
+				if err := p.checkMIME(key, v); err != nil {
+					return err
+				}
+				p.PublicCode.OutputTypes = append(p.PublicCode.OutputTypes, v)
 			}
-			p.PublicCode.OutputTypes = append(p.PublicCode.OutputTypes, v)
 		}
 
 	default:
