@@ -4,8 +4,10 @@ import (
 	"flag"
 	"fmt"
 	"io/ioutil"
+	"net/url"
 	"os"
 
+	"github.com/alranel/go-vcsurl"
 	publiccode "github.com/italia/publiccode-parser-go"
 )
 
@@ -32,7 +34,20 @@ func main() {
 	p.LocalBasePath = *localBasePathPtr
 	p.DisableNetwork = *disableNetworkPtr
 	p.Strict = !*noStrictPtr
-	err := p.ParseFile(flag.Args()[0])
+
+	var err error
+	if url, err2 := url.ParseRequestURI(flag.Args()[0]); err2 == nil {
+		// supplied argument looks like an URL
+		url = vcsurl.GetRawFile(url)
+		if p.RemoteBaseURL == "" {
+			p.RemoteBaseURL = vcsurl.GetRawRoot(url).String()
+		}
+
+		err = p.ParseRemoteFile(url.String())
+	} else {
+		// supplied argument looks like a file path
+		err = p.ParseFile(flag.Args()[0])
+	}
 	if err != nil {
 		fmt.Printf("validation ko:\n%v\n", err)
 		return
