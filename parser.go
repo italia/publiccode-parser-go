@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"sync"
 
 	funk "github.com/thoas/go-funk"
 	"gopkg.in/yaml.v2"
@@ -41,21 +40,14 @@ type Parser struct {
 	missing map[string]bool
 }
 
-// Lock uses sync.Mutex lock/unlock for goroutines.
-var Lock sync.Mutex
-
 // Parse loads the yaml bytes and tries to parse it. Return an error if fails.
 func (p *Parser) Parse(in []byte) error {
 	var s map[interface{}]interface{}
-	// Lock for goroutines.
-	Lock.Lock()
 
 	d := yaml.NewDecoder(bytes.NewReader(in))
 	if err := d.Decode(&s); err != nil {
 		return err
 	}
-	// Unlock for goroutines.
-	Lock.Unlock()
 
 	if err := p.decoderec("", s); err != nil {
 		return err
