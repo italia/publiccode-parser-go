@@ -4,7 +4,7 @@ import (
 	"regexp"
 	"strings"
 
-	spdxValidator "github.com/r3vit/go-spdx/spdx"
+	spdxValidator "github.com/alranel/go-spdx/spdx"
 	"github.com/thoas/go-funk"
 )
 
