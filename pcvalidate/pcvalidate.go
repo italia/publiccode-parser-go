@@ -50,7 +50,7 @@ func main() {
 	}
 	if err != nil {
 		fmt.Printf("validation ko:\n%v\n", err)
-		return
+		os.Exit(1)
 	}
 	fmt.Println("validation ok")
 
