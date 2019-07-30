@@ -43,6 +43,8 @@ $ pcvalidate mypubliccode.yml
 
 Run `pcvalidate --help` for the available command line flags.
 
+The tool returns 0 in case of successful validation, 1 otherwise.
+
 ## Assets
 
 - [data/amministrazioni.txt](data/amministrazioni.txt) updated on: _2018-07-12_.
