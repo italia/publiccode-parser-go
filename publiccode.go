@@ -9,6 +9,7 @@ var mandatoryKeys = []string{
 	"publiccodeYmlVersion",
 	"name",
 	"url",
+	"developmentStatus",
 	"releaseDate",
 	"platforms",
 	"categories",
