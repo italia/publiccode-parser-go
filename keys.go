@@ -255,7 +255,7 @@ func (p *Parser) decodeArrString(key string, value []string) error {
 		if attr == "awards" {
 			desc.Awards = append(desc.Awards, value...)
 		}
-		if attr == "features" {
+		if attr == "features" || (attr == "featureList" && !p.Strict) {
 			for _, v := range value {
 				if len(v) > 100 {
 					return newErrorInvalidValue(key, "too long, max 100 chars")
@@ -426,8 +426,10 @@ func (p *Parser) finalize() (es ErrorParseMulti) {
 		es = append(es, newErrorInvalidValue("description", "at least one language is required"))
 	}
 
-	// description/[lang]/{genericName,shortDescription,longDescription} are mandatory
-	haveLongDescription := false // required for at least one language
+	// description/[lang]/{genericName,shortDescription} are mandatory for all languages
+	// description/[lang]/{features,longDescription} are mandatory for at least one language
+	haveFeatures := false
+	haveLongDescription := false
 	for lang, description := range p.PublicCode.Description {
 		if description.GenericName == "" {
 			es = append(es, newErrorInvalidValue("description/"+lang+"/genericName", "missing mandatory key"))
@@ -435,9 +437,15 @@ func (p *Parser) finalize() (es ErrorParseMulti) {
 		if description.ShortDescription == "" {
 			es = append(es, newErrorInvalidValue("description/"+lang+"/shortDescription", "missing mandatory key"))
 		}
+		if len(description.Features) > 0 {
+			haveFeatures = true
+		}
 		if description.LongDescription != "" {
 			haveLongDescription = true
 		}
+	}
+	if haveFeatures == false {
+		es = append(es, newErrorInvalidValue("description/*/features", "missing mandatory key"))
 	}
 	if haveLongDescription == false {
 		es = append(es, newErrorInvalidValue("description/*/longDescription", "missing mandatory key"))

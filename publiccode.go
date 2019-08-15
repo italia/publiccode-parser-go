@@ -23,7 +23,6 @@ var mandatoryKeys = []string{
 // list of keys that were renamed in the publiccode.yml spec
 var renamedKeys = map[string]string{
 	"publiccode-yaml-version":    "publiccodeYmlVersion",
-	"featureList":                "features",
 	"it/conforme/accessibile":    "it/conforme/lineeGuidaDesign",
 	"it/conforme/interoperabile": "it/conforme/modelloInteroperabilita",
 	"it/conforme/sicuro":         "it/conforme/misureMinimeSicurezza",
