@@ -8,6 +8,10 @@ github.com/alranel/go-spdx v0.0.5 h1:dpWfqUWDd3IEf9KTjWu++ZiC3pKws+77lk+/qXjgir8
 github.com/alranel/go-spdx v0.0.5/go.mod h1:lcAlhyAoH9rjd33PkIx+2gsCIYwDpL4H0WX7Jrays70=
 github.com/alranel/go-vcsurl v0.0.0-20190629140424-48c90269973e h1:AuE78FDVAfO8KIeJlHq4fZ+EQgiyjSafP8kd7waBWAQ=
 github.com/alranel/go-vcsurl v0.0.0-20190629140424-48c90269973e/go.mod h1:tp+e312yiwgu8H4/Ly26J8MevK9lz7BucU4PPlEv0ag=
+github.com/alranel/go-vcsurl v0.0.0-20190819110505-d6d5cfbba734 h1:MMPoahuEmgUAO8NmrEP+rclIFGEQcU0wt/vVKHSzIho=
+github.com/alranel/go-vcsurl v0.0.0-20190819110505-d6d5cfbba734/go.mod h1:tp+e312yiwgu8H4/Ly26J8MevK9lz7BucU4PPlEv0ag=
+github.com/alranel/go-vcsurl v0.0.0-20190819164520-88a614c7acb4 h1:a+SmZVgzBVoCfNK1LPRyy/rXDn8JiA/8SpMwcaBRRO0=
+github.com/alranel/go-vcsurl v0.0.0-20190819164520-88a614c7acb4/go.mod h1:tp+e312yiwgu8H4/Ly26J8MevK9lz7BucU4PPlEv0ag=
 github.com/davecgh/go-spew v1.1.0 h1:ZDRjVQ15GmhC3fiQ8ni8+OwkZQO4DARzQgrnXU1Liz8=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=

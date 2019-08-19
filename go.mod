@@ -3,7 +3,7 @@ module github.com/italia/publiccode-parser-go
 require (
 	github.com/Jeffail/gabs v1.4.0 // indirect
 	github.com/alranel/go-spdx v0.0.5
-	github.com/alranel/go-vcsurl v0.0.0-20190629140424-48c90269973e
+	github.com/alranel/go-vcsurl v0.0.0-20190819164520-88a614c7acb4
 	github.com/dyatlov/go-oembed v0.0.0-20180429203341-4bc5ab7a42e9
 	github.com/go-bindata/go-bindata v3.1.2+incompatible // indirect
 	github.com/golang/mock v1.3.1 // indirect
