@@ -61,8 +61,10 @@ func (p *Parser) checkCodiceIPA(key string, codiceiPA string) (string, error) {
 		amm := manageLine(scanner.Text())
 		// The iPA codes should be validated as case-insensitive, according
 		// to the IndicePA guidelines.
+		// We always fold it to lower case so that users of this library can rely
+		// on a consistent case.
 		if strings.EqualFold(amm.CodAmm, codiceiPA) {
-			return codiceiPA, nil
+			return strings.ToLower(codiceiPA), nil
 		}
 	}
 	if err := scanner.Err(); err != nil {
