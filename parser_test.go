@@ -16,10 +16,12 @@ func TestDecodeValueErrors(t *testing.T) {
 	testFiles := []testType{
 		// A complete and valid yml.
 		{"tests/valid.yml", ""},
-		//A complete and valid minimal yml.
+		// A complete and valid minimal yml.
 		{"tests/valid.minimal.yml", ""},
+		// Fields must be valid against different type
+		{"tests/valid_maintenance_contacts_phone.yml", ""}, // Valid maintenance/contacts/phone.
 
-		//Missing mandatory fields.
+		// Missing mandatory fields.
 		{"tests/missing_publiccodeYmlVersion.yml", "publiccodeYmlVersion"},                       // Missing version.
 		{"tests/missing_name.yml", "name"},                                                       // Missing name.
 		{"tests/missing_legal_license.yml", "legal/license"},                                     // Missing legal/license.
