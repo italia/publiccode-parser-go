@@ -1,6 +1,7 @@
 package publiccode
 
 import (
+	"fmt"
 	"log"
 	"net/url"
 	"regexp"
@@ -412,7 +413,7 @@ func (p *Parser) decodeArrObj(key string, value map[interface{}]interface{}) err
 					}
 					contact.Email = val.(string)
 				} else if k.(string) == "phone" {
-					contact.Phone = val.(string)
+					contact.Phone = fmt.Sprint(val) //forcing cast to string, phone number must always be a string
 				} else if k.(string) == "affiliation" {
 					contact.Affiliation = val.(string)
 				} else {
