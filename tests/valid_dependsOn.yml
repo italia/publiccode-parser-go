@@ -87,8 +87,8 @@ legal:
 maintenance:
   type: "community"
   contacts:
-    - email: informatica@cittametropolitana.ve.it
-      name: Luca Celeghin
+    - email: mrossi@cittametropolitana.it
+      name: Mario Rossi
       phone: '+390412501953'
 
 localisation:
