@@ -20,6 +20,8 @@ func TestDecodeValueErrors(t *testing.T) {
 		{"tests/valid.minimal.yml", ""},
 		// Fields must be valid against different type
 		{"tests/valid_maintenance_contacts_phone.yml", ""}, // Valid maintenance/contacts/phone.
+		// Test if dependsOn multiple subkeys are kept
+		{"tests/valid_dependsOn.yml", ""},
 
 		// Missing mandatory fields.
 		{"tests/missing_publiccodeYmlVersion.yml", "publiccodeYmlVersion"},                       // Missing version.
@@ -61,6 +63,25 @@ func TestDecodeValueErrors(t *testing.T) {
 				}
 				if _, ok := p.PublicCode.Description["en"]; !ok {
 					t.Errorf("Missing description/en")
+				}
+			}
+			if test.file == "tests/valid_dependsOn.yml" {
+				if len(p.PublicCode.DependsOn.Open) != 2 {
+					t.Errorf("dependsOn/open length mismatch")
+				}
+				if len(p.PublicCode.DependsOn.Proprietary) != 1 {
+					t.Errorf("dependsOn/proprietary length mismatch")
+				}
+				if len(p.PublicCode.DependsOn.Hardware) != 3 {
+					t.Errorf("dependsOn/hardware length mismatch")
+				}
+			}
+			if test.file == "tests/valid_maintenance_contacts_phone.yml" {
+				if len(p.PublicCode.Maintenance.Contacts) != 3 {
+					t.Errorf("maintenance/contacts length mismatch")
+				}
+				if len(p.PublicCode.Maintenance.Contractors) != 1 {
+					t.Errorf("maintenance/contractors length mismatch")
 				}
 			}
 		})
