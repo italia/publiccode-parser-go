@@ -423,7 +423,6 @@ func (p *Parser) decodeArrObj(key string, value map[interface{}]interface{}) err
 			if contact.Name == "" {
 				return newErrorInvalidValue(key, "missing mandatory key 'name'")
 			}
-
 			p.PublicCode.Maintenance.Contacts = append(p.PublicCode.Maintenance.Contacts, contact)
 		}
 
@@ -432,21 +431,21 @@ func (p *Parser) decodeArrObj(key string, value map[interface{}]interface{}) err
 		if err != nil {
 			return err
 		}
-		p.PublicCode.DependsOn.Open = deps
+		p.PublicCode.DependsOn.Open = append(p.PublicCode.DependsOn.Open, deps...)
 
 	case "dependsOn/proprietary":
 		deps, err := p.checkDependencies(key, value)
 		if err != nil {
 			return err
 		}
-		p.PublicCode.DependsOn.Proprietary = deps
+		p.PublicCode.DependsOn.Proprietary = append(p.PublicCode.DependsOn.Proprietary, deps...)
 
 	case "dependsOn/hardware":
 		deps, err := p.checkDependencies(key, value)
 		if err != nil {
 			return err
 		}
-		p.PublicCode.DependsOn.Hardware = deps
+		p.PublicCode.DependsOn.Hardware = append(p.PublicCode.DependsOn.Hardware, deps...)
 
 	default:
 		return ErrorInvalidKey{"Unexpected array key: " + key}
