@@ -24,6 +24,9 @@ func TestDecodeValueErrors(t *testing.T) {
 		// Test if dependsOn multiple subkeys are kept
 		{"tests/valid_dependsOn.yml", nil},
 
+		// File is not UTF-8 encoded.
+		{"tests/invalid_file_encoding.yml", ParseError{"Invalid UTF-8"}},
+
 		// Missing mandatory fields.
 
 		{"tests/missing_publiccodeYmlVersion.yml", ErrorInvalidValue{Key: "publiccodeYmlVersion", Reason: "missing mandatory key"}},
@@ -50,9 +53,9 @@ func TestDecodeValueErrors(t *testing.T) {
 		// Invalid legal/license.
 		{"tests/invalid_legal_license.yml", ErrorInvalidValue{Key: "legal/license", Reason: "invalid value AGPLicense-3.0: invalid license \"AGPLicense-3.0\" at 0 (\"AGPLi\")"}},
 		// Invalid categories (nil).
-		{"tests/nil_categories.yml", ErrorInvalidValue{Key: "categories", Reason: "invalid value AGPLicense-3.0: invalid license \"AGPLicense-3.0\" at 0 (\"AGPLi\")"} },
+		{"tests/nil_categories.yml", ErrorInvalidValue{Key: "categories", Reason: "invalid type <nil>."}},
 		// Invalid name (nil).
-		{"tests/nil_name.yml", ErrorInvalidValue{Key: "name", Reason: "invalid value AGPLicense-3.0: invalid license \"AGPLicense-3.0\" at 0 (\"AGPLi\")"} },
+		{"tests/nil_name.yml", ErrorInvalidValue{Key: "name", Reason: "invalid type <nil>."}},
 	}
 
 	for _, test := range testFiles {

@@ -5,6 +5,15 @@ import (
 	"strings"
 )
 
+// A generic parse error.
+type ParseError struct {
+	Reason string
+}
+
+func (e ParseError) Error() string {
+	return e.Reason
+}
+
 // ErrorInvalidKey represents an error caused by an invalid key.
 type ErrorInvalidKey struct {
 	Key string
