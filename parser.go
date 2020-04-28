@@ -38,6 +38,27 @@ type Parser struct {
 
 	OEmbed  map[string]string
 	missing map[string]bool
+
+	// Domain will have domain specific settings, including basic auth if provided
+	// this will avoid strong quota limit imposed by code hosting platform
+	Domain Domain
+}
+
+// Domain is a single code hosting service.
+type Domain struct {
+	// Domains.yml data
+	Host      string   `yaml:"host"`
+	BasicAuth []string `yaml:"basic-auth"`
+}
+
+// ParseInDomain wrapper func to be in domain env
+func (p *Parser) ParseInDomain(in []byte, host string, ba []string) error {
+	p.Domain = Domain{
+		Host:      host,
+		BasicAuth: ba,
+	}
+
+	return p.Parse(in)
 }
 
 // Parse loads the yaml bytes and tries to parse it. Return an error if fails.
