@@ -3,11 +3,12 @@ package publiccode
 import (
 	"bytes"
 	"compress/gzip"
+	"encoding/base64"
 	"image"
 	"image/png"
 	"io"
 	"io/ioutil"
-	"net/http"
+	"math/rand"
 	"net/url"
 	"os"
 	"path"
@@ -16,6 +17,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/italia/developers-italia-backend/crawler/httpclient"
 	"github.com/thoas/go-funk"
 )
 
@@ -33,12 +35,25 @@ func (p *Parser) checkEmail(key string, fn string) error {
 	return nil
 }
 
+func getBasicAuth(domain Domain) string {
+	if len(domain.BasicAuth) > 0 {
+		auth := domain.BasicAuth[rand.Intn(len(domain.BasicAuth))]
+		return "Basic " + base64.StdEncoding.EncodeToString([]byte(auth))
+	}
+	return ""
+}
+
+func getHeaderFromDomain(domain Domain) map[string]string {
+	// Set BasicAuth header
+	headers := make(map[string]string)
+	headers["Authorization"] = getBasicAuth(domain)
+	return headers
+}
+
 // checkURL tells whether the URL resource is well formatted and reachable and return it as *url.URL.
 // An URL resource is well formatted if it's a valid URL and the scheme is not empty.
 // An URL resource is reachable if returns an http Status = 200 OK.
 func (p *Parser) checkURL(key string, value string) (string, *url.URL, error) {
-	//fmt.Printf("checking URL: %s\n", value)
-
 	// Check if URL is well formatted
 	u, err := url.Parse(value)
 	if err != nil {
@@ -50,12 +65,12 @@ func (p *Parser) checkURL(key string, value string) (string, *url.URL, error) {
 
 	if !p.DisableNetwork {
 		// Check whether URL is reachable
-		r, err := http.Get(value)
+		r, err := httpclient.GetURL(value, getHeaderFromDomain(p.Domain))
 		if err != nil {
 			return "", nil, newErrorInvalidValue(key, "HTTP GET failed for %s: %v", value, err)
 		}
-		if r.StatusCode != 200 {
-			return "", nil, newErrorInvalidValue(key, "HTTP GET returned %d for %s; 200 was expected", r.StatusCode, value)
+		if r.Status.Code != 200 {
+			return "", nil, newErrorInvalidValue(key, "HTTP GET returned %d for %s; 200 was expected", r.Status.Code, value)
 		}
 	}
 
@@ -104,9 +119,9 @@ func (p *Parser) getAbsolutePaths(key, file string) (string, string, error) {
 		}
 	}
 
-	//fmt.Printf("file = %s\n", file)
-	//fmt.Printf("  LocalPath = %s\n", LocalPath)
-	//fmt.Printf("  RemoteURL = %s\n", RemoteURL)
+	// fmt.Printf("file = %s\n", file)
+	// fmt.Printf("  LocalPath = %s\n", LocalPath)
+	// fmt.Printf("  RemoteURL = %s\n", RemoteURL)
 
 	return LocalPath, RemoteURL, nil
 }
@@ -199,7 +214,7 @@ func (p *Parser) checkLogo(key string, value string) (string, error) {
 			return file, nil
 		}
 
-		localPath, err = downloadTmpFile(remoteURL)
+		localPath, err = downloadTmpFile(remoteURL, getHeaderFromDomain(p.Domain))
 		if err != nil {
 			return file, err
 		}
@@ -256,8 +271,7 @@ func (p *Parser) checkMonochromeLogo(key string, value string) (string, error) {
 		if p.DisableNetwork {
 			return file, nil
 		}
-
-		localPath, err = downloadTmpFile(remoteURL)
+		localPath, err = downloadTmpFile(remoteURL, getHeaderFromDomain(p.Domain))
 		if err != nil {
 			return file, err
 		}

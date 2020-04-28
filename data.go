@@ -1,17 +1,19 @@
 package publiccode
 
 import (
+	"bytes"
 	"io"
 	"io/ioutil"
 	"log"
-	"net/http"
 	"os"
 	"path"
 	"path/filepath"
+
+	"github.com/italia/developers-italia-backend/crawler/httpclient"
 )
 
 // downloadFile download the file in the path.
-func downloadFile(filepath string, url string) error {
+func downloadFile(filepath string, url string, headers map[string]string) error {
 	// Create the file.
 	out, err := os.Create(filepath)
 	if err != nil {
@@ -20,20 +22,21 @@ func downloadFile(filepath string, url string) error {
 	defer out.Close()
 
 	// Get the data from the url.
-	resp, err := http.Get(url)
+	resp, err := httpclient.GetURL(url, headers)
 	if err != nil {
 		return err
 	}
-	defer resp.Body.Close()
+
+	reader := bytes.NewReader(resp.Body)
 
 	// Write the body to file.
-	_, err = io.Copy(out, resp.Body)
+	_, err = io.Copy(out, reader)
 
 	return err
 }
 
 // Caller is responsible for removing the temporary directory.
-func downloadTmpFile(url string) (string, error) {
+func downloadTmpFile(url string, headers map[string]string) (string, error) {
 	// Create a temp dir
 	tmpdir, err := ioutil.TempDir("", "publiccode.yml-parser-go")
 	if err != nil {
@@ -42,7 +45,7 @@ func downloadTmpFile(url string) (string, error) {
 
 	// Download the file in the temp dir.
 	tmpFile := filepath.Join(tmpdir, path.Base(url))
-	err = downloadFile(tmpFile, url)
+	err = downloadFile(tmpFile, url, headers)
 	if err != nil {
 		return "", err
 	}
