@@ -45,6 +45,29 @@ Run `pcvalidate --help` for the available command line flags.
 
 The tool returns 0 in case of successful validation, 1 otherwise.
 
+## Easy validation with Docker
+
+You may not want to install Go on your environment, or you'd just want something quick and easy that allows you to validate *publiccode.yml* files in your CI pipeline. With this goal in mind, a Docker container for the parser has also been published.
+
+The image is available on [Dockerhub](https://hub.docker.com/repository/docker/italia/publiccode-parser-go).
+You can also build your own starting from the [Dockerfile](Dockerfile) in this repository, running from the root `docker build -t italia/publiccode-parser-go .`.
+
+Below some validation examples are reported. The examples assume that your publiccode.yml file is on your local machine, at `/home/my-user/publiccodes/publiccode.yml`
+
+```shell
+# Validate a publiccode file called publiccode.yml (default)
+docker run -v /home/my-user/publiccodes:/files italia/publiccode-parser-go
+
+# Validate a publiccode file called /home/my-user/publiccodes/my-amazing-code.yaml
+docker run -v /home/my-user/publiccodes:/files italia/publiccode-parser-go my-amazing-code.yaml
+
+# Do extra validations of the local publiccode.yml file against the corresponding remote repository
+docker run -v /home/my-user/publiccodes:/files italia/publiccode-parser-go -remote-base-url https://github.com/YOUR_GITHUB_USER/YOUR_REPO files/publiccode.yml
+
+# For debugging, access the container interactive shell (/bin/sh), overriding the entrypoint
+docker run -it --entrypoint "/bin/sh" italia/publiccode-parser-go
+```
+
 ## Assets
 
 - [data/amministrazioni.txt](data/amministrazioni.txt) updated on: _2018-07-12_.
@@ -72,7 +95,7 @@ This software is maintained by the [Developers Italia](https://developers.italia
 
 ## License
 
-© 2018-2019 Team per la Trasformazione Digitale - Presidenza del Consiglio dei Minstri
+© 2018-2020 Team per la Trasformazione Digitale - Presidenza del Consiglio dei Minstri
 
 Licensed under the EUPL.
 The version control system provides attribution for specific lines of code.
