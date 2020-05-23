@@ -36,7 +36,6 @@ func main() {
 	p.Strict = !*noStrictPtr
 
 	var err error
-	//if url, err2 := url.ParseRequestURI(flag.Args()[0]); err2 == nil {
 	if ok, url := isValidURL(flag.Args()[0]); ok {
 		// supplied argument looks like an URL
 		url = vcsurl.GetRawFile(url)
