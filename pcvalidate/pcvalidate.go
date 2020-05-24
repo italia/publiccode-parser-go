@@ -7,7 +7,7 @@ import (
 	"net/url"
 	"os"
 
-	"github.com/alranel/go-vcsurl"
+	vcsurl "github.com/alranel/go-vcsurl"
 	publiccode "github.com/italia/publiccode-parser-go"
 )
 
@@ -36,7 +36,7 @@ func main() {
 	p.Strict = !*noStrictPtr
 
 	var err error
-	if url, err2 := url.ParseRequestURI(flag.Args()[0]); err2 == nil {
+	if ok, url := isValidURL(flag.Args()[0]); ok {
 		// supplied argument looks like an URL
 		url = vcsurl.GetRawFile(url)
 		if p.RemoteBaseURL == "" {
@@ -62,4 +62,27 @@ func main() {
 		}
 		fmt.Printf("publiccode written to %s\n", *exportPtr)
 	}
+}
+
+// isValidURL tests a string to determine if it is a well-structured url or not.
+func isValidURL(toTest string) (bool, *url.URL) {
+	_, err := url.ParseRequestURI(toTest)
+	if err != nil {
+		return false, nil
+	}
+
+	u, err := url.Parse(toTest)
+	if err != nil || u.Scheme == "" || u.Host == "" {
+		return false, nil
+	}
+
+	// Check it's an acceptable scheme
+	switch u.Scheme {
+	case "http":
+	case "https":
+	default:
+		return false, nil
+	}
+
+	return true, u
 }

@@ -6,7 +6,7 @@ jobs:
       - image: circleci/golang:1.13
     steps:
       - checkout
-      - run: go test -race
+      - run: go test -race ./...
 
 workflows:
   version: 2
