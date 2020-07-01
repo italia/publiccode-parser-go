@@ -36,12 +36,17 @@ pc := parser.PublicCode
 
 This repository also contains an executable tool which can be used for validating a publiccode.yml file locally.
 
+To get latest development version use:
 ```
 $ go get github.com/italia/publiccode-parser-go/pcvalidate
 $ pcvalidate mypubliccode.yml
 ```
 
+To get latest stable version go to [release page](https://github.com/italia/publiccode-parser-go/releases/latest) and grab which will match your arch.
+
 Run `pcvalidate --help` for the available command line flags.
+
+Run `pcvalidate --version` to print actual version.
 
 The tool returns 0 in case of successful validation, 1 otherwise.
 

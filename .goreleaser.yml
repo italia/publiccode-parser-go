@@ -9,6 +9,9 @@ before:
 builds:
 - 
   main: ./pcvalidate/pcvalidate.go
+  # Default is `-s -w -X main.version={{.Version}} -X main.commit={{.Commit}} -X main.date={{.Date}} -X main.builtBy=goreleaser`.
+  ldflags:
+    - -s -w -X main.version={{.Version}} -X main.date={{.Date}}
   env:
   - CGO_ENABLED=0
 archives:

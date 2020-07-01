@@ -6,10 +6,26 @@ import (
 	"io/ioutil"
 	"net/url"
 	"os"
+	"runtime/debug"
 
 	vcsurl "github.com/alranel/go-vcsurl"
 	publiccode "github.com/italia/publiccode-parser-go"
 )
+
+var (
+	version string
+	date    string
+)
+
+func init() {
+	if version == "" {
+		info, _ := debug.ReadBuildInfo()
+		version = info.Main.Version
+	}
+	if date == "" {
+		date = "(latest)"
+	}
+}
 
 func main() {
 	flag.Usage = func() {
@@ -22,7 +38,13 @@ func main() {
 	exportPtr := flag.String("export", "", "Export the normalized publiccode.yml file to the given path.")
 	noStrictPtr := flag.Bool("no-strict", false, "Disable strict mode.")
 	helpPtr := flag.Bool("help", false, "Display command line usage.")
+	versionPtr := flag.Bool("version", false, "Display current software version.")
 	flag.Parse()
+
+	if *versionPtr {
+		println(version, date)
+		return
+	}
 
 	if *helpPtr || len(flag.Args()) < 1 {
 		flag.Usage()
