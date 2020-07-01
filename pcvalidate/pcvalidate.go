@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"net/url"
 	"os"
+	"runtime/debug"
 
 	vcsurl "github.com/alranel/go-vcsurl"
 	publiccode "github.com/italia/publiccode-parser-go"
@@ -18,10 +19,11 @@ var (
 
 func init() {
 	if version == "" {
-		version = "no version"
+		info, _ := debug.ReadBuildInfo()
+		version = info.Main.Version
 	}
 	if date == "" {
-		date = "(Mon YYYY)"
+		date = "(latest)"
 	}
 }
 
