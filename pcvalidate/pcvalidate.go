@@ -19,8 +19,10 @@ var (
 
 func init() {
 	if version == "" {
-		info, _ := debug.ReadBuildInfo()
-		version = info.Main.Version
+		version = "devel"
+		if info, ok := debug.ReadBuildInfo(); ok {
+			version = info.Main.Version
+		}
 	}
 	if date == "" {
 		date = "(latest)"
