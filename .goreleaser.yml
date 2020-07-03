@@ -8,7 +8,8 @@ before:
     - go generate ./...
 builds:
 - 
-  binary: "pcvalidate"
+  id: pcvalidate
+  binary: pcvalidate
   main: ./pcvalidate/pcvalidate.go
   ldflags:
     - -s -w -X main.version={{.Version}} -X main.date={{.Date}}
@@ -31,3 +32,14 @@ changelog:
     exclude:
     - '^docs:'
     - '^test:'
+dockers:
+  -
+    goos: linux
+    goarch: amd64
+    binaries:
+      - pcvalidate
+    builds:
+      - pcvalidate
+    image_templates:
+      - "italia/publiccode-parser-go:latest"
+      - "italia/publiccode-parser-go:{{ .Tag }}"
