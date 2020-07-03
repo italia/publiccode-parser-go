@@ -40,6 +40,7 @@ dockers:
       - pcvalidate
     builds:
       - pcvalidate
+    skip_push: false
     image_templates:
       - "italia/publiccode-parser-go:latest"
       - "italia/publiccode-parser-go:{{ .Tag }}"
