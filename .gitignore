@@ -1,3 +1,4 @@
 pcvalidate/pcvalidate
 .vscode
-
+.history
+.DS_Store
