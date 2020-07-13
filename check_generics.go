@@ -43,7 +43,21 @@ func getBasicAuth(domain Domain) string {
 	return ""
 }
 
-func getHeaderFromDomain(domain Domain) map[string]string {
+func isHostInDomain(domain Domain, u string) bool {
+	if len(domain.Host) == 0 {
+		return false
+	}
+	url, _ := url.Parse(u)
+	if domain.Host == url.Host {
+		return true
+	}
+	return false
+}
+
+func getHeaderFromDomain(domain Domain, url string) map[string]string {
+	if !isHostInDomain(domain, url) {
+		return nil
+	}
 	// Set BasicAuth header
 	headers := make(map[string]string)
 	headers["Authorization"] = getBasicAuth(domain)
@@ -65,7 +79,7 @@ func (p *Parser) checkURL(key string, value string) (string, *url.URL, error) {
 
 	if !p.DisableNetwork {
 		// Check whether URL is reachable
-		r, err := httpclient.GetURL(value, getHeaderFromDomain(p.Domain))
+		r, err := httpclient.GetURL(value, getHeaderFromDomain(p.Domain, value))
 		if err != nil {
 			return "", nil, newErrorInvalidValue(key, "HTTP GET failed for %s: %v", value, err)
 		}
@@ -214,7 +228,7 @@ func (p *Parser) checkLogo(key string, value string) (string, error) {
 			return file, nil
 		}
 
-		localPath, err = downloadTmpFile(remoteURL, getHeaderFromDomain(p.Domain))
+		localPath, err = downloadTmpFile(remoteURL, getHeaderFromDomain(p.Domain, remoteURL))
 		if err != nil {
 			return file, err
 		}
@@ -271,7 +285,7 @@ func (p *Parser) checkMonochromeLogo(key string, value string) (string, error) {
 		if p.DisableNetwork {
 			return file, nil
 		}
-		localPath, err = downloadTmpFile(remoteURL, getHeaderFromDomain(p.Domain))
+		localPath, err = downloadTmpFile(remoteURL, getHeaderFromDomain(p.Domain, remoteURL))
 		if err != nil {
 			return file, err
 		}
