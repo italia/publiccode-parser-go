@@ -11,14 +11,26 @@ type testURL struct {
 }
 
 func TestHostsInDomain(t *testing.T) {
+	domain := Domain{
+		UseTokenFor: []string{
+			"github.com",
+			"api.github.com",
+			"raw.githubusercontent.com",
+		},
+	}
+
 	list := []testURL{
-		{"https://github.com", Domain{Host: "github.com"}, true},
-		{"https://githubs.com", Domain{Host: "github.com"}, false},
-		{"https://github.org", Domain{Host: "github.com"}, false},
-		{"https://github", Domain{Host: "github.com"}, false},
-		{"http://github.com", Domain{Host: "github.com"}, true},
-		{"http:/github.com", Domain{Host: "github.com"}, false},
-		{"", Domain{Host: ""}, false},
+		{"https://github.com", domain, true},
+		{"https://githubs.com", domain, false},
+		{"https://github.org", domain, false},
+		{"https://github", domain, false},
+		{"http://github.com", domain, true},
+		{"http:/github.com", domain, false},
+		{"https://api.github.com", domain, true},
+		{"https://api.github.com/org/repo/file", domain, true},
+		{"https://raw.githubusercontent.com/org/repo/master/pc.yml", domain, true},
+		{"https://raw.githubusercontent.com", domain, true},
+		{"", Domain{UseTokenFor: []string{}}, false},
 		{"", Domain{}, false},
 	}
 	for _, l := range list {

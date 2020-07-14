@@ -47,15 +47,17 @@ type Parser struct {
 // Domain is a single code hosting service.
 type Domain struct {
 	// Domains.yml data
-	Host      string   `yaml:"host"`
-	BasicAuth []string `yaml:"basic-auth"`
+	Host        string   `yaml:"host"`
+	UseTokenFor []string `yaml:"use-token-for"`
+	BasicAuth   []string `yaml:"basic-auth"`
 }
 
 // ParseInDomain wrapper func to be in domain env
-func (p *Parser) ParseInDomain(in []byte, host string, ba []string) error {
+func (p *Parser) ParseInDomain(in []byte, host string, utf []string, ba []string) error {
 	p.Domain = Domain{
-		Host:      host,
-		BasicAuth: ba,
+		Host:        host,
+		UseTokenFor: utf,
+		BasicAuth:   ba,
 	}
 
 	return p.Parse(in)
