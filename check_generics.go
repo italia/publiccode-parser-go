@@ -43,12 +43,21 @@ func getBasicAuth(domain Domain) string {
 	return ""
 }
 
+func stringInSlice(a string, list []string) bool {
+	for _, b := range list {
+		if b == a {
+			return true
+		}
+	}
+	return false
+}
+
 func isHostInDomain(domain Domain, u string) bool {
-	if len(domain.Host) == 0 {
+	if len(domain.UseTokenFor) == 0 {
 		return false
 	}
-	url, _ := url.Parse(u)
-	if domain.Host == url.Host {
+	urlP, _ := url.Parse(u)
+	if stringInSlice(urlP.Host, domain.UseTokenFor) {
 		return true
 	}
 	return false
