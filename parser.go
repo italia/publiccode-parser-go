@@ -184,11 +184,7 @@ func (p *Parser) decoderec(prefix string, s map[interface{}]interface{}) (es Err
 				es = append(es, errs...)
 			}
 		default:
-			if v == nil {
-				es = append(es, newErrorInvalidValue(k, "is empty. Remove it or fill with valid values"))
-				return
-			}
-			panic(fmt.Errorf("key \"%s\" - invalid type: %T", k, v))
+			es = append(es, newErrorInvalidValue(k, "invalid type %T.", v))
 		}
 	}
 	return

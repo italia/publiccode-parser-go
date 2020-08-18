@@ -45,6 +45,8 @@ func TestDecodeValueErrors(t *testing.T) {
 
 		// Invalid fields.
 		{"tests/invalid_legal_license.yml", "legal/license"}, // Invalid legal/license.
+		{"tests/nil_categories.yml", "categories"},           // Invalid categories (nil).
+		{"tests/nil_name.yml", "name"},                       // Invalid name (nil).
 	}
 
 	for _, test := range testFiles {
