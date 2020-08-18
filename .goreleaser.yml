@@ -15,6 +15,10 @@ builds:
     - -s -w -X main.version={{.Version}} -X main.date={{.Date}}
   env:
   - CGO_ENABLED=0
+  # https://github.com/italia/publiccode-parser-go/issues/50
+  ignore:
+  - goos: darwin
+    goarch: 386
 archives:
 - replacements:
     darwin: Darwin
