@@ -59,7 +59,7 @@ description:
           on multiple rows. You should note what the software
           is and why one should need it. This is 632 characters.
 
-    documentation: "https://docs.developers.italia.it"
+    documentation: "https://docs.italia.it"
     apiDocumentation: "https://developers.italia.it/it/api"
 
     features:

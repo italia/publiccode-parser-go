@@ -92,7 +92,7 @@ func TestDecodeValueErrors(t *testing.T) {
 // Test publiccode.yml remote files for key errors.
 func TestDecodeValueErrorsRemote(t *testing.T) {
 	testRemoteFiles := []testType{
-		{"https://raw.githubusercontent.com/gith002/Medusa/master/publiccode.yml", ""},
+		{"https://raw.githubusercontent.com/pagopa/io-app/master/publiccode.yml", ""},
 	}
 
 	for _, test := range testRemoteFiles {
@@ -100,7 +100,7 @@ func TestDecodeValueErrorsRemote(t *testing.T) {
 			// Parse data into pc struct.
 			p := NewParser()
 			p.Strict = false
-			p.RemoteBaseURL = "https://raw.githubusercontent.com/gith002/Medusa/master/"
+			p.RemoteBaseURL = "https://raw.githubusercontent.com/pagopa/io-app/master"
 			err := p.ParseRemoteFile(test.file)
 
 			checkParseErrors(t, err, test)
