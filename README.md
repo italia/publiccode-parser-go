@@ -55,20 +55,18 @@ The tool returns 0 in case of successful validation, 1 otherwise.
 You may not want to install Go on your environment, or you'd just want something quick and easy that allows you to validate *publiccode.yml* files in your CI pipeline. With this goal in mind, a Docker container for the parser has also been published.
 
 The image is available on [Dockerhub](https://hub.docker.com/repository/docker/italia/publiccode-parser-go).
-You can also build your own starting from the [Dockerfile](Dockerfile) in this repository, running from the root `goreleaser release --skip-publish --skip-validate` (you need goreleaser installed) or use the docker image instead as follow:
+You can also build your own starting from the [Dockerfile](Dockerfile) in this repository:
 
 ```sh
-$ docker run --rm --privileged \
-  -v $PWD:/go/src/github.com/user/repo \
-  -v /var/run/docker.sock:/var/run/docker.sock \
-  -w /go/src/github.com/user/repo \
-  goreleaser/goreleaser release --skip-publish --skip-validate
+docker build -t italia/publiccode-parser-go .
 ```
-Or for more dev purpose you can use `docker build -f Dockerfile.dev -t italia/publiccode-parser-go .`
 
 Below some validation examples are reported. The examples assume that your publiccode.yml file is on your local machine, at `/home/my-user/publiccodes/publiccode.yml`
 
 ```shell
+# Validate from stdin
+docker run -i italia/publiccode-parser-go /dev/stdin < pcvalidate/publiccode.yml
+
 # Validate a publiccode file called publiccode.yml (default)
 docker run -v /home/my-user/publiccodes:/files italia/publiccode-parser-go
 
