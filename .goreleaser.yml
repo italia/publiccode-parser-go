@@ -41,6 +41,7 @@ dockers:
     builds:
       - pcvalidate
     skip_push: false
+    dockerfile: Dockerfile.goreleaser
     image_templates:
       - "italia/publiccode-parser-go:latest"
       - "italia/publiccode-parser-go:{{ .Tag }}"
