@@ -80,7 +80,7 @@ at `/home/my-user/publiccodes/publiccode.yml`
 - Validate and print the canonicalized file
 
   ```shell
-  docker run -i italia/publiccod-parser-go -export /dev/stdout /dev/stdin < publiccode.yml
+  docker run -i italia/publiccode-parser-go -export /dev/stdout /dev/stdin < publiccode.yml
   ```
 
 - Validate a publiccode file named `publiccode.yml` (default)
