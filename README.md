@@ -89,7 +89,7 @@ at `/home/my-user/publiccodes/publiccode.yml`
   docker run -v /home/my-user/publiccodes:/files italia/publiccode-parser-go
   ```
 
-- Validate a publiccode file named `/opt/publiccodes/my-amazing-code.yaml
+- Validate a publiccode file named `/opt/publiccodes/my-amazing-code.yaml`
 
   ```shell
   docker run -v /opt/publiccodes:/files italia/publiccode-parser-go my-amazing-code.yaml
