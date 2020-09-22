@@ -2,7 +2,7 @@ module github.com/italia/publiccode-parser-go
 
 require (
 	github.com/alranel/go-spdx v0.0.5
-	github.com/alranel/go-vcsurl v0.0.0-20190918163743-e14328dc728a
+	github.com/alranel/go-vcsurl v0.0.0-20200922084853-6436e6ad1149
 	github.com/dyatlov/go-oembed v0.0.0-20180429203341-4bc5ab7a42e9
 	github.com/italia/developers-italia-backend/crawler v0.0.0-20200425112233-2942d1274b6d
 	github.com/sirupsen/logrus v1.4.2 // indirect
