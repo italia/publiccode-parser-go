@@ -2,8 +2,6 @@ package publiccode
 
 import (
 	"fmt"
-	"log"
-	"net/url"
 	"regexp"
 	"strings"
 
@@ -63,29 +61,6 @@ func (p *Parser) decodeString(key string, value string) (err error) {
 		// Check that the supplied URL points to a repository.
 		if !vcsurl.IsRepo(p.PublicCode.URL) {
 			return newErrorInvalidValue(key, "invalid repository URL: %s", value)
-		}
-
-		// Check that the supplied URL matches the source repository, if known.
-		if p.RemoteBaseURL != "" {
-			url1, err := url.Parse(p.RemoteBaseURL)
-			if err != nil {
-				return err
-			}
-			url2, err := url.Parse(value)
-			if err != nil {
-				return err
-			}
-			repo1 := vcsurl.GetRepo(url1)
-			repo2 := vcsurl.GetRepo(url2)
-			if repo1 == nil {
-				log.Printf("Warning: go-vcsurl failed to detect repo for %s\n", url1.String())
-			}
-			if repo2 == nil {
-				log.Printf("Warning: go-vcsurl failed to detect repo for %s\n", url2.String())
-			}
-			if !strings.EqualFold(repo1.String(), repo2.String()) {
-				return newErrorInvalidValue(key, "declared url (%s) does not match the actual publiccode.yml source URL (%s)", value, p.RemoteBaseURL)
-			}
 		}
 	case key == "landingURL":
 		p.PublicCode.LandingURLString, p.PublicCode.LandingURL, err = p.checkURL(key, value)
