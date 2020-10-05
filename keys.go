@@ -2,7 +2,6 @@ package publiccode
 
 import (
 	"fmt"
-	"log"
 	"net/url"
 	"regexp"
 	"strings"
@@ -78,10 +77,10 @@ func (p *Parser) decodeString(key string, value string) (err error) {
 			repo1 := vcsurl.GetRepo(url1)
 			repo2 := vcsurl.GetRepo(url2)
 			if repo1 == nil {
-				log.Printf("Warning: go-vcsurl failed to detect repo for %s\n", url1.String())
+				return fmt.Errorf("failed to detect repo for remote-base-url: %s\n", url1.String())
 			}
 			if repo2 == nil {
-				log.Printf("Warning: go-vcsurl failed to detect repo for %s\n", url2.String())
+				return newErrorInvalidValue(key, "failed to detect repo for %s\n", url2.String())
 			}
 			if !strings.EqualFold(repo1.String(), repo2.String()) {
 				return newErrorInvalidValue(key, "declared url (%s) does not match the actual publiccode.yml source URL (%s)", value, p.RemoteBaseURL)
