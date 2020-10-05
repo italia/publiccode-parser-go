@@ -62,12 +62,16 @@ func main() {
 	var err error
 	if ok, url := isValidURL(flag.Args()[0]); ok {
 		// supplied argument looks like an URL
-		url = vcsurl.GetRawFile(url)
+		rawUrl := vcsurl.GetRawFile(url)
+		if rawUrl == nil {
+			fmt.Fprintf(os.Stderr, "Code hosting provider not supported for %s\n", url)
+			os.Exit(1)
+		}
 		if p.RemoteBaseURL == "" {
-			p.RemoteBaseURL = vcsurl.GetRawRoot(url).String()
+			p.RemoteBaseURL = vcsurl.GetRawRoot(rawUrl).String()
 		}
 
-		err = p.ParseRemoteFile(url.String())
+		err = p.ParseRemoteFile(rawUrl.String())
 	} else {
 		// supplied argument looks like a file path
 		err = p.ParseFile(flag.Args()[0])
