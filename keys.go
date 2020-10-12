@@ -83,7 +83,11 @@ func (p *Parser) decodeString(key string, value string) (err error) {
 				return newErrorInvalidValue(key, "failed to detect repo for %s\n", url2.String())
 			}
 			if !strings.EqualFold(repo1.String(), repo2.String()) {
-				return newErrorInvalidValue(key, "declared url (%s) does not match the actual publiccode.yml source URL (%s)", value, p.RemoteBaseURL)
+				return newErrorInvalidValue(
+					key,
+					"declared url (%s) and actual publiccode.yml source URL (%s) "+
+						"are not in the same repo: '%s' vs '%s'",
+					value, p.RemoteBaseURL, repo2, repo1)
 			}
 		}
 	case key == "landingURL":
