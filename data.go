@@ -9,7 +9,7 @@ import (
 	"path"
 	"path/filepath"
 
-	"github.com/italia/developers-italia-backend/crawler/httpclient"
+	httpclient "github.com/italia/httpclient-lib-go"
 )
 
 // downloadFile download the file in the path.

@@ -17,7 +17,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/italia/developers-italia-backend/crawler/httpclient"
+	httpclient "github.com/italia/httpclient-lib-go"
 	"github.com/thoas/go-funk"
 )
 
