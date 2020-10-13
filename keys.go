@@ -82,6 +82,13 @@ func (p *Parser) decodeString(key string, value string) (err error) {
 			if repo2 == nil {
 				return newErrorInvalidValue(key, "failed to detect repo for %s\n", url2.String())
 			}
+
+			// Let's ignore the schema when checking for equality.
+			//
+			// This is mainly to match repos regardless of whether they are served
+			// through HTTPS or HTTP.
+			repo1.Scheme, repo2.Scheme = "", ""
+
 			if !strings.EqualFold(repo1.String(), repo2.String()) {
 				return newErrorInvalidValue(
 					key,
