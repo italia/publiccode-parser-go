@@ -26,6 +26,8 @@ func TestDecodeValueErrors(t *testing.T) {
 
 		// File is not UTF-8 encoded.
 		{"tests/invalid_file_encoding.yml", ParseError{"Invalid UTF-8"}},
+		// Valid genericName length with non latin characters
+		{"tests/valid_unicode_grapheme_clusters.yml", nil},
 
 		// Missing mandatory fields.
 
@@ -56,6 +58,8 @@ func TestDecodeValueErrors(t *testing.T) {
 		{"tests/nil_categories.yml", ErrorInvalidValue{Key: "categories", Reason: "invalid type <nil>."}},
 		// Invalid name (nil).
 		{"tests/nil_name.yml", ErrorInvalidValue{Key: "name", Reason: "invalid type <nil>."}},
+		// longDescription too short.
+		{"tests/invalid_unicode_grapheme_clusters.yml", ErrorInvalidValue{Key: "description/eng/longDescription", Reason: "too short (135), min 500 chars"}},
 	}
 
 	for _, test := range testFiles {

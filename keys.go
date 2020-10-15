@@ -8,6 +8,7 @@ import (
 
 	spdxValidator "github.com/alranel/go-spdx/spdx"
 	"github.com/alranel/go-vcsurl"
+	"github.com/rivo/uniseg"
 	"github.com/thoas/go-funk"
 )
 
@@ -158,20 +159,22 @@ func (p *Parser) decodeString(key string, value string) (err error) {
 			desc.LocalisedName = value
 		}
 		if attr == "genericName" {
-			if len(value) == 0 {
+			length := uniseg.GraphemeClusterCount(value)
+			if length == 0 {
 				return newErrorInvalidValue(key, "missing mandatory field")
 			}
-			if len(value) > 35 {
-				return newErrorInvalidValue(key, "too long (%d), max 35 chars", len(value))
+			if length > 35 {
+				return newErrorInvalidValue(key, "too long (%d), max 35 chars", length)
 			}
 			desc.GenericName = value
 		}
 		if attr == "longDescription" {
-			if len(value) < 500 {
-				return newErrorInvalidValue(key, "too short (%d), min 500 chars", len(value))
+			length := uniseg.GraphemeClusterCount(value)
+			if length < 500 {
+				return newErrorInvalidValue(key, "too short (%d), min 500 chars", length)
 			}
-			if len(value) > 10000 {
-				return newErrorInvalidValue(key, "too long (%d), max 10000 chars", len(value))
+			if length > 10000 {
+				return newErrorInvalidValue(key, "too long (%d), max 10000 chars", length)
 			}
 			desc.LongDescription = value
 		}
@@ -188,8 +191,9 @@ func (p *Parser) decodeString(key string, value string) (err error) {
 			}
 		}
 		if attr == "shortDescription" {
-			if len(value) > 150 {
-				return newErrorInvalidValue(key, "too long (%d), max 150 chars", len(value))
+			length := uniseg.GraphemeClusterCount(value)
+			if length > 150 {
+				return newErrorInvalidValue(key, "too long (%d), max 150 chars", length)
 			}
 			desc.ShortDescription = value
 		}
@@ -302,8 +306,9 @@ func (p *Parser) decodeArrString(key string, value []string) error {
 		}
 		if attr == "features" || (attr == "featureList" && !p.Strict) {
 			for _, v := range value {
-				if len(v) > 100 {
-					return newErrorInvalidValue(key, "too long, max 100 chars")
+				length := uniseg.GraphemeClusterCount(v)
+				if length > 100 {
+					return newErrorInvalidValue(key, "too long (%d), max 100 chars", length)
 
 				}
 				desc.Features = append(desc.Features, v)
