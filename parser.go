@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"unicode/utf8"
 
 	funk "github.com/thoas/go-funk"
 	"gopkg.in/yaml.v2"
@@ -66,6 +67,10 @@ func (p *Parser) ParseInDomain(in []byte, host string, utf []string, ba []string
 // Parse loads the yaml bytes and tries to parse it. Return an error if fails.
 func (p *Parser) Parse(in []byte) error {
 	var s map[interface{}]interface{}
+
+	if !utf8.Valid(in) {
+		return ParseError{"Invalid UTF-8"}
+	}
 
 	d := yaml.NewDecoder(bytes.NewReader(in))
 	if err := d.Decode(&s); err != nil {

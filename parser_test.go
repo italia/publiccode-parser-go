@@ -2,55 +2,64 @@ package publiccode
 
 import (
 	"bytes"
+	"fmt"
 	"strings"
 	"testing"
 )
 
 type testType struct {
-	file   string
-	errkey string
+	file string
+	err  error
 }
 
 // Test publiccode.yml local files for key errors.
 func TestDecodeValueErrors(t *testing.T) {
 	testFiles := []testType{
 		// A complete and valid yml.
-		{"tests/valid.yml", ""},
+		{"tests/valid.yml", nil},
 		// A complete and valid minimal yml.
-		{"tests/valid.minimal.yml", ""},
+		{"tests/valid.minimal.yml", nil},
 		// Fields must be valid against different type
-		{"tests/valid_maintenance_contacts_phone.yml", ""}, // Valid maintenance/contacts/phone.
+		{"tests/valid_maintenance_contacts_phone.yml", nil}, // Valid maintenance/contacts/phone.
 		// Test if dependsOn multiple subkeys are kept
-		{"tests/valid_dependsOn.yml", ""},
+		{"tests/valid_dependsOn.yml", nil},
+
+		// File is not UTF-8 encoded.
+		{"tests/invalid_file_encoding.yml", ParseError{"Invalid UTF-8"}},
 
 		// Missing mandatory fields.
-		{"tests/missing_publiccodeYmlVersion.yml", "publiccodeYmlVersion"},                       // Missing version.
-		{"tests/missing_name.yml", "name"},                                                       // Missing name.
-		{"tests/missing_legal_license.yml", "legal/license"},                                     // Missing legal/license.
-		{"tests/missing_localisation_availableLanguages.yml", "localisation/availableLanguages"}, // Missing localisation/availableLanguages.
-		{"tests/missing_localisation_localisationReady.yml", "localisation/localisationReady"},   // Missing localisation/localisationReady.
-		{"tests/missing_maintenance_contacts.yml", "maintenance/contacts"},                       // Missing maintenance/contacts.
-		{"tests/missing_maintenance_type.yml", "maintenance/type"},                               // Missing maintenance/type.
-		{"tests/missing_platforms.yml", "platforms"},                                             // Missing platforms.
-		{"tests/missing_developmentStatus.yml", "developmentStatus"},                             // Missing developmentStatus.
-		{"tests/missing_releaseDate.yml", "releaseDate"},                                         // Missing releaseDate.
-		{"tests/missing_genericName.yml", "description/en/genericName"},                          // Missing genericName.
-		{"tests/missing_shortDescription.yml", "description/en/shortDescription"},                // Missing shortDescription.
-		{"tests/missing_features.yml", "description/*/features"},                                 // Missing features.
-		{"tests/empty_features.yml", "description/*/features"},                                   // Empty features.
-		{"tests/missing_longDescription.yml", "description/*/longDescription"},                   // Missing longDescription.
-		{"tests/missing_softwareType.yml", "softwareType"},                                       // Missing softwareType/type.
-		{"tests/missing_categories.yml", "categories"},                                           // Missing tags.
-		{"tests/missing_url.yml", "url"},                                                         // Missing url.
+
+		{"tests/missing_publiccodeYmlVersion.yml", ErrorInvalidValue{Key: "publiccodeYmlVersion", Reason: "missing mandatory key"}},
+		{"tests/missing_name.yml", ErrorInvalidValue{Key: "name", Reason: "missing mandatory key"}},
+		{"tests/missing_legal_license.yml", ErrorInvalidValue{Key: "legal/license", Reason: "missing mandatory key"}},
+		{"tests/missing_localisation_availableLanguages.yml", ErrorInvalidValue{Key: "localisation/availableLanguages", Reason: "missing mandatory key"}},
+		{"tests/missing_localisation_localisationReady.yml", ErrorInvalidValue{Key: "localisation/localisationReady", Reason: "missing mandatory key"}},
+		{"tests/missing_maintenance_contacts.yml", ErrorInvalidValue{Key: "maintenance/contacts", Reason: "missing but mandatory for \"internal\" or \"community\" maintenance"}},
+		{"tests/missing_maintenance_type.yml", ErrorInvalidValue{Key: "maintenance/type", Reason: "missing mandatory key"}},
+		{"tests/missing_platforms.yml", ErrorInvalidValue{Key: "platforms", Reason: "missing mandatory key"}},
+		{"tests/missing_developmentStatus.yml", ErrorInvalidValue{Key: "developmentStatus", Reason: "missing mandatory key"}},
+		{"tests/missing_releaseDate.yml", ErrorInvalidValue{Key: "releaseDate", Reason: "missing mandatory key"}},
+		{"tests/missing_genericName.yml", ErrorInvalidValue{Key: "description/en/genericName", Reason: "missing mandatory key"}},
+		{"tests/missing_shortDescription.yml", ErrorInvalidValue{Key: "description/en/shortDescription", Reason: "missing mandatory key"}},
+		{"tests/missing_features.yml", ErrorInvalidValue{Key: "description/*/features", Reason: "missing mandatory key"}},
+		{"tests/empty_features.yml", ErrorInvalidValue{Key: "description/*/features", Reason: "missing mandatory key"}},
+		{"tests/missing_longDescription.yml", ErrorInvalidValue{Key: "description/*/longDescription", Reason: "missing mandatory key"}},
+		{"tests/missing_softwareType.yml", ErrorInvalidValue{Key: "softwareType", Reason: "missing mandatory key"}},
+		{"tests/missing_categories.yml", ErrorInvalidValue{Key: "categories", Reason: "missing mandatory key"}},
+		{"tests/missing_url.yml", ErrorInvalidValue{Key: "url", Reason: "missing mandatory key"}},
 
 		// Invalid fields.
-		{"tests/invalid_legal_license.yml", "legal/license"}, // Invalid legal/license.
-		{"tests/nil_categories.yml", "categories"},           // Invalid categories (nil).
-		{"tests/nil_name.yml", "name"},                       // Invalid name (nil).
+
+		// Invalid legal/license.
+		{"tests/invalid_legal_license.yml", ErrorInvalidValue{Key: "legal/license", Reason: "invalid value AGPLicense-3.0: invalid license \"AGPLicense-3.0\" at 0 (\"AGPLi\")"}},
+		// Invalid categories (nil).
+		{"tests/nil_categories.yml", ErrorInvalidValue{Key: "categories", Reason: "invalid type <nil>."}},
+		// Invalid name (nil).
+		{"tests/nil_name.yml", ErrorInvalidValue{Key: "name", Reason: "invalid type <nil>."}},
 	}
 
 	for _, test := range testFiles {
-		t.Run(test.errkey, func(t *testing.T) {
+		t.Run(fmt.Sprintf("%v", test.err), func(t *testing.T) {
 			// Parse file into pc struct.
 			p := NewParser()
 			p.Strict = false
@@ -94,11 +103,11 @@ func TestDecodeValueErrors(t *testing.T) {
 // Test publiccode.yml remote files for key errors.
 func TestDecodeValueErrorsRemote(t *testing.T) {
 	testRemoteFiles := []testType{
-		{"https://raw.githubusercontent.com/pagopa/io-app/master/publiccode.yml", ""},
+		{"https://raw.githubusercontent.com/pagopa/io-app/master/publiccode.yml", nil},
 	}
 
 	for _, test := range testRemoteFiles {
-		t.Run(test.errkey, func(t *testing.T) {
+		t.Run(fmt.Sprintf("%v", test.err), func(t *testing.T) {
 			// Parse data into pc struct.
 			p := NewParser()
 			p.Strict = false
@@ -111,22 +120,24 @@ func TestDecodeValueErrorsRemote(t *testing.T) {
 }
 
 func checkParseErrors(t *testing.T, err error, test testType) {
-	if test.errkey == "" && err != nil {
+	if test.err == nil && err != nil {
 		t.Errorf("[%s] unexpected error: %v\n", test.file, err)
-	} else if test.errkey != "" && err == nil {
+	} else if test.err != nil && err == nil {
 		t.Errorf("[%s] no error generated\n", test.file)
-	} else if test.errkey != "" && err != nil {
-		if multi, ok := err.(ErrorParseMulti); !ok {
-			panic(err)
-		} else if len(multi) != 1 {
-			t.Errorf("[%s] too many errors generated; 1 was expected but got:\n", test.file)
-			for _, e := range multi {
-				t.Errorf("  * %s\n", e)
+	} else if test.err != nil && err != nil {
+		if multi, ok := err.(ErrorParseMulti); ok {
+			if len(multi) != 1 {
+				t.Errorf("[%s] too many errors generated; 1 was expected but got:\n", test.file)
+				for _, e := range multi {
+					t.Errorf("  * %s\n", e)
+				}
+				return
 			}
-		} else if e, ok := multi[0].(ErrorInvalidValue); ok && (e.Key != test.errkey) {
-			t.Errorf("[%s] wrong error generated: %s - key: %#v - instead of %s", test.file, e, e.Key, test.errkey)
-		} else if e, ok := multi[0].(ErrorInvalidKey); ok && (e.Key != test.errkey) {
-			t.Errorf("[%s] wrong error generated: %s - key: %#v - instead of %s", test.file, e, e.Key, test.errkey)
+			err = multi[0]
+		}
+
+		if err != test.err {
+			t.Errorf("[%s] wrong error generated:\n%T - %s\n- instead of:\n%T - %s", test.file, test.err, test.err, err, err)
 		}
 	}
 }
