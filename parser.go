@@ -3,12 +3,13 @@ package publiccode
 import (
 	"bytes"
 	"fmt"
+	"log"
 	"io/ioutil"
 	"net/http"
 	"unicode/utf8"
 
 	funk "github.com/thoas/go-funk"
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 )
 
 // Parser is a helper class for parsing publiccode.yml files.
@@ -64,25 +65,53 @@ func (p *Parser) ParseInDomain(in []byte, host string, utf []string, ba []string
 	return p.Parse(in)
 }
 
+type T struct {
+		A string
+		B struct {
+			RenamedC int   `yaml:"c"`
+			D        []int `yaml:",flow"`
+		}
+	}
+
 // Parse loads the yaml bytes and tries to parse it. Return an error if fails.
 func (p *Parser) Parse(in []byte) error {
-	var s map[interface{}]interface{}
+	// var s map[interface{}]interface{}
+	// var s yaml.Node
+	var x PublicCode
+	// s := T{}
 
 	if !utf8.Valid(in) {
 		return ParseError{"Invalid UTF-8"}
 	}
 
 	d := yaml.NewDecoder(bytes.NewReader(in))
-	if err := d.Decode(&s); err != nil {
+	d.KnownFields(true)
+	if err := d.Decode(&x); err != nil {
 		return err
 	}
+	// err := yaml.Unmarshal(in, &s)
+	// log.Printf("%T", s)
+	// log.Printf("____%s Line: %d\n%s Line content: %d", s, s.Line, s.Content[0], s.Content[1].Line)
+	// if err != nil {
+	// 	log.Fatalf("error: %T %s", err, err)
+	// }
+	// err = s.Decode(&x)
+	// if err != nil {
+	// 	log.Fatalf("error: %T %s", err, err)
+	// }
+	log.Printf("%s", x.ReleaseDateString)
 
-	if err := p.decoderec("", s); err != nil {
-		return err
-	}
-	if err := p.finalize(); err != nil {
-		return err
-	}
+	 // log.Printf("Length: %d", len(s.Content[0].Content))
+	 // log.Printf("Tag: %s", s.Content[0].Content[0].Tag)
+	 // log.Printf("Value: %s", s.Content[0].Content[0].Value)
+	 // log.Printf("s", s)
+	 // log.Printf("Line: %d", s.Line)
+	 // log.Printf("Column: %d", s.Column)
+	 // var x interface{};
+	 // log.Printf("%s", s.Decode(x))
+	// if err := p.validate(); err != nil {
+	// 	return err
+	// }
 	return nil
 }
 
@@ -123,76 +152,6 @@ func NewParser() *Parser {
 		p.missing[k] = true
 	}
 	return &p
-}
-
-func (p *Parser) decoderec(prefix string, s map[interface{}]interface{}) (es ErrorParseMulti) {
-
-	for ki, v := range s {
-		k, ok := ki.(string)
-		if !ok {
-			es = append(es, ErrorInvalidKey{Key: fmt.Sprint(ki)})
-			continue
-		}
-
-		if prefix != "" {
-			k = prefix + "/" + k
-		}
-
-		// if we are not running in strict mode, support legacy keys
-		if !p.Strict {
-			if k2, ok := renamedKeys[k]; ok {
-				k = k2
-			}
-			if funk.Contains(removedKeys, k) {
-				continue // ignore key
-			}
-		}
-
-		delete(p.missing, k)
-
-		switch v := v.(type) {
-		case string:
-			if err := p.decodeString(k, v); err != nil {
-				es = append(es, err)
-			}
-		case bool:
-			if err := p.decodeBool(k, v); err != nil {
-				es = append(es, err)
-			}
-		case []interface{}:
-			sl := []string{}
-			sli := make(map[interface{}]interface{})
-
-			for idx, v1 := range v {
-				// if array of strings
-				if s, ok := v1.(string); ok {
-					sl = append(sl, s)
-					if len(sl) == len(v) { //the v1.(string) check should be extracted.
-						if err := p.decodeArrString(k, sl); err != nil {
-							es = append(es, err)
-						}
-					}
-					// if array of objects
-				} else if _, ok := v1.(map[interface{}]interface{}); ok {
-					sli[k] = v1
-					if err := p.decodeArrObj(k, sli); err != nil {
-						es = append(es, err)
-					}
-
-				} else {
-					es = append(es, newErrorInvalidValue(k, "array element %d not a string", idx))
-				}
-			}
-
-		case map[interface{}]interface{}:
-			if errs := p.decoderec(k, v); len(errs) > 0 {
-				es = append(es, errs...)
-			}
-		default:
-			es = append(es, newErrorInvalidValue(k, "invalid type %T.", v))
-		}
-	}
-	return
 }
 
 // ToYAML converts parser.PublicCode into YAML again.

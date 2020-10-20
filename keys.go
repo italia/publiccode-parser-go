@@ -12,33 +12,6 @@ import (
 	"github.com/thoas/go-funk"
 )
 
-func (p *Parser) decodeBool(key string, boolValue bool) (err error) {
-	switch key {
-	case "localisation/localisationReady":
-		p.PublicCode.Localisation.LocalisationReady = boolValue
-	case "it/conforme/lineeGuidaDesign":
-		p.PublicCode.It.Conforme.LineeGuidaDesign = boolValue
-	case "it/conforme/modelloInteroperabilita":
-		p.PublicCode.It.Conforme.ModelloInteroperabilita = boolValue
-	case "it/conforme/misureMinimeSicurezza":
-		p.PublicCode.It.Conforme.MisureMinimeSicurezza = boolValue
-	case "it/conforme/gdpr":
-		p.PublicCode.It.Conforme.GDPR = boolValue
-	case "it/piattaforme/spid":
-		p.PublicCode.It.Piattaforme.Spid = boolValue
-	case "it/piattaforme/pagopa":
-		p.PublicCode.It.Piattaforme.Pagopa = boolValue
-	case "it/piattaforme/cie":
-		p.PublicCode.It.Piattaforme.Cie = boolValue
-	case "it/piattaforme/anpr":
-		p.PublicCode.It.Piattaforme.Anpr = boolValue
-
-	default:
-		return ErrorInvalidKey{"Unexpected boolean key: " + key}
-	}
-	return
-}
-
 func (p *Parser) decodeString(key string, value string) (err error) {
 	switch {
 	case key == "publiccodeYmlVersion":
