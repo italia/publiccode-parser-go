@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
 	"io/ioutil"
@@ -38,7 +39,7 @@ func main() {
 	localBasePathPtr := flag.String("path", "", "An absolute or relative path pointing to a locally cloned repository where the publiccode.yml is located.")
 	disableNetworkPtr := flag.Bool("no-network", false, "Disables checks that require network connections (URL existence and oEmbed). This makes validation much faster.")
 	exportPtr := flag.String("export", "", "Export the normalized publiccode.yml file to the given path.")
-	noStrictPtr := flag.Bool("no-strict", false, "Disable strict mode.")
+	jsonOutputPtr := flag.Bool("json", false, "Output the validation errors as a JSON list.")
 	helpPtr := flag.Bool("help", false, "Display command line usage.")
 	versionPtr := flag.Bool("version", false, "Display current software version.")
 	flag.Parse()
@@ -57,7 +58,6 @@ func main() {
 	p.RemoteBaseURL = *remoteBaseURLPtr
 	p.LocalBasePath = *localBasePathPtr
 	p.DisableNetwork = *disableNetworkPtr
-	p.Strict = !*noStrictPtr
 
 	var err error
 	if ok, url := isValidURL(flag.Args()[0]); ok {
@@ -76,11 +76,28 @@ func main() {
 		// supplied argument looks like a file path
 		err = p.ParseFile(flag.Args()[0])
 	}
-	if err != nil {
-		fmt.Printf("validation ko:\n%v\n", err)
-		os.Exit(1)
+
+	if *jsonOutputPtr {
+		if err == nil {
+			fmt.Println("[]")
+			os.Exit(0)
+		}
+
+		out, jsonerr := json.MarshalIndent(err, "", "    ")
+		if (jsonerr != nil) {
+			fmt.Fprintf(os.Stderr, "Error encoding JSON\n")
+			os.Exit(1)
+		}
+
+		fmt.Println(string(out))
+
+		return
+	} else {
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
 	}
-	fmt.Println("validation ok")
 
 	if *exportPtr != "" {
 		yaml, err := p.ToYAML()

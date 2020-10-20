@@ -2,13 +2,16 @@ package publiccode
 
 import (
 	"bytes"
-	"fmt"
 	"io/ioutil"
 	"net/http"
+	"regexp"
+	"strconv"
+	"strings"
 	"unicode/utf8"
 
-	funk "github.com/thoas/go-funk"
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
+	"github.com/go-playground/validator/v10"
+	publiccodeValidator "github.com/italia/publiccode-parser-go/validators"
 )
 
 // Parser is a helper class for parsing publiccode.yml files.
@@ -32,13 +35,6 @@ type Parser struct {
 	// DisableNetwork disables all network tests (URL existence and Oembed). This
 	// results in much faster parsing.
 	DisableNetwork bool
-
-	// Strict makes the parser less tolerant by allowing some errors that do not
-	// affect the rendering of the software catalog. It is enabled by default.
-	Strict bool
-
-	OEmbed  map[string]string
-	missing map[string]bool
 
 	// Domain will have domain specific settings, including basic auth if provided
 	// this will avoid strong quota limit imposed by code hosting platform
@@ -64,26 +60,159 @@ func (p *Parser) ParseInDomain(in []byte, host string, utf []string, ba []string
 	return p.Parse(in)
 }
 
+func getNodes(key string, node *yaml.Node) (*yaml.Node, *yaml.Node) {
+	for i := 0; i < len(node.Content); i += 2 {
+		childNode := *node.Content[i]
+
+		if childNode.Value == key {
+			return &childNode, node.Content[i + 1]
+		}
+	}
+
+	return nil, nil
+}
+
+func getPositionInFile(key string, node yaml.Node) (int, int) {
+	var n *yaml.Node = &node
+
+	keys := strings.Split(key, ".")
+	for _, path := range keys[:len(keys) - 1] {
+		_, n = getNodes(path, n)
+
+		// This should not happen, but let's be defensive
+		if (n == nil) {
+			return 0, 0
+		}
+	}
+
+	parentNode := n
+
+	n, _ = getNodes(keys[len(keys) - 1], n)
+
+	if (n != nil) {
+		return n.Line, n.Column
+	} else {
+		return parentNode.Line, parentNode.Column
+	}
+}
+
+func toValidationError(errorText string) ValidationError {
+	r := regexp.MustCompile(`^(line ([0-9]+): )`)
+	matches := r.FindStringSubmatch(errorText)
+
+	line := 0
+	if (len(matches) > 1) {
+		line, _ = strconv.Atoi(matches[2])
+		errorText = strings.ReplaceAll(errorText, matches[1], "")
+	}
+
+	// Transform unmarshalling errors messages to a user friendlier message
+	r = regexp.MustCompile("^cannot unmarshal")
+	if r.MatchString(errorText) {
+		errorText = "wrong type for this field"
+	}
+
+	return ValidationError{
+		Key: "",
+		Description: errorText,
+		Line: line,
+		Column: 1,
+	}
+}
+
 // Parse loads the yaml bytes and tries to parse it. Return an error if fails.
 func (p *Parser) Parse(in []byte) error {
-	var s map[interface{}]interface{}
+	var ve ValidationErrors
 
 	if !utf8.Valid(in) {
-		return ParseError{"Invalid UTF-8"}
+		ve = append(ve,newValidationError("", "Invalid UTF-8"))
+		return ve
 	}
 
 	d := yaml.NewDecoder(bytes.NewReader(in))
-	if err := d.Decode(&s); err != nil {
-		return err
+	d.KnownFields(true)
+	if err := d.Decode(&p.PublicCode); err != nil {
+		switch err.(type) {
+			case *yaml.TypeError:
+				for _, errorText := range err.(*yaml.TypeError).Errors {
+					ve = append(ve, toValidationError(errorText))
+				}
+			default:
+				ve = append(ve, newValidationError("", err.Error()))
+		}
 	}
 
-	if err := p.decoderec("", s); err != nil {
-		return err
+	validate := publiccodeValidator.New()
+
+	var node yaml.Node
+
+	d = yaml.NewDecoder(bytes.NewReader(in))
+	d.KnownFields(true)
+	if decodeErr := d.Decode(&node); decodeErr != nil {
+		// Should not happen, we already parsed it before
+		panic(decodeErr.Error())
 	}
-	if err := p.finalize(); err != nil {
-		return err
+	node = *node.Content[0]
+
+	err := validate.Struct(p.PublicCode)
+	if err != nil {
+		tagMap := map[string]string{
+			"gt": "must be more than",
+			"oneof": "must be one of the following:",
+			"email": "must be a valid email",
+			"date": "must be a date with format 'YYYY-MM-DD'",
+			"umax": "must be less or equal than",
+			"umin": "must be more or equal than",
+			"is_category_v0_2": "must be a valid category",
+			"is_scope_v0_2": "must be a valid scope",
+			"iso3166_1_alpha2_lowercase": "must be a valid lowercase ISO 3166-1 alpha-2 two-letter country code",
+			"bcp47": "must be a valid BCP 47 language",
+		}
+		for _, err := range err.(validator.ValidationErrors) {
+			var sb strings.Builder
+
+			tag, ok := tagMap[err.ActualTag()]
+			if !ok {
+				tag = err.ActualTag()
+			}
+
+			sb.WriteString(tag)
+
+			// condition parameters, e.g. oneof=red blue -> red blue
+			if err.Param() != "" {
+				sb.WriteString(" " + err.Param())
+			}
+
+			// TODO: find a cleaner way
+			key := strings.Replace(err.Namespace(), "PublicCode.", "", 1)
+			m := regexp.MustCompile(`\[([[:alpha:]]+)\]`)
+			key = m.ReplaceAllString(key, ".$1")
+
+			line, column := getPositionInFile(key, node)
+
+			ve = append(ve, ValidationError{
+				Key: key,
+				Description: sb.String(),
+				Line: line,
+				Column: column,
+			})
+		}
 	}
-	return nil
+
+	err = p.validateFields()
+	if err != nil {
+		for _, err := range err.(ValidationErrors) {
+			err.Line, err.Column = getPositionInFile(err.Key, node)
+
+			ve = append(ve, err)
+		}
+	}
+
+	if (len(ve) == 0) {
+		return nil
+	}
+
+	return ve
 }
 
 // ParseFile loads a publiccode.yml file from a given file path.
@@ -116,83 +245,8 @@ func (p *Parser) ParseRemoteFile(url string) error {
 // NewParser initializes a new Parser object and returns it.
 func NewParser() *Parser {
 	var p Parser
-	p.Strict = true
-	p.OEmbed = make(map[string]string)
-	p.missing = make(map[string]bool)
-	for _, k := range mandatoryKeys {
-		p.missing[k] = true
-	}
+
 	return &p
-}
-
-func (p *Parser) decoderec(prefix string, s map[interface{}]interface{}) (es ErrorParseMulti) {
-
-	for ki, v := range s {
-		k, ok := ki.(string)
-		if !ok {
-			es = append(es, ErrorInvalidKey{Key: fmt.Sprint(ki)})
-			continue
-		}
-
-		if prefix != "" {
-			k = prefix + "/" + k
-		}
-
-		// if we are not running in strict mode, support legacy keys
-		if !p.Strict {
-			if k2, ok := renamedKeys[k]; ok {
-				k = k2
-			}
-			if funk.Contains(removedKeys, k) {
-				continue // ignore key
-			}
-		}
-
-		delete(p.missing, k)
-
-		switch v := v.(type) {
-		case string:
-			if err := p.decodeString(k, v); err != nil {
-				es = append(es, err)
-			}
-		case bool:
-			if err := p.decodeBool(k, v); err != nil {
-				es = append(es, err)
-			}
-		case []interface{}:
-			sl := []string{}
-			sli := make(map[interface{}]interface{})
-
-			for idx, v1 := range v {
-				// if array of strings
-				if s, ok := v1.(string); ok {
-					sl = append(sl, s)
-					if len(sl) == len(v) { //the v1.(string) check should be extracted.
-						if err := p.decodeArrString(k, sl); err != nil {
-							es = append(es, err)
-						}
-					}
-					// if array of objects
-				} else if _, ok := v1.(map[interface{}]interface{}); ok {
-					sli[k] = v1
-					if err := p.decodeArrObj(k, sli); err != nil {
-						es = append(es, err)
-					}
-
-				} else {
-					es = append(es, newErrorInvalidValue(k, "array element %d not a string", idx))
-				}
-			}
-
-		case map[interface{}]interface{}:
-			if errs := p.decoderec(k, v); len(errs) > 0 {
-				es = append(es, errs...)
-			}
-		default:
-			es = append(es, newErrorInvalidValue(k, "invalid type %T.", v))
-		}
-	}
-	return
 }
 
 // ToYAML converts parser.PublicCode into YAML again.

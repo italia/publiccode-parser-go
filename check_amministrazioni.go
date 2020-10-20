@@ -2,6 +2,7 @@ package publiccode
 
 import (
 	"bufio"
+	"fmt"
 	"strings"
 )
 
@@ -41,17 +42,13 @@ type Amministrazione struct {
 	LivAccessibili    string
 }
 
-// checkCodiceIPA tells whether the codiceIPA is registered into amministrazioni.txt
+// isCodiceIPA returns an error if codiceIPA is not registered into amministrazioni.txt
 // Reference: http://www.indicepa.gov.it/documentale/n-opendata.php.
-func (p *Parser) checkCodiceIPA(key string, codiceiPA string) (string, error) {
-	if codiceiPA == "" {
-		return codiceiPA, newErrorInvalidValue(key, "empty codiceIPA key")
-	}
-
-	// Load adminisrations data from amministrazoni.txt
+func (p *Parser) isCodiceIPA(codiceiPA string) error {
+	// Load Public Aministrations data from amministrazioni.txt
 	dataFile, err := Asset("data/amministrazioni.txt")
 	if err != nil {
-		return "", err
+		return err
 	}
 	input := string(dataFile)
 
@@ -61,17 +58,15 @@ func (p *Parser) checkCodiceIPA(key string, codiceiPA string) (string, error) {
 		amm := manageLine(scanner.Text())
 		// The iPA codes should be validated as case-insensitive, according
 		// to the IndicePA guidelines.
-		// We always fold it to lower case so that users of this library can rely
-		// on a consistent case.
 		if strings.EqualFold(amm.CodAmm, codiceiPA) {
-			return strings.ToLower(codiceiPA), nil
+			return nil
 		}
 	}
 	if err := scanner.Err(); err != nil {
-		return "", newErrorInvalidValue(key, "error validating Codice IPA: %s", err)
+		return fmt.Errorf("error validating Codice IPA: %s", err)
 	}
 
-	return "", newErrorInvalidValue(key, "this is not a valid Codice IPA: %s", codiceiPA)
+	return fmt.Errorf("not a valid Codice IPA: %s", codiceiPA)
 }
 
 // manageLine populate an Amministrazione with the values read.
