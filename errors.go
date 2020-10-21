@@ -29,6 +29,10 @@ type ErrorInvalidValue struct {
 	Reason string
 }
 
+type ValidationError struct {
+	Reason string
+}
+
 func (e ErrorInvalidValue) Error() string {
 	return fmt.Sprintf("%s: %s", e.Key, e.Reason)
 }

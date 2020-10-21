@@ -1,14 +1,12 @@
 package publiccode
 
-import "github.com/thoas/go-funk"
+import (
+	"github.com/thoas/go-funk"
+)
 
-// checkCategory tells whether the supplied value is a valid category or not and returns it.
-func (p *Parser) checkCategory(key, category string) (string, error) {
-	if funk.Contains(supportedCategories, category) {
-		return category, nil
-	}
-
-	return "", newErrorInvalidValue(key, "unknown category: %s", category)
+// TODO checkCategory tells whether the supplied value is a valid category or not and returns it.
+func (p *Parser) isCategory(category string) (bool) {
+	return funk.Contains(supportedCategories, category)
 }
 
 var supportedCategories = []string{

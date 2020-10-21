@@ -2,6 +2,7 @@ package publiccode
 
 import (
 	"bufio"
+	"fmt"
 	"strings"
 )
 
@@ -43,9 +44,9 @@ type Amministrazione struct {
 
 // checkCodiceIPA tells whether the codiceIPA is registered into amministrazioni.txt
 // Reference: http://www.indicepa.gov.it/documentale/n-opendata.php.
-func (p *Parser) checkCodiceIPA(key string, codiceiPA string) (string, error) {
+func (p *Parser) checkCodiceIPA(codiceiPA string) (string, error) {
 	if codiceiPA == "" {
-		return codiceiPA, newErrorInvalidValue(key, "empty codiceIPA key")
+		return codiceiPA, fmt.Errorf("empty codiceIPA key")
 	}
 
 	// Load adminisrations data from amministrazoni.txt
@@ -68,10 +69,10 @@ func (p *Parser) checkCodiceIPA(key string, codiceiPA string) (string, error) {
 		}
 	}
 	if err := scanner.Err(); err != nil {
-		return "", newErrorInvalidValue(key, "error validating Codice IPA: %s", err)
+		return "", fmt.Errorf("error validating Codice IPA: %s", err)
 	}
 
-	return "", newErrorInvalidValue(key, "this is not a valid Codice IPA: %s", codiceiPA)
+	return "", fmt.Errorf("this is not a valid Codice IPA: %s", codiceiPA)
 }
 
 // manageLine populate an Amministrazione with the values read.

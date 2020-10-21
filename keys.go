@@ -12,108 +12,121 @@ import (
 	"github.com/thoas/go-funk"
 )
 
-func (p *Parser) decodeString(key string, value string) (err error) {
-	switch {
-	case key == "publiccodeYmlVersion":
-		// strip legacy URI prefix
-		value = strings.Replace(value, "http://w3id.org/publiccode/version/", "", 1)
+func (p *Parser) validateFields(publiccode PublicCode) (err error) {
+	// strip legacy URI prefix
+	publiccode.PubliccodeYamlVersion = strings.Replace(publiccode.PubliccodeYamlVersion, "http://w3id.org/publiccode/version/", "", 1)
+	if !funk.Contains(SupportedVersions, publiccode.PubliccodeYamlVersion) {
+		return newErrorInvalidValue("version %s not supported", publiccode.PubliccodeYamlVersion)
+	}
 
-		if !funk.Contains(SupportedVersions, value) {
-			return newErrorInvalidValue(key, "version %s not supported", value)
-		}
-		p.PublicCode.PubliccodeYamlVersion = value
-	case key == "name":
-		p.PublicCode.Name = value
-	case key == "applicationSuite":
-		p.PublicCode.ApplicationSuite = value
-	case key == "url":
-		// Check that the supplied URL is valid and exists.
-		p.PublicCode.URLString, p.PublicCode.URL, err = p.checkURL(key, value)
+	// Check that the supplied URL is valid and exists.
+	err = p.checkURL(p.PublicCode.URL)
+	if err != nil {
+		return err
+	}
+	// Check that the supplied URL points to a repository.
+	if !vcsurl.IsRepo(p.PublicCode.URL) {
+		return newErrorInvalidValue(key, "invalid repository URL: %s", value)
+	}
+	// Check that the supplied URL matches the source repository, if known.
+	if p.RemoteBaseURL != "" {
+		url1, err := url.Parse(p.RemoteBaseURL)
 		if err != nil {
 			return err
 		}
-
-		// Check that the supplied URL points to a repository.
-		if !vcsurl.IsRepo(p.PublicCode.URL) {
-			return newErrorInvalidValue(key, "invalid repository URL: %s", value)
+		url2, err := url.Parse(value)
+		if err != nil {
+			return err
+		}
+		repo1 := vcsurl.GetRepo(url1)
+		repo2 := vcsurl.GetRepo(url2)
+		if repo1 == nil {
+			return fmt.Errorf("failed to detect repo for remote-base-url: %s\n", url1.String())
+		}
+		if repo2 == nil {
+			return newErrorInvalidValue(key, "failed to detect repo for %s\n", url2.String())
 		}
 
-		// Check that the supplied URL matches the source repository, if known.
-		if p.RemoteBaseURL != "" {
-			url1, err := url.Parse(p.RemoteBaseURL)
-			if err != nil {
-				return err
-			}
-			url2, err := url.Parse(value)
-			if err != nil {
-				return err
-			}
-			repo1 := vcsurl.GetRepo(url1)
-			repo2 := vcsurl.GetRepo(url2)
-			if repo1 == nil {
-				return fmt.Errorf("failed to detect repo for remote-base-url: %s\n", url1.String())
-			}
-			if repo2 == nil {
-				return newErrorInvalidValue(key, "failed to detect repo for %s\n", url2.String())
-			}
+		// Let's ignore the schema when checking for equality.
+		//
+		// This is mainly to match repos regardless of whether they are served
+		// through HTTPS or HTTP.
+		repo1.Scheme, repo2.Scheme = "", ""
 
-			// Let's ignore the schema when checking for equality.
-			//
-			// This is mainly to match repos regardless of whether they are served
-			// through HTTPS or HTTP.
-			repo1.Scheme, repo2.Scheme = "", ""
+		if !strings.EqualFold(repo1.String(), repo2.String()) {
+			return newErrorInvalidValue(
+				key,
+				"declared url (%s) and actual publiccode.yml source URL (%s) "+
+				"are not in the same repo: '%s' vs '%s'",
+				value, p.RemoteBaseURL, repo2, repo1)
+		}
+	}
 
-			if !strings.EqualFold(repo1.String(), repo2.String()) {
-				return newErrorInvalidValue(
-					key,
-					"declared url (%s) and actual publiccode.yml source URL (%s) "+
-						"are not in the same repo: '%s' vs '%s'",
-					value, p.RemoteBaseURL, repo2, repo1)
-			}
-		}
-	case key == "landingURL":
-		p.PublicCode.LandingURLString, p.PublicCode.LandingURL, err = p.checkURL(key, value)
+	if p.PublicCode.LandingURL != nil {
+		err = p.checkURL(p.PublicCode.LandingURL)
 		return err
-	case key == "isBasedOn":
-		return p.decodeArrString(key, []string{value})
-	case key == "softwareVersion":
-		p.PublicCode.SoftwareVersion = value
-	case key == "releaseDate":
-		p.PublicCode.ReleaseDateString, p.PublicCode.ReleaseDate, err = p.checkDate(key, value)
-		return err
-	case key == "logo":
-		p.PublicCode.Logo, err = p.checkLogo(key, value)
-		return err
-	case key == "monochromeLogo":
-		p.PublicCode.MonochromeLogo, err = p.checkMonochromeLogo(key, value)
-		return err
-	case key == "platforms":
-		return p.decodeArrString(key, []string{value})
-	case key == "tags":
-		return p.decodeArrString(key, []string{value})
-	case key == "roadmap":
-		p.PublicCode.RoadmapString, p.PublicCode.Roadmap, err = p.checkURL(key, value)
-		return err
-	case key == "developmentStatus":
-		for _, v := range []string{"concept", "development", "beta", "stable", "obsolete"} {
-			if v == value {
-				p.PublicCode.DevelopmentStatus = value
-				return nil
-			}
-		}
-		return newErrorInvalidValue(key, "invalid value: %s", value)
-	case key == "softwareType":
-		// the "standalone" value was deprecated in publiccode.yml 0.2
-		if value == "standalone" {
-			value = "standalone/other"
-		}
+	}
 
-		var supportedTypes = []string{"standalone/mobile", "standalone/iot", "standalone/desktop", "standalone/web", "standalone/backend", "standalone/other", "addon", "library", "configurationFiles"}
-		if !funk.Contains(supportedTypes, value) {
-			return newErrorInvalidValue(key, "invalid value: %s", value)
+	// TODO Check for nil
+	for _, c := range p.PublicCode.Categories {
+		if !p.isCategory(c) {
+			return fmt.Errorf("unknown category: %s", c)
 		}
-		p.PublicCode.SoftwareType = value
+	}
 
+	p.PublicCode.Logo, err = p.checkLogo(p.PublicCode.Logo)
+	if err != nil {
+		return err
+	}
+	
+	p.PublicCode.MonochromeLogo, err = p.checkMonochromeLogo(p.PublicCode.MonochromeLogo)
+	if err != nil {
+		return err
+	}
+
+	err = p.checkURL(value)
+	if err != nill {
+		return err
+	}
+
+	if !funk.Contains([]string{"concept", "development", "beta", "stable", "obsolete"}, p.PublicCode.DevelopmentStatus) {
+		return fmt.Errorf("invalid developmentStatus: %s", p.PublicCode.DevelopmentStatus)
+	}
+
+	// the "standalone" value was deprecated in publiccode.yml 0.2
+	if p.PublicCode.SoftwareType == "standalone" {
+		p.PublicCode.SoftwareType = "standalone/other"
+	}
+	var supportedTypes = []string{"standalone/mobile", "standalone/iot", "standalone/desktop", "standalone/web", "standalone/backend", "standalone/other", "addon", "library", "configurationFiles"}
+	if !funk.Contains(supportedTypes, value) {
+		return fmt.Errorf("invalid softwareType: %s", p.PublicCode.SoftwareType)
+	}
+
+	p.PublicCode.Legal.AuthorsFile, err = p.checkFile(p.PublicCode.Legal.AuthorsFile)
+	// If not running in strict mode we can tolerate this absence.
+	if err != nil && p.Strict {
+		return err
+	}
+
+	_, err = spdxValidator.Parse(p.PublicCode.Legal.License)
+	if err != nil {
+		return fmt.Errorf("invalid license %s: %v", p.PublicCode.Legal.License, err)
+	}
+
+	if !funk.Contains([]string{"internal", "contract", "community", "none"}, p.Publiccode.Maintenance.Type) {
+		return fmt.Errorf("invalid maintenanceType: %s", p.PublicCode.Maintenance.Type)
+	}
+
+	if !funk.Contains(ExtensionITSupportedVersions, p.Publiccode.It.CcountryExtensionVersion) {
+		return fmt.Errorf("version %s not supported for 'it' extension", p.Publiccode.It.CcountryExtensionVersion)
+	}
+
+	p.PublicCode.It.Riuso.CodiceIPA, err = p.checkCodiceIPA(p.PublicCode.It.Riuso.CodiceIPA)
+	if err != nil {
+		return err
+	}
+
+	switch {
 	case regexp.MustCompile(`^description/.+/`).MatchString(key):
 		if p.PublicCode.Description == nil {
 			p.PublicCode.Description = make(map[string]Desc)
@@ -172,68 +185,11 @@ func (p *Parser) decodeString(key string, value string) (err error) {
 		}
 		p.PublicCode.Description[lang] = desc
 		return nil
-	case key == "legal/authorsFile":
-		p.PublicCode.Legal.AuthorsFile, err = p.checkFile(key, value)
-
-		// If not running in strict mode we can tolerate this absence.
-		if err != nil && p.Strict {
-			return err
-		}
-		return nil
-	case key == "legal/license":
-		_, err := spdxValidator.Parse(value)
-		if err != nil {
-			return newErrorInvalidValue(key, "invalid value %s: %v", value, err)
-		}
-		p.PublicCode.Legal.License = value
-		return nil
-	case key == "legal/mainCopyrightOwner":
-		p.PublicCode.Legal.MainCopyrightOwner = value
-	case key == "legal/repoOwner":
-		p.PublicCode.Legal.RepoOwner = value
-	case key == "maintenance/type":
-		for _, v := range []string{"internal", "contract", "community", "none"} {
-			if v == value {
-				p.PublicCode.Maintenance.Type = value
-				return nil
-			}
-		}
-		return newErrorInvalidValue(key, "invalid value: %s", value)
-	case key == "it/countryExtensionVersion":
-		if !funk.Contains(ExtensionITSupportedVersions, value) {
-			return newErrorInvalidValue(key, "version %s not supported for 'it' extension", value)
-		}
-		p.PublicCode.It.CountryExtensionVersion = value
-	case key == "it/riuso/codiceIPA":
-		p.PublicCode.It.Riuso.CodiceIPA, err = p.checkCodiceIPA(key, value)
-		if err != nil {
-			return err
-		}
-	default:
-		return ErrorInvalidKey{"Unexpected string key: " + key}
 	}
-	return
 }
 
 func (p *Parser) decodeArrString(key string, value []string) error {
 	switch {
-	case key == "isBasedOn":
-		p.PublicCode.IsBasedOn = append(p.PublicCode.IsBasedOn, value...)
-
-	case key == "platforms":
-		p.PublicCode.Platforms = append(p.PublicCode.Platforms, value...)
-
-	case key == "categories":
-		for _, v := range value {
-			v, err := p.checkCategory(key, v)
-			if err != nil {
-				return err
-			}
-			p.PublicCode.Categories = append(p.PublicCode.Categories, v)
-		}
-
-	case key == "usedBy":
-		p.PublicCode.UsedBy = append(p.PublicCode.UsedBy, value...)
 
 	case key == "intendedAudience/countries":
 		for _, v := range value {
@@ -442,7 +398,7 @@ func (p *Parser) decodeArrObj(key string, value map[interface{}]interface{}) err
 }
 
 // finalize do the cross-validation checks.
-func (p *Parser) finalize() (es ErrorParseMulti) {
+func (p *Parser) validate() (es ErrorParseMulti) {
 	// description must have at least one language
 	if len(p.PublicCode.Description) == 0 {
 		es = append(es, newErrorInvalidValue("description", "at least one language is required"))

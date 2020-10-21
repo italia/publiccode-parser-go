@@ -3,6 +3,7 @@ package publiccode
 import (
 	"net/url"
 	"time"
+	"cloud.google.com/go/civil"
 )
 
 var mandatoryKeys = []string{
@@ -58,17 +59,15 @@ type PublicCode struct {
 
 	Name             string   `yaml:"name"`
 	ApplicationSuite string   `yaml:"applicationSuite,omitempty"`
-	URL              *url.URL `yaml:"-"`
-	URLString        string   `yaml:"url"`
+	URL              *url.URL `yaml:"url"`
 	LandingURL       *url.URL `yaml:"-"`
 	LandingURLString string   `yaml:"landingURL,omitempty"`
 
-	IsBasedOn         []string  `yaml:"isBasedOn,omitempty"`
-	SoftwareVersion   string    `yaml:"softwareVersion,omitempty"`
-	ReleaseDate       time.Time `yaml:"-"`
-	ReleaseDateString string    `yaml:"releaseDate"`
-	Logo              string    `yaml:"logo,omitempty"`
-	MonochromeLogo    string    `yaml:"monochromeLogo,omitempty"`
+	IsBasedOn         []string   `yaml:"isBasedOn,omitempty"`
+	SoftwareVersion   string     `yaml:"softwareVersion,omitempty"`
+	ReleaseDate       civil.Date `yaml:"releaseDate"`
+	Logo              string     `yaml:"logo,omitempty"`
+	MonochromeLogo    string     `yaml:"monochromeLogo,omitempty"`
 
 	InputTypes  []string `yaml:"inputTypes,omitempty"`
 	OutputTypes []string `yaml:"outputTypes,omitempty"`
@@ -79,8 +78,7 @@ type PublicCode struct {
 
 	UsedBy []string `yaml:"usedBy,omitempty"`
 
-	Roadmap       *url.URL `yaml:"-"`
-	RoadmapString string   `yaml:"roadmap,omitempty"`
+	Roadmap *url.URL `yaml:"roadmap,omitempty"`
 
 	DevelopmentStatus string `yaml:"developmentStatus"`
 
