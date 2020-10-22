@@ -2,6 +2,7 @@ package publiccode
 
 import (
 	"bytes"
+	"fmt"
 	"net/url"
 
 	"github.com/dyatlov/go-oembed/oembed"
@@ -9,7 +10,7 @@ import (
 
 // checkOembed tells whether the link is hosted on a valid oembed provider.
 // Reference: https://oembed.com/providers.json
-func (p *Parser) checkOembed(key string, link string) (string, *url.URL, error) {
+func (p *Parser) checkOembed(link string) (string, *url.URL, error) {
 	u, err := url.Parse(link)
 	if err != nil {
 		return "", nil, err
@@ -29,15 +30,15 @@ func (p *Parser) checkOembed(key string, link string) (string, *url.URL, error) 
 
 	item := oe.FindItem(link)
 	if item == nil {
-		return "", nil, newErrorInvalidValue(key, "invalid oembed link: %s", link)
+		return "", nil, fmt.Errorf("invalid oembed link: %s", link)
 	}
 
 	info, err := item.FetchOembed(oembed.Options{URL: link})
 	if err != nil {
-		return "", nil, newErrorInvalidValue(key, "invalid oembed link: %s", err)
+		return "", nil, fmt.Errorf("invalid oembed link: %s", err)
 	}
 	if info.Status >= 300 {
-		return "", nil, newErrorInvalidValue(key, "invalid oembed link Status: %d", info.Status)
+		return "", nil, fmt.Errorf("invalid oembed link Status: %d", info.Status)
 	}
 
 	// save the Oembed HTML

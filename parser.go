@@ -2,13 +2,12 @@ package publiccode
 
 import (
 	"bytes"
-	"fmt"
+	_ "fmt"
 	"log"
 	"io/ioutil"
 	"net/http"
 	"unicode/utf8"
 
-	funk "github.com/thoas/go-funk"
 	"gopkg.in/yaml.v3"
 )
 

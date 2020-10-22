@@ -16,7 +16,6 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
-	"time"
 
 	httpclient "github.com/italia/httpclient-lib-go"
 	"github.com/thoas/go-funk"
@@ -24,17 +23,6 @@ import (
 
 // Despite the spec requires at least 1000px, we temporarily release this constraint to 120px.
 const minLogoWidth = 120
-
-// checkEmail tells whether email is well formatted.
-// In general an email is valid if compile the regex: ^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,4}$
-func (p *Parser) checkEmail(key string, fn string) error {
-	re := regexp.MustCompile(`^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,4}$`)
-	if !re.MatchString(fn) {
-		return newErrorInvalidValue(key, "invalid email: %v", fn)
-	}
-
-	return nil
-}
 
 func getBasicAuth(domain Domain) string {
 	if len(domain.BasicAuth) > 0 {
@@ -178,13 +166,13 @@ func (p *Parser) checkFile(file string) (string, error) {
 
 // checkImage tells whether the string in a valid image. It also checks if the file exists.
 // Reference: https://github.com/publiccodenet/publiccode.yml/blob/develop/schema.md
-func (p *Parser) checkImage(key string, value string) (string, error) {
+func (p *Parser) checkImage(value string) (string, error) {
 	validExt := []string{".jpg", ".png"}
 	ext := strings.ToLower(filepath.Ext(value))
 
 	// Check for valid extension.
 	if !funk.Contains(validExt, ext) {
-		return value, newErrorInvalidValue(key, "invalid file extension for: %s", value)
+		return value, fmt.Errorf("invalid file extension for: %s", value)
 	}
 
 	// Check existence of file.
@@ -243,7 +231,7 @@ func (p *Parser) checkLogo(value string) (string, error) {
 			}
 
 			if image.Width < minLogoWidth {
-				return file, newErrorInvalidValue(key, "invalid image size of %d (min %dpx of width): %s", image.Width, minLogoWidth, value)
+				return file, fmt.Errorf("invalid image size of %d (min %dpx of width): %s", image.Width, minLogoWidth, value)
 			}
 		}
 	}
@@ -364,16 +352,12 @@ func (p *Parser) checkMonochromeLogo(value string) (string, error) {
 }
 
 // checkMIME tells whether the string in input is a well formatted MIME or not.
-func (p *Parser) checkMIME(key string, value string) error {
+func (p *Parser) isMIME(value string) bool {
 	// Regex for MIME.
 	// Reference: https://github.com/jshttp/media-typer/
 	re := regexp.MustCompile("^ *([A-Za-z0-9][A-Za-z0-9!#$&^_-]{0,126})/([A-Za-z0-9][A-Za-z0-9!#$&^_.+-]{0,126}) *$")
 
-	if !re.MatchString(value) {
-		return newErrorInvalidValue(key, " %s is not a valid MIME.", value)
-	}
-
-	return nil
+	return re.MatchString(value)
 }
 
 // gUnzipData g-unzip a list of bytes. (used for svgz unzip)
