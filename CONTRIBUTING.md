@@ -47,7 +47,7 @@ FAIL	publiccode.yml-parser-go	5.255s
 * Catched! The `nickname` key is detected as a String, and there is no definition in the keys list.
 
 * Open `keys.go` and search the right function that will handle this new String element.
-  When found it, you can add the right key to the switch case.
+  When found, you can add the right key to the switch case.
 
 ```
 func (p *Parser) decodeString(key string, value string) (err error) {
