@@ -16,6 +16,10 @@ platforms:
 categories:
   - cloud-management
 
+# Should NOT validate: developmentStatus is missing
+#
+# developmentStatus: development
+
 softwareType: "standalone"
 
 description:

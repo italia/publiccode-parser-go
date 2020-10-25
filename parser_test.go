@@ -3,6 +3,9 @@ package publiccode
 import (
 	"bytes"
 	"fmt"
+	"io/ioutil"
+	"path"
+	"path/filepath"
 	"strings"
 	"testing"
 )
@@ -12,113 +15,25 @@ type testType struct {
 	err  error
 }
 
-// Test publiccode.yml local files for key errors.
-func TestDecodeValueErrors(t *testing.T) {
-	testFiles := []testType{
-		// A complete and valid yml.
-		{"testdata/v0.2/valid/valid.yml", nil},
-		// A complete and valid minimal yml.
-		{"testdata/v0.1/valid/valid.minimal.yml", nil},
-		// Fields must be valid against different type
-		{"testdata/v0.2/valid/maintenance_contacts_phone.yml", nil}, // Valid maintenance/contacts/phone.
-		// Test if dependsOn multiple subkeys are kept
-		{"testdata/v0.2/valid/dependsOn.yml", nil},
-
-		// File is not UTF-8 encoded.
-		{"testdata/v0.1/invalid/file_encoding.yml", ParseError{"Invalid UTF-8"}},
-		// Valid genericName length with non latin characters
-		{"testdata/v0.1/valid/unicode_grapheme_clusters.yml", nil},
-
-		// Missing mandatory fields.
-
-		{"testdata/v0.1/invalid/publiccodeYmlVersion_missing.yml", ErrorInvalidValue{Key: "publiccodeYmlVersion", Reason: "missing mandatory key"}},
-		{"testdata/v0.1/invalid/name_missing.yml", ErrorInvalidValue{Key: "name", Reason: "missing mandatory key"}},
-		{"testdata/v0.1/invalid/legal_license_missing.yml", ErrorInvalidValue{Key: "legal/license", Reason: "missing mandatory key"}},
-		{"testdata/v0.1/invalid/localisation_availableLanguages_missing.yml", ErrorInvalidValue{Key: "localisation/availableLanguages", Reason: "missing mandatory key"}},
-		{"testdata/v0.1/invalid/localisation_localisationReady_missing.yml", ErrorInvalidValue{Key: "localisation/localisationReady", Reason: "missing mandatory key"}},
-		{"testdata/v0.1/invalid/maintenance_contacts_missing.yml", ErrorInvalidValue{Key: "maintenance/contacts", Reason: "missing but mandatory for \"internal\" or \"community\" maintenance"}},
-		{"testdata/v0.1/invalid/maintenance_type_missing.yml", ErrorInvalidValue{Key: "maintenance/type", Reason: "missing mandatory key"}},
-		{"testdata/v0.1/invalid/platforms_missing.yml", ErrorInvalidValue{Key: "platforms", Reason: "missing mandatory key"}},
-		{"testdata/v0.1/invalid/developmentStatus_missing.yml", ErrorInvalidValue{Key: "developmentStatus", Reason: "missing mandatory key"}},
-		{"testdata/v0.1/invalid/releaseDate_missing.yml", ErrorInvalidValue{Key: "releaseDate", Reason: "missing mandatory key"}},
-		{"testdata/v0.1/invalid/genericName_missing.yml", ErrorInvalidValue{Key: "description/en/genericName", Reason: "missing mandatory key"}},
-		{"testdata/v0.1/invalid/shortDescription_missing.yml", ErrorInvalidValue{Key: "description/en/shortDescription", Reason: "missing mandatory key"}},
-		{"testdata/v0.1/invalid/features_missing.yml", ErrorInvalidValue{Key: "description/*/features", Reason: "missing mandatory key"}},
-		{"testdata/v0.1/invalid/features_empty.yml", ErrorInvalidValue{Key: "description/*/features", Reason: "missing mandatory key"}},
-		{"testdata/v0.1/invalid/longDescription_missing.yml", ErrorInvalidValue{Key: "description/*/longDescription", Reason: "missing mandatory key"}},
-		{"testdata/v0.1/invalid/softwareType_missing.yml", ErrorInvalidValue{Key: "softwareType", Reason: "missing mandatory key"}},
-		{"testdata/v0.2/invalid/categories_missing.yml", ErrorInvalidValue{Key: "categories", Reason: "missing mandatory key"}},
-		{"testdata/v0.1/invalid/url_missing.yml", ErrorInvalidValue{Key: "url", Reason: "missing mandatory key"}},
-
-		// Invalid fields.
-
-		// Invalid legal/license.
-		{"testdata/v0.1/invalid/legal_license_invalid.yml", ErrorInvalidValue{Key: "legal/license", Reason: "invalid value AGPLicense-3.0: invalid license \"AGPLicense-3.0\" at 0 (\"AGPLi\")"}},
-		// Invalid categories (nil).
-		{"testdata/v0.1/invalid/categories_nil.yml", ErrorInvalidValue{Key: "categories", Reason: "invalid type <nil>."}},
-		// Invalid name (nil).
-		{"testdata/v0.1/invalid/name_nil.yml", ErrorInvalidValue{Key: "name", Reason: "invalid type <nil>."}},
-		// longDescription too short.
-		{"testdata/v0.1/invalid/unicode_grapheme_clusters.yml", ErrorInvalidValue{Key: "description/eng/longDescription", Reason: "too short (135), min 500 chars"}},
-	}
-
-	for _, test := range testFiles {
-		t.Run(fmt.Sprintf("%v", test.err), func(t *testing.T) {
-			// Parse file into pc struct.
-			p := NewParser()
-			p.Strict = false
-			p.RemoteBaseURL = ""
-			err := p.ParseFile(test.file)
-
-			checkParseErrors(t, err, test)
-
-			if test.file == "testdata/v0.1/valid/valid.yml" {
-				if !strings.Contains(p.OEmbed["https://www.youtube.com/watch?v=RaHmGbBOP84"], "<iframe ") {
-					t.Errorf("Missing Oembed info")
-				}
-				if _, ok := p.PublicCode.Description["en"]; !ok {
-					t.Errorf("Missing description/en")
-				}
-			}
-			if test.file == "testdata/v0.1/valid/dependsOn.yml" {
-				if len(p.PublicCode.DependsOn.Open) != 2 {
-					t.Errorf("dependsOn/open length mismatch")
-				}
-				if len(p.PublicCode.DependsOn.Proprietary) != 1 {
-					t.Errorf("dependsOn/proprietary length mismatch")
-				}
-				if len(p.PublicCode.DependsOn.Hardware) != 3 {
-					t.Errorf("dependsOn/hardware length mismatch")
-				}
-			}
-			if test.file == "testdata/v0.1/valid/maintenance_contacts_phone.yml" {
-				if len(p.PublicCode.Maintenance.Contacts) != 3 {
-					t.Errorf("maintenance/contacts length mismatch")
-				}
-				if len(p.PublicCode.Maintenance.Contractors) != 1 {
-					t.Errorf("maintenance/contractors length mismatch")
-				}
-			}
-		})
-	}
-
+// Parse the YAML file passed as argument.
+// Return nil if the parsing succeded or an error if it failed.
+func parse(path string) error {
+	p := NewParser()
+	p.Strict = false
+	p.RemoteBaseURL = ""
+	return p.ParseFile(path)
 }
 
-// Test publiccode.yml remote files for key errors.
-func TestDecodeValueErrorsRemote(t *testing.T) {
-	testRemoteFiles := []testType{
-		{"https://raw.githubusercontent.com/pagopa/io-app/master/publiccode.yml", nil},
-	}
-
-	for _, test := range testRemoteFiles {
-		t.Run(fmt.Sprintf("%v", test.err), func(t *testing.T) {
-			// Parse data into pc struct.
-			p := NewParser()
-			p.Strict = false
-			p.RemoteBaseURL = "https://raw.githubusercontent.com/pagopa/io-app/master"
-			err := p.ParseRemoteFile(test.file)
-
-			checkParseErrors(t, err, test)
+// Check all the YAML files matching the glob pattern and Fail for each file
+// with parsing or validation errors.
+func checkValidFiles(pattern string, t *testing.T) {
+	testFiles, _ := filepath.Glob(pattern)
+	for _, file := range testFiles {
+		t.Run(file, func(t *testing.T) {
+			err := parse(file)
+			if (err != nil) {
+				t.Errorf("[%s] validation failed for valid file: %T - %s\n", file, err, err)
+			}
 		})
 	}
 }
@@ -143,6 +58,89 @@ func checkParseErrors(t *testing.T, err error, test testType) {
 		if err != test.err {
 			t.Errorf("[%s] wrong error generated:\n%T - %s\n- instead of:\n%T - %s", test.file, test.err, test.err, err, err)
 		}
+	}
+}
+
+// Test v0.1 invalid YAML testcases (testdata/v0.1/invalid/).
+func TestInvalidTestcasesV0_1(t *testing.T) {
+	expected := map[string]error{
+		"publiccodeYmlVersion_missing.yml":	ErrorInvalidValue{
+			"publiccodeYmlVersion", "missing mandatory key",
+		},
+		"name_missing.yml": ErrorInvalidValue{"name", "missing mandatory key"},
+		"legal_license_missing.yml": ErrorInvalidValue{"legal/license", "missing mandatory key"},
+		"localisation_availableLanguages_missing.yml": ErrorInvalidValue{
+			"localisation/availableLanguages", "missing mandatory key",
+		},
+		"localisation_localisationReady_missing.yml": ErrorInvalidValue{
+			"localisation/localisationReady", "missing mandatory key",
+		},
+		"maintenance_contacts_missing.yml": ErrorInvalidValue{
+			"maintenance/contacts",
+			"missing but mandatory for \"internal\" or \"community\" maintenance",
+		},
+		"maintenance_type_missing.yml": ErrorInvalidValue{"maintenance/type", "missing mandatory key"},
+		"platforms_missing.yml": ErrorInvalidValue{"platforms", "missing mandatory key"},
+		"developmentStatus_missing.yml": ErrorInvalidValue{"developmentStatus", "missing mandatory key"},
+		"releaseDate_missing.yml": ErrorInvalidValue{"releaseDate", "missing mandatory key"},
+		// "genericName_missing.yml": ErrorInvalidValue{"description/en/genericName", "missing mandatory key"},
+		"shortDescription_missing.yml": ErrorInvalidValue{"description/en/shortDescription", "missing mandatory key"},
+		"features_missing.yml": ErrorInvalidValue{"description/*/features", "missing mandatory key"},
+		"features_empty.yml": ErrorInvalidValue{"description/*/features", "missing mandatory key"},
+		"longDescription_missing.yml": ErrorInvalidValue{"description/*/longDescription", "missing mandatory key"},
+		"softwareType_missing.yml": ErrorInvalidValue{"softwareType", "missing mandatory key"},
+		"categories_missing.yml": ErrorInvalidValue{"categories", "missing mandatory key"},
+		"url_missing.yml": ErrorInvalidValue{"url", "missing mandatory key"},
+		"legal_license_invalid.yml": ErrorInvalidValue{
+			"legal/license",
+			"invalid value AGPLicense-3.0: invalid license \"AGPLicense-3.0\" at 0 (\"AGPLi\")",
+		},
+		"categories_nil.yml": ErrorInvalidValue{"categories", "invalid type <nil>."},
+		"categories_empty.yml": ErrorInvalidValue{"categories", "invalid type <nil>."},
+		"name_nil.yml": ErrorInvalidValue{"name", "invalid type <nil>."},
+		"unicode_grapheme_clusters.yml": ErrorInvalidValue{"description/eng/longDescription", "too short (135), min 500 chars"},
+		"file_encoding.yml": ParseError{"Invalid UTF-8"},
+	}
+
+    testFiles, _ := filepath.Glob("testdata/v0.1/invalid/*.yml")
+	for _, file := range testFiles {
+		baseName := path.Base(file)
+		if expected[baseName] == nil {
+			t.Errorf("No expected data for file %s", baseName)
+		}
+		t.Run(file, func(t *testing.T) {
+			err := parse(file)
+			checkParseErrors(t, err, testType{file, expected[baseName]})
+		})
+	}
+}
+
+// Test v0.1 valid YAML testcases (testdata/v0.1/valid/).
+func TestValidTestcasesV0_1(t *testing.T) {
+	checkValidFiles("testdata/v0.1/valid/*.yml", t)
+}
+
+// Test v0.2 valid YAML testcases (testdata/v0.2/valid/).
+func TestValidTestcasesV0_2(t *testing.T) {
+    checkValidFiles("testdata/v0.2/valid/*.yml", t)
+}
+
+// Test publiccode.yml remote files for key errors.
+func TestDecodeValueErrorsRemote(t *testing.T) {
+	testRemoteFiles := []testType{
+		{"https://raw.githubusercontent.com/pagopa/io-app/master/publiccode.yml", nil},
+	}
+
+	for _, test := range testRemoteFiles {
+		t.Run(fmt.Sprintf("%v", test.err), func(t *testing.T) {
+			// Parse data into pc struct.
+			p := NewParser()
+			p.Strict = false
+			p.RemoteBaseURL = "https://raw.githubusercontent.com/pagopa/io-app/master"
+			err := p.ParseRemoteFile(test.file)
+
+			checkParseErrors(t, err, test)
+		})
 	}
 }
 
@@ -178,6 +176,7 @@ func TestExport(t *testing.T) {
 	if err != nil {
 		t.Errorf("Failed to export YAML: %v", err)
 	}
+	_ = ioutil.WriteFile("testdata/v0.2/valid/valid.yml.golden", yaml1, 0644)
 
 	p2 := NewParser()
 	p2.Strict = false

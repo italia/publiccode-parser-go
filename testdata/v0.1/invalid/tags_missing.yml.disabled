@@ -13,8 +13,8 @@ outputTypes:
 platforms:
   - web
 
-categories:
-  - cloud-management
+# Should NOT validate: tags is missing
+# tags:
 
 developmentStatus: development
 
@@ -40,9 +40,8 @@ description:
           Very long description of this software, also split
           on multiple rows. You should note what the software
           is and why one should need it. This is 632 characters.
-
-    # Should NOT validate: features is empty
-    features: []
+    features:
+       - Just one feature
 
 legal:
   license: AGPL-3.0-or-later
