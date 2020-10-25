@@ -202,8 +202,7 @@ func (p *Parser) decodeString(key string, value string) (err error) {
 	case key == "legal/authorsFile":
 		p.PublicCode.Legal.AuthorsFile, err = p.checkFile(key, value)
 
-		// If not running in strict mode we can tolerate this absence.
-		if err != nil && p.Strict {
+		if err != nil {
 			return err
 		}
 		return nil
@@ -304,7 +303,7 @@ func (p *Parser) decodeArrString(key string, value []string) error {
 		if attr == "awards" {
 			desc.Awards = append(desc.Awards, value...)
 		}
-		if attr == "features" || (attr == "featureList" && !p.Strict) {
+		if attr == "features" {
 			for _, v := range value {
 				length := uniseg.GraphemeClusterCount(v)
 				if length > 100 {
@@ -348,23 +347,19 @@ func (p *Parser) decodeArrString(key string, value []string) error {
 		}
 
 	case key == "inputTypes":
-		if p.Strict {
-			for _, v := range value {
-				if err := p.checkMIME(key, v); err != nil {
-					return err
-				}
-				p.PublicCode.InputTypes = append(p.PublicCode.InputTypes, v)
+		for _, v := range value {
+			if err := p.checkMIME(key, v); err != nil {
+				return err
 			}
+			p.PublicCode.InputTypes = append(p.PublicCode.InputTypes, v)
 		}
 
 	case key == "outputTypes":
-		if p.Strict {
-			for _, v := range value {
-				if err := p.checkMIME(key, v); err != nil {
-					return err
-				}
-				p.PublicCode.OutputTypes = append(p.PublicCode.OutputTypes, v)
+		for _, v := range value {
+			if err := p.checkMIME(key, v); err != nil {
+				return err
 			}
+			p.PublicCode.OutputTypes = append(p.PublicCode.OutputTypes, v)
 		}
 
 	default:

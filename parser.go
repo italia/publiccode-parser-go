@@ -33,10 +33,6 @@ type Parser struct {
 	// results in much faster parsing.
 	DisableNetwork bool
 
-	// Strict makes the parser less tolerant by allowing some errors that do not
-	// affect the rendering of the software catalog. It is enabled by default.
-	Strict bool
-
 	OEmbed  map[string]string
 	missing map[string]bool
 
@@ -116,7 +112,6 @@ func (p *Parser) ParseRemoteFile(url string) error {
 // NewParser initializes a new Parser object and returns it.
 func NewParser() *Parser {
 	var p Parser
-	p.Strict = true
 	p.OEmbed = make(map[string]string)
 	p.missing = make(map[string]bool)
 	for _, k := range mandatoryKeys {
@@ -136,16 +131,6 @@ func (p *Parser) decoderec(prefix string, s map[interface{}]interface{}) (es Err
 
 		if prefix != "" {
 			k = prefix + "/" + k
-		}
-
-		// if we are not running in strict mode, support legacy keys
-		if !p.Strict {
-			if k2, ok := renamedKeys[k]; ok {
-				k = k2
-			}
-			if funk.Contains(removedKeys, k) {
-				continue // ignore key
-			}
 		}
 
 		delete(p.missing, k)

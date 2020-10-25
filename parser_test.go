@@ -66,7 +66,6 @@ func TestDecodeValueErrors(t *testing.T) {
 		t.Run(fmt.Sprintf("%v", test.err), func(t *testing.T) {
 			// Parse file into pc struct.
 			p := NewParser()
-			p.Strict = false
 			p.RemoteBaseURL = ""
 			err := p.ParseFile(test.file)
 
@@ -114,7 +113,6 @@ func TestDecodeValueErrorsRemote(t *testing.T) {
 		t.Run(fmt.Sprintf("%v", test.err), func(t *testing.T) {
 			// Parse data into pc struct.
 			p := NewParser()
-			p.Strict = false
 			p.RemoteBaseURL = "https://raw.githubusercontent.com/pagopa/io-app/master"
 			err := p.ParseRemoteFile(test.file)
 
@@ -151,7 +149,6 @@ func TestRelativePaths(t *testing.T) {
 	// Parse file into pc struct.
 	const url = "https://raw.githubusercontent.com/italia/18app/master/publiccode.yml"
 	p := NewParser()
-	p.Strict = false
 	p.RemoteBaseURL = "https://raw.githubusercontent.com/italia/18app/master"
 	err := p.ParseRemoteFile(url)
 	if err != nil {
@@ -167,7 +164,6 @@ func TestRelativePaths(t *testing.T) {
 // matches the first export (lossless roundtrip).
 func TestExport(t *testing.T) {
 	p := NewParser()
-	p.Strict = false
 	p.DisableNetwork = true
 	err := p.ParseFile("testdata/v0.2/valid/valid.yml")
 	if err != nil {
@@ -180,7 +176,6 @@ func TestExport(t *testing.T) {
 	}
 
 	p2 := NewParser()
-	p2.Strict = false
 	p2.DisableNetwork = true
 	err = p2.Parse(yaml1)
 	if err != nil {

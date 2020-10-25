@@ -38,7 +38,6 @@ func main() {
 	localBasePathPtr := flag.String("path", "", "An absolute or relative path pointing to a locally cloned repository where the publiccode.yml is located.")
 	disableNetworkPtr := flag.Bool("no-network", false, "Disables checks that require network connections (URL existence and oEmbed). This makes validation much faster.")
 	exportPtr := flag.String("export", "", "Export the normalized publiccode.yml file to the given path.")
-	noStrictPtr := flag.Bool("no-strict", false, "Disable strict mode.")
 	helpPtr := flag.Bool("help", false, "Display command line usage.")
 	versionPtr := flag.Bool("version", false, "Display current software version.")
 	flag.Parse()
@@ -57,7 +56,6 @@ func main() {
 	p.RemoteBaseURL = *remoteBaseURLPtr
 	p.LocalBasePath = *localBasePathPtr
 	p.DisableNetwork = *disableNetworkPtr
-	p.Strict = !*noStrictPtr
 
 	var err error
 	if ok, url := isValidURL(flag.Args()[0]); ok {
