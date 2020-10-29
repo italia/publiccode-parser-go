@@ -34,7 +34,7 @@ func (p *Parser) decodeBool(key string, boolValue bool) (err error) {
 		p.PublicCode.It.Piattaforme.Anpr = boolValue
 
 	default:
-		return ErrorInvalidKey{"Unexpected boolean key: " + key}
+		return newErrorInvalidValue(key, "Unexpected boolean key")
 	}
 	return
 }
@@ -78,7 +78,7 @@ func (p *Parser) decodeString(key string, value string) (err error) {
 			repo1 := vcsurl.GetRepo(url1)
 			repo2 := vcsurl.GetRepo(url2)
 			if repo1 == nil {
-				return fmt.Errorf("failed to detect repo for remote-base-url: %s\n", url1.String())
+				return fmt.Errorf("failed to detect repo for remote-base-url: %s", url1.String())
 			}
 			if repo2 == nil {
 				return newErrorInvalidValue(key, "failed to detect repo for %s\n", url2.String())
@@ -237,7 +237,7 @@ func (p *Parser) decodeString(key string, value string) (err error) {
 			return err
 		}
 	default:
-		return ErrorInvalidKey{"Unexpected string key: " + key}
+		return newErrorInvalidValue(key, "Unexpected string key")
 	}
 	return
 }
@@ -368,8 +368,7 @@ func (p *Parser) decodeArrString(key string, value []string) error {
 		}
 
 	default:
-		return ErrorInvalidKey{"Unexpected array key: " + key}
-
+		return newErrorInvalidValue(key, "Unexpected array key")
 	}
 	return nil
 }
@@ -463,7 +462,7 @@ func (p *Parser) decodeArrObj(key string, value map[interface{}]interface{}) err
 		p.PublicCode.DependsOn.Hardware = append(p.PublicCode.DependsOn.Hardware, deps...)
 
 	default:
-		return ErrorInvalidKey{"Unexpected array key: " + key}
+		return newErrorInvalidValue(key, "Unexpected array key")
 	}
 	return nil
 }
