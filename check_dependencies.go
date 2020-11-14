@@ -8,7 +8,10 @@ func (p *Parser) checkDependencies(key string, value map[interface{}]interface{}
 			if k.(string) == "name" {
 				dep.Name = val.(string)
 			} else if k.(string) == "optional" {
-				dep.Optional = val.(bool)
+				var ok bool
+				if dep.Optional, ok = val.(bool); !ok {
+					return nil, newErrorInvalidValue(key, "invalid type for key '%s', boolean expected", k)
+				}
 			} else if k.(string) == "version" {
 				dep.Version = val.(string)
 			} else if k.(string) == "versionMin" {
@@ -16,7 +19,7 @@ func (p *Parser) checkDependencies(key string, value map[interface{}]interface{}
 			} else if k.(string) == "versionMax" {
 				dep.VersionMax = val.(string)
 			} else {
-				return nil, newErrorInvalidValue(key, "invalid value for '%s'", k)
+				return nil, newErrorInvalidValue(key, "unexpected key '%s'", k)
 			}
 		}
 		if dep.Name == "" {
