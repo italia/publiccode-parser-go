@@ -61,7 +61,7 @@ func TestDecodeValueErrors(t *testing.T) {
 		// longDescription too short.
 		{"testdata/v0.1/invalid/unicode_grapheme_clusters.yml", ErrorInvalidValue{Key: "description/eng/longDescription", Reason: "too short (135), min 500 chars"}},
 		// Invalid type for optional ("true").
-		{"testdata/v0.2/invalid/dependsOn.yml", ErrorInvalidValue{Key: "dependsOn/open", Reason: "invalid type for key 'optional', boolean expected"}},
+		{"testdata/v0.2/invalid/dependsOn_open_optional_invalid.yml", ErrorInvalidValue{Key: "dependsOn/open", Reason: "invalid type for key 'optional', boolean expected"}},
 	}
 
 	for _, test := range testFiles {
