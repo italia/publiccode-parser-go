@@ -9,7 +9,10 @@ WORKDIR /go/src
 
 COPY . .
 
-RUN go build -o $BIN pcvalidate/pcvalidate.go \
+# git and openssh-client are needed by CircleCI when using
+# publiccode-parser-orb, which uses on this image.
+RUN apk --no-cache add git openssh-client \
+  && go build -o $BIN pcvalidate/pcvalidate.go \
   && chmod +x $BIN
 
 ENTRYPOINT ["/usr/local/bin/pcvalidate"]
