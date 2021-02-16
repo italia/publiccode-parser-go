@@ -400,14 +400,14 @@ func TestValidTestcasesV0_2(t *testing.T) {
 // Test publiccode.yml remote files for key errors.
 func TestDecodeValueErrorsRemote(t *testing.T) {
 	testRemoteFiles := []testType{
-		{"https://raw.githubusercontent.com/pagopa/io-app/master/publiccode.yml", nil},
+		{"https://raw.githubusercontent.com/italia/publiccode-editor/master/publiccode.yml", nil},
 	}
 
 	for _, test := range testRemoteFiles {
 		t.Run(fmt.Sprintf("%v", test.err), func(t *testing.T) {
 			// Parse data into pc struct.
 			p := NewParser()
-			p.RemoteBaseURL = "https://raw.githubusercontent.com/pagopa/io-app/master"
+			p.RemoteBaseURL = "https://raw.githubusercontent.com/italia/publiccode-editor/master"
 			err := p.ParseRemoteFile(test.file)
 
 			checkParseErrors(t, err, test)
