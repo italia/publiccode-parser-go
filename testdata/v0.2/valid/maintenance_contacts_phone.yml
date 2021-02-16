@@ -63,6 +63,6 @@ maintenance:
         phone: "+391624231322"
 
 localisation:
-  localisationReady: yes
+  localisationReady: true
   availableLanguages:
     - eng

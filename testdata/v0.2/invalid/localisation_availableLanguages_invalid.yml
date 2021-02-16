@@ -53,7 +53,7 @@ maintenance:
     - name: Francesco Rossi
 
 localisation:
-  localisationReady: yes
+  localisationReady: true
   availableLanguages:
      # Should NOT validate: invalid BCP47 language
      - no such language

@@ -56,6 +56,6 @@ maintenance:
        email: not_an_email
 
 localisation:
-  localisationReady: yes
+  localisationReady: true
   availableLanguages:
     - eng

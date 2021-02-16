@@ -55,6 +55,6 @@ maintenance:
       until: not_a_date
 
 localisation:
-  localisationReady: yes
+  localisationReady: true
   availableLanguages:
     - eng

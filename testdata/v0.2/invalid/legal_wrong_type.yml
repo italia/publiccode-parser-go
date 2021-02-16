@@ -47,6 +47,6 @@ maintenance:
 legal: []
 
 localisation:
-  localisationReady: yes
+  localisationReady: true
   availableLanguages:
     - eng

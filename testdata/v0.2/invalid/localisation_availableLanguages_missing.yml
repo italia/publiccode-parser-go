@@ -53,7 +53,7 @@ maintenance:
     - name: Francesco Rossi
 
 localisation:
-  localisationReady: yes
+  localisationReady: true
   # Should NOT validate: availableLanguages is missing
   # availableLanguages:
   #   - eng

@@ -107,7 +107,7 @@ maintenance:
       phone: +39 16 24231322
 
 localisation:
-  localisationReady: yes
+  localisationReady: true
   availableLanguages:
     - eng
     - ita

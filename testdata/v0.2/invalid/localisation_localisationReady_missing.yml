@@ -54,6 +54,6 @@ maintenance:
 
 localisation:
   # Should not validate: localisationReady is missing
-  # localisationReady: yes
+  # localisationReady: true
   availableLanguages:
     - eng

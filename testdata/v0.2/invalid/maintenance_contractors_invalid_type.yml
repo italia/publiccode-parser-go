@@ -53,6 +53,6 @@ maintenance:
   contractors: {}
 
 localisation:
-  localisationReady: yes
+  localisationReady: true
   availableLanguages:
     - eng

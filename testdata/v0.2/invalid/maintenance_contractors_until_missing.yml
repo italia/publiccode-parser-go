@@ -55,6 +55,6 @@ maintenance:
       # until: 2001-01-01
 
 localisation:
-  localisationReady: yes
+  localisationReady: true
   availableLanguages:
     - eng
