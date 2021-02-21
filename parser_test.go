@@ -57,24 +57,24 @@ func TestInvalidTestcasesV0_2(t *testing.T) {
 			"publiccodeYmlVersion", "must be one of the following: 0.2 0.2.2", 2, 1,
 		}},
 		"publiccodeYmlVersion_wrong_type.yml":	ValidationErrors{
-			ValidationError{"", "wrong type for this field", 2, 1},
+			ValidationError{"publiccodeYmlVersion", "wrong type for this field", 2, 1},
 			ValidationError{"publiccodeYmlVersion", "required", 2, 1}},
 
 		// name
 		"name_missing.yml": ValidationErrors{ValidationError{"name", "required", 1, 1}},
 		"name_nil.yml": ValidationErrors{ValidationError{"name", "required", 4, 1}},
 		"name_wrong_type.yml": ValidationErrors{
-			ValidationError{"", "wrong type for this field", 4, 1},
+			ValidationError{"name", "wrong type for this field", 4, 1},
 			ValidationError{"name", "required", 4, 1},
 		},
 
 		// applicationSuite
-		"applicationSuite_wrong_type.yml": ValidationErrors{ValidationError{"", "wrong type for this field", 4, 1}},
+		"applicationSuite_wrong_type.yml": ValidationErrors{ValidationError{"applicationSuite", "wrong type for this field", 4, 1}},
 
 		// url
 		"url_missing.yml": ValidationErrors{ValidationError{"url", "required", 1, 1}},
 		"url_wrong_type.yml": ValidationErrors{
-			ValidationError{"", "wrong type for this field", 6, 1},
+			ValidationError{"url", "wrong type for this field", 6, 1},
 			ValidationError{"url", "'' not reachable: missing URL scheme", 6, 1},
 			ValidationError{"url", "is not a valid code repository", 6, 1},
 		},
@@ -85,7 +85,7 @@ func TestInvalidTestcasesV0_2(t *testing.T) {
 
 		// landingURL
 		"landingURL_wrong_type.yml": ValidationErrors{
-			ValidationError{"", "wrong type for this field", 8, 1},
+			ValidationError{"landingURL", "wrong type for this field", 8, 1},
 			ValidationError{"landingURL", "'' not reachable: missing URL scheme", 8, 1},
 		},
 		"landingURL_invalid.yml": ValidationErrors{
@@ -94,10 +94,10 @@ func TestInvalidTestcasesV0_2(t *testing.T) {
 
 		// isBasedOn
 		"isBasedOn_wrong_type.yml": ValidationErrors{
-			ValidationError{"", "wrong type for this field", 10, 1},
+			ValidationError{"isBasedOn.foobar", "wrong type for this field", 10, 1},
 		},
 		"isBasedOn_bad_url_array.yml": ValidationErrors{
-			ValidationError{"", "wrong type for this field", 8, 1},
+			ValidationError{"isBasedOn", "wrong type for this field", 8, 1},
 		},
 		"isBasedOn_bad_url_string.yml": ValidationErrors{
 			ValidationError{"isBasedOn", "'???' not reachable: missing URL scheme", 8, 1},
@@ -105,13 +105,13 @@ func TestInvalidTestcasesV0_2(t *testing.T) {
 
 		// softwareVersion
 		"softwareVersion_wrong_type.yml": ValidationErrors{
-			ValidationError{"", "wrong type for this field", 8, 1},
+			ValidationError{"softwareVersion", "wrong type for this field", 8, 1},
 		},
 
 		// releaseDate
 		"releaseDate_missing.yml": ValidationErrors{ValidationError{"releaseDate", "required", 1, 1}},
 		"releaseDate_wrong_type.yml": ValidationErrors{
-			ValidationError{"", "wrong type for this field", 8, 1},
+			ValidationError{"releaseDate", "wrong type for this field", 8, 1},
 			ValidationError{"releaseDate", "required", 8, 1},
 		},
 		"releaseDate_invalid.yml": ValidationErrors{
@@ -120,7 +120,7 @@ func TestInvalidTestcasesV0_2(t *testing.T) {
 
 		// logo
 		"logo_wrong_type.yml": ValidationErrors{
-			ValidationError{"", "wrong type for this field", 18, 1},
+			ValidationError{"logo", "wrong type for this field", 18, 1},
 		},
 		"logo_unsupported_extension.yml": ValidationErrors{
 			ValidationError{"logo", "invalid file extension for: logo.mpg", 18, 1},
@@ -134,7 +134,7 @@ func TestInvalidTestcasesV0_2(t *testing.T) {
 
 		// monochromeLogo
 		"monochromeLogo_wrong_type.yml": ValidationErrors{
-			ValidationError{"", "wrong type for this field", 18, 1},
+			ValidationError{"monochromeLogo", "wrong type for this field", 18, 1},
 		},
 		"monochromeLogo_unsupported_extension.yml": ValidationErrors{
 			ValidationError{"monochromeLogo", "invalid file extension for: monochromeLogo.mpg", 18, 1},
@@ -151,7 +151,7 @@ func TestInvalidTestcasesV0_2(t *testing.T) {
 			ValidationError{"inputTypes[1]", "'foobar' is not a MIME type", 1, 1},
 		},
 		"inputTypes_wrong_type.yml": ValidationErrors{
-			ValidationError{"", "wrong type for this field", 15, 1},
+			ValidationError{"inputTypes.foobar", "wrong type for this field", 15, 1},
 		},
 
 		// outputTypes
@@ -159,13 +159,13 @@ func TestInvalidTestcasesV0_2(t *testing.T) {
 			ValidationError{"outputTypes[1]", "'foobar' is not a MIME type", 1, 1},
 		},
 		"outputTypes_wrong_type.yml": ValidationErrors{
-			ValidationError{"", "wrong type for this field", 15, 1},
+			ValidationError{"outputTypes.foobar", "wrong type for this field", 15, 1},
 		},
 
 		// platforms
 		"platforms_missing.yml": ValidationErrors{ValidationError{"platforms", "must be more than 0", 1, 1}},
 		"platforms_wrong_type.yml": ValidationErrors{
-			ValidationError{"", "wrong type for this field", 14, 1},
+			ValidationError{"platforms", "wrong type for this field", 14, 1},
 			ValidationError{"platforms", "must be more than 0", 14, 1},
 		},
 
@@ -183,7 +183,7 @@ func TestInvalidTestcasesV0_2(t *testing.T) {
 
 		// usedBy
 		"usedBy_wrong_type.yml": ValidationErrors{
-			ValidationError{"", "wrong type for this field", 14, 1},
+			ValidationError{"usedBy", "wrong type for this field", 14, 1},
 		},
 
 		// roadmap
@@ -191,7 +191,7 @@ func TestInvalidTestcasesV0_2(t *testing.T) {
 			ValidationError{"roadmap", "'foobar' not reachable: missing URL scheme", 4, 1},
 		},
 		"roadmap_wrong_type.yml": ValidationErrors{
-			ValidationError{"", "wrong type for this field", 4, 1},
+			ValidationError{"roadmap", "wrong type for this field", 4, 1},
 			ValidationError{"roadmap", "'' not reachable: missing URL scheme", 4, 1},
 		},
 
@@ -203,7 +203,7 @@ func TestInvalidTestcasesV0_2(t *testing.T) {
 			ValidationError{"developmentStatus", "must be one of the following: concept development beta stable obsolete", 21, 1},
 		},
 		"developmentStatus_wrong_type.yml": ValidationErrors{
-			ValidationError{"", "wrong type for this field", 21, 1},
+			ValidationError{"developmentStatus", "wrong type for this field", 21, 1},
 			ValidationError{"developmentStatus", "required", 21, 1},
 		},
 
@@ -215,32 +215,32 @@ func TestInvalidTestcasesV0_2(t *testing.T) {
 			ValidationError{"softwareType", "must be one of the following: standalone/mobile standalone/iot standalone/desktop standalone/web standalone/backend standalone/other addon library configurationFiles", 22, 1},
 		},
 		"softwareType_wrong_type.yml": ValidationErrors{
-			ValidationError{"", "wrong type for this field", 22, 1},
+			ValidationError{"softwareType", "wrong type for this field", 22, 1},
 			ValidationError{"softwareType", "required", 22, 1},
 		},
 
 		// intendedAudience
 		// intendedAudience.*
 		"intendedAudience_wrong_type.yml": ValidationErrors{
-			ValidationError{"", "wrong type for this field", 18, 1},
+			ValidationError{"intendedAudience", "wrong type for this field", 18, 1},
 		},
 		"intendedAudience_countries_invalid_country.yml": ValidationErrors{
 			ValidationError{"intendedAudience.countries[1]", "must be a valid lowercase ISO 3166-1 alpha-2 two-letter country code", 18, 5},
 		},
 		"intendedAudience_countries_wrong_type.yml": ValidationErrors{
-			ValidationError{"", "wrong type for this field", 19, 1},
+			ValidationError{"intendedAudience.countries", "wrong type for this field", 19, 1},
 		},
 		"intendedAudience_unsupportedCountries_invalid_country.yml": ValidationErrors{
 			ValidationError{"intendedAudience.unsupportedCountries[0]", "must be a valid lowercase ISO 3166-1 alpha-2 two-letter country code", 18, 5},
 		},
 		"intendedAudience_unsupportedCountries_wrong_type.yml": ValidationErrors{
-			ValidationError{"", "wrong type for this field", 19, 1},
+			ValidationError{"intendedAudience.unsupportedCountries", "wrong type for this field", 19, 1},
 		},
 		"intendedAudience_scope_invalid_scope.yml": ValidationErrors{
 			ValidationError{"intendedAudience.scope[0]", "must be a valid scope", 18, 5},
 		},
 		"intendedAudience_scope_wrong_type.yml": ValidationErrors{
-			ValidationError{"", "wrong type for this field", 19, 1},
+			ValidationError{"intendedAudience.scope", "wrong type for this field", 19, 1},
 		},
 
 		// description
@@ -252,7 +252,7 @@ func TestInvalidTestcasesV0_2(t *testing.T) {
 			ValidationError{"description.eng.features", "must be more than 0", 45, 5},
 		},
 		"description_eng_localisedName_wrong_type.yml": ValidationErrors{
-			ValidationError{"", "wrong type for this field", 26, 1},
+			ValidationError{"description.eng.localisedName", "wrong type for this field", 26, 1},
 		},
 		"description_eng_genericName_missing.yml": ValidationErrors{
 			ValidationError{"description.eng.genericName", "required", 25, 5},
@@ -282,7 +282,7 @@ func TestInvalidTestcasesV0_2(t *testing.T) {
 			ValidationError{"description.eng.screenshots[0]", "'no_such_file.png' is not an image: no such file : no_such_file.png", 25, 5},
 		},
 		"description_eng_awards_wrong_type.yml": ValidationErrors{
-			ValidationError{"", "wrong type for this field", 46, 1},
+			ValidationError{"description.eng.awards", "wrong type for this field", 46, 1},
 		},
 		"description_eng_videos_invalid.yml": ValidationErrors{
 			ValidationError{"description.eng.videos[0]", "'https://google.com' is not a valid video URL supporting oEmbed: invalid oembed link: https://google.com", 25, 5},
@@ -292,7 +292,7 @@ func TestInvalidTestcasesV0_2(t *testing.T) {
 		// legal.*
 		"legal_missing.yml": ValidationErrors{ValidationError{"legal.license", "required", 0, 0}},
 		"legal_wrong_type.yml": ValidationErrors{
-			ValidationError{"", "wrong type for this field", 47, 1},
+			ValidationError{"legal", "wrong type for this field", 47, 1},
 			ValidationError{"legal.license", "required", 47, 8},
 		},
 		"legal_license_missing.yml": ValidationErrors{ValidationError{"legal.license", "required", 47, 3}},
@@ -327,7 +327,7 @@ func TestInvalidTestcasesV0_2(t *testing.T) {
 			ValidationError{"maintenance.contractors", "required_if Type contract", 50, 3},
 		},
 		"maintenance_contractors_invalid_type.yml": ValidationErrors{
-			ValidationError{"", "wrong type for this field", 53, 1},
+			ValidationError{"maintenance.contractors", "wrong type for this field", 53, 1},
 			ValidationError{"maintenance.contractors", "required_if Type contract", 53, 3},
 		},
 		"maintenance_contractors_name_missing.yml": ValidationErrors{
@@ -359,20 +359,20 @@ func TestInvalidTestcasesV0_2(t *testing.T) {
 
 		// dependsOn
 		"dependsOn_open_name_wrong_type.yml": ValidationErrors{
-			ValidationError{"", "wrong type for this field", 57, 1},
+			ValidationError{"dependsOn.open.name", "wrong type for this field", 57, 1},
 			ValidationError{"dependsOn.open[0].name", "required", 0, 0},
 		},
 		"dependsOn_open_versionMin_wrong_type.yml": ValidationErrors{
-			ValidationError{"", "wrong type for this field", 58, 1},
+			ValidationError{"dependsOn.open.versionMin", "wrong type for this field", 58, 1},
 		},
 		"dependsOn_open_versionMax_wrong_type.yml": ValidationErrors{
-			ValidationError{"", "wrong type for this field", 58, 1},
+			ValidationError{"dependsOn.open.versionMax", "wrong type for this field", 58, 1},
 		},
 		"dependsOn_open_version_wrong_type.yml": ValidationErrors{
-			ValidationError{"", "wrong type for this field", 58, 1},
+			ValidationError{"dependsOn.open.version", "wrong type for this field", 58, 1},
 		},
 		"dependsOn_open_optional_wrong_type.yml": ValidationErrors{
-			ValidationError{"", "wrong type for this field", 58, 1},
+			ValidationError{"dependsOn.open.optional", "wrong type for this field", 58, 1},
 		},
 
 		// misc

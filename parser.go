@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"strings"
 	"unicode/utf8"
+	"fmt"
 
 	"gopkg.in/yaml.v3"
 	"github.com/go-playground/validator/v10"
@@ -96,7 +97,44 @@ func getPositionInFile(key string, node yaml.Node) (int, int) {
 	}
 }
 
-func toValidationError(errorText string) ValidationError {
+// getKeyAtLine returns the key name at line "line" for the YAML document
+// represented at parentNode.
+func getKeyAtLine(parentNode yaml.Node, line int, path string) string {
+	var key = path
+
+	for i, currNode := range parentNode.Content {
+		// If this node is a mapping and the index is odd it means
+		// we are not looking at a key, but at its value. Skip it.
+		if parentNode.Kind == yaml.MappingNode && i%2 != 0 && currNode.Kind == yaml.ScalarNode {
+			continue
+		}
+
+		// This node is a key of a mapping type
+		if parentNode.Kind == yaml.MappingNode && i%2 == 0 {
+			if path == "" {
+				key = currNode.Value
+			} else {
+				key = fmt.Sprintf("%s.%s", path, currNode.Value)
+			}
+		}
+
+		// We want the scalar node (ie. key) not the mapping node which
+		// doesn't have a tag name even if it has the same line number
+		if currNode.Line == line && parentNode.Kind == yaml.MappingNode && currNode.Kind == yaml.ScalarNode {
+			return key
+		}
+
+		if currNode.Kind != yaml.ScalarNode {
+			if k := getKeyAtLine(*currNode, line, key); k != "" {
+				return k
+			}
+		}
+	}
+
+	return ""
+}
+
+func toValidationError(errorText string, node yaml.Node) ValidationError {
 	r := regexp.MustCompile(`^(line ([0-9]+): )`)
 	matches := r.FindStringSubmatch(errorText)
 
@@ -112,8 +150,10 @@ func toValidationError(errorText string) ValidationError {
 		errorText = "wrong type for this field"
 	}
 
+	key := getKeyAtLine(node, line, "")
+
 	return ValidationError{
-		Key: "",
+		Key: key,
 		Description: errorText,
 		Line: line,
 		Column: 1,
@@ -129,13 +169,24 @@ func (p *Parser) Parse(in []byte) error {
 		return ve
 	}
 
+	// First, decode the YAML into yaml.Node so we can access line and column
+	// numbers.
+	var node yaml.Node
+
 	d := yaml.NewDecoder(bytes.NewReader(in))
+	d.KnownFields(true)
+	d.Decode(&node)
+
+	node = *node.Content[0]
+
+	// Decode the YAML into a PublicCode structure, so we get type errors
+	d = yaml.NewDecoder(bytes.NewReader(in))
 	d.KnownFields(true)
 	if err := d.Decode(&p.PublicCode); err != nil {
 		switch err.(type) {
 			case *yaml.TypeError:
 				for _, errorText := range err.(*yaml.TypeError).Errors {
-					ve = append(ve, toValidationError(errorText))
+					ve = append(ve, toValidationError(errorText, node))
 				}
 			default:
 				ve = append(ve, newValidationError("", err.Error()))
@@ -143,16 +194,6 @@ func (p *Parser) Parse(in []byte) error {
 	}
 
 	validate := publiccodeValidator.New()
-
-	var node yaml.Node
-
-	d = yaml.NewDecoder(bytes.NewReader(in))
-	d.KnownFields(true)
-	if decodeErr := d.Decode(&node); decodeErr != nil {
-		// Should not happen, we already parsed it before
-		panic(decodeErr.Error())
-	}
-	node = *node.Content[0]
 
 	err := validate.Struct(p.PublicCode)
 	if err != nil {
