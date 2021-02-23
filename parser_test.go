@@ -3,6 +3,7 @@ package publiccode
 import (
 	"bytes"
 	"fmt"
+	"net/url"
 	"path"
 	"path/filepath"
 	_ "strings"
@@ -429,6 +430,16 @@ func TestRelativePaths(t *testing.T) {
 	// if strings.Index(p.PublicCode.Description["it"].Screenshots[0], p.RemoteBaseURL) != 0 {
 	// 	t.Errorf("Relative path was not turned into absolute URL: %v", p.PublicCode.Description["it"].Screenshots[0])
 	// }
+}
+
+func TestIsReachable(t *testing.T) {
+	p := NewParser()
+	p.DisableNetwork = true
+
+	u, _ := url.Parse("https://google.com/404")
+	if reachable, _ := p.isReachable(u); !reachable {
+		t.Errorf("isReachable() returned false with DisableNetwork enabled")
+	}
 }
 
 // Test that the exported YAML passes validation again, and that re-exporting it

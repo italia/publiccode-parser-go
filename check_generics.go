@@ -65,6 +65,10 @@ func getHeaderFromDomain(domain Domain, url string) map[string]string {
 // isReachable checks whether the URL resource is reachable.
 // An URL resource is reachable if it returns HTTP 200.
 func (p *Parser) isReachable(u *url.URL) (bool, error) {
+	if p.DisableNetwork {
+		return true, nil
+	}
+
 	if u.Scheme == "" {
 		return false, fmt.Errorf("missing URL scheme")
 	}
@@ -130,13 +134,11 @@ func (p *Parser) fileExists(file string) bool {
 		_, err := os.Stat(url.Path);
 
 		return err == nil
-	} else if !p.DisableNetwork {
-		reachable, _ := p.isReachable(url)
-
-		return reachable
-	} else {
-		return true
 	}
+
+	reachable, _ := p.isReachable(url)
+
+	return reachable
 }
 
 // isImageFile check whether the string is a valid image. It also checks if the file exists.
