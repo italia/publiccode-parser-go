@@ -6,8 +6,8 @@ import (
 	"strings"
 )
 
-// Amministrazione is an Administration from amministrazoni.txt
-// Retrieved from: http://www.indicepa.gov.it/documentale/n-opendata.php
+// Amministrazione is an row from
+// https://www.indicepa.gov.it/public-services/opendata-read-service.php?dstype=FS&filename=amministrazioni.txt
 type Amministrazione struct {
 	CodAmm            string
 	DesAmm            string
@@ -43,9 +43,7 @@ type Amministrazione struct {
 }
 
 // isCodiceIPA returns an error if codiceIPA is not registered into amministrazioni.txt
-// Reference: http://www.indicepa.gov.it/documentale/n-opendata.php.
 func (p *Parser) isCodiceIPA(codiceiPA string) error {
-	// Load Public Aministrations data from amministrazioni.txt
 	dataFile, err := Asset("data/amministrazioni.txt")
 	if err != nil {
 		return err
