@@ -28,8 +28,8 @@ This parser performs syntactic and semantic validation according to the
 parser := publiccode.NewParser()
 
 // all these settings are optional:
-parser.LocalBasePath = "/path/to/local/clone"
-parser.RemoteBaseURL = "https://raw.githubusercontent.com/gith002/Medusa/master"
+parser.BaseURL = "file:///path/to/local/dir"
+// parser.BaseURL = "https://raw.githubusercontent.com/gith002/Medusa/master"
 parser.DisableNetwork = false
 
 err := parser.ParseRemoteFile(url)

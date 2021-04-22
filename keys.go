@@ -8,6 +8,8 @@ import (
 	spdxValidator "github.com/alranel/go-spdx/spdx"
 	"github.com/alranel/go-vcsurl"
 	"github.com/thoas/go-funk"
+
+	urlutil "github.com/italia/publiccode-parser-go/internal"
 )
 
 // validateFields validates publiccode with additional rules not validatable
@@ -18,7 +20,7 @@ func (p *Parser) validateFields() error {
 	var err error
 
 	if (p.PublicCode.URL != nil) {
-		if reachable, err := p.isReachable((*url.URL)(p.PublicCode.URL)); !reachable {
+		if reachable, err := p.isReachable(*(*url.URL)(p.PublicCode.URL)); !reachable {
 			ve = append(ve, newValidationError("url", "'%s' not reachable: %s", p.PublicCode.URL, err.Error()))
 		}
 		if !vcsurl.IsRepo((*url.URL)(p.PublicCode.URL)) {
@@ -27,21 +29,17 @@ func (p *Parser) validateFields() error {
 	}
 
 	// Check that the supplied URL matches the source repository, if known.
-	if p.RemoteBaseURL != "" {
-		url1, err := url.Parse(p.RemoteBaseURL)
-		if err != nil {
-			ve = append(ve, newValidationError("", err.Error()))
-		}
-		repo1 := vcsurl.GetRepo(url1)
+	if p.baseURL.Scheme != "file" {
+		repo1 := vcsurl.GetRepo((*url.URL)(p.baseURL))
 		repo2 := vcsurl.GetRepo((*url.URL)(p.PublicCode.URL))
 		if repo1 == nil {
 			ve = append(ve, newValidationError(
-				"", "failed to detect repo for remote-base-url: %s\n", url1.String()),
+				"", "failed to detect a code repository at publiccode.yml's location: %s\n", p.baseURL),
 			)
 		}
 		if repo2 == nil {
 			ve = append(ve, newValidationError(
-				"url", "failed to detect repo for %s\n", p.PublicCode.URL),
+				"url", "failed to detect a code repository at %s\n", p.PublicCode.URL),
 			)
 		}
 
@@ -55,16 +53,16 @@ func (p *Parser) validateFields() error {
 			if !strings.EqualFold(repo1.String(), repo2.String()) {
 				ve = append(ve, newValidationError(
 					"",
-					"declared url (%s) and actual publiccode.yml source URL (%s) "+
+					"declared url (%s) and actual publiccode.yml location URL (%s) "+
 					"are not in the same repo: '%s' vs '%s'",
-					p.PublicCode.URL, p.RemoteBaseURL, repo2, repo1,
+					p.PublicCode.URL, p.baseURL, repo2, repo1,
 				))
 			}
 		}
 	}
 
 	if p.PublicCode.LandingURL != nil {
-		if reachable, err := p.isReachable((*url.URL)(p.PublicCode.LandingURL)); !reachable {
+		if reachable, err := p.isReachable(*(*url.URL)(p.PublicCode.LandingURL)); !reachable {
 			ve = append(ve, newValidationError(
 				"landingURL",
 				"'%s' not reachable: %s", p.PublicCode.LandingURL, err.Error(),
@@ -73,7 +71,7 @@ func (p *Parser) validateFields() error {
 	}
 
 	if p.PublicCode.Roadmap != nil {
-		if reachable, err := p.isReachable((*url.URL)(p.PublicCode.Roadmap)); !reachable {
+		if reachable, err := p.isReachable(*(*url.URL)(p.PublicCode.Roadmap)); !reachable {
 			ve = append(ve, newValidationError(
 				"roadmap",
 				"'%s' not reachable: %s", p.PublicCode.Roadmap, err.Error(),
@@ -82,21 +80,20 @@ func (p *Parser) validateFields() error {
 	}
 
 	if (p.PublicCode.Logo != "") {
-		if validLogo, err := p.validLogo(p.PublicCode.Logo); !validLogo {
+		if validLogo, err := p.validLogo(p.toURL(p.PublicCode.Logo)); !validLogo {
 			ve = append(ve, newValidationError("logo", err.Error()))
 		}
 	}
 	if (p.PublicCode.MonochromeLogo != "") {
-		if validLogo, err := p.validLogo(p.PublicCode.MonochromeLogo); !validLogo {
+		if validLogo, err := p.validLogo(p.toURL(p.PublicCode.MonochromeLogo)); !validLogo {
 			ve = append(ve, newValidationError("monochromeLogo", err.Error()))
 		}
 	}
 
-	if p.PublicCode.Legal.AuthorsFile != nil && !p.fileExists(*p.PublicCode.Legal.AuthorsFile) {
-		ve = append(ve, newValidationError(
-			"legal.authorsFile",
-			"file '%s' does not exist", *p.PublicCode.Legal.AuthorsFile,
-		))
+	if p.PublicCode.Legal.AuthorsFile != nil && !p.fileExists(p.toURL(*p.PublicCode.Legal.AuthorsFile)) {
+		u := p.toURL(*p.PublicCode.Legal.AuthorsFile)
+
+		ve = append(ve, newValidationError("legal.authorsFile", "'%s' does not exist", urlutil.DisplayURL(&u)))
 	}
 
 	if p.PublicCode.Legal.License != "" {
@@ -146,7 +143,7 @@ func (p *Parser) validateFields() error {
 		}
 
 		if (desc.Documentation != nil) {
-			if reachable, err := p.isReachable((*url.URL)(desc.Documentation)); !reachable {
+			if reachable, err := p.isReachable(*(*url.URL)(desc.Documentation)); !reachable {
 				ve = append(ve, newValidationError(
 					fmt.Sprintf("description.%s.documentation", lang),
 					"'%s' not reachable: %s", desc.Documentation, err.Error(),
@@ -154,7 +151,7 @@ func (p *Parser) validateFields() error {
 			}
 		}
 		if desc.APIDocumentation != nil {
-			if reachable, err := p.isReachable((*url.URL)(desc.APIDocumentation)); !reachable {
+			if reachable, err := p.isReachable(*(*url.URL)(desc.APIDocumentation)); !reachable {
 				ve = append(ve, newValidationError(
 					fmt.Sprintf("description.%s.apiDocumentation", lang),
 					"'%s' not reachable: %s", desc.APIDocumentation, err.Error(),
@@ -163,7 +160,7 @@ func (p *Parser) validateFields() error {
 		}
 
 		for i, v := range desc.Screenshots {
-			if isImage, err := p.isImageFile(v); !isImage {
+			if isImage, err := p.isImageFile(p.toURL(v)); !isImage {
 				ve = append(ve, newValidationError(
 					fmt.Sprintf("description.%s.screenshots[%d]", lang, i),
 					"'%s' is not an image: %s", v, err.Error(),

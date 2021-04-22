@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"io/ioutil"
 	"net/http"
+	"net/url"
+	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
@@ -12,26 +14,15 @@ import (
 
 	"gopkg.in/yaml.v3"
 	"github.com/go-playground/validator/v10"
+	"github.com/alranel/go-vcsurl"
+
 	publiccodeValidator "github.com/italia/publiccode-parser-go/validators"
+	urlutil "github.com/italia/publiccode-parser-go/internal"
 )
 
 // Parser is a helper class for parsing publiccode.yml files.
 type Parser struct {
 	PublicCode PublicCode
-
-	// LocalBasePath is a filesystem path pointing to the directory where the
-	// publiccode.yml is located. It's used as a base for relative paths. If
-	// left empty, RemoteBaseURL will be used.
-	LocalBasePath string
-
-	// RemoteBaseURL is the URL pointing to the raw directory where the publiccode.yml
-	// file is located. It's used for validating abolute URLs and as a base for
-	// relative paths. If left empty, absolute URLs will not be validated and
-	// no remote validation of files with relative paths will be performed. If
-	// not left empty, publiccode.yml keys with relative paths will be turned
-	// into absolute URLs.
-	// (eg: https://raw.githubusercontent.com/gith002/Medusa/master)
-	RemoteBaseURL string
 
 	// DisableNetwork disables all network tests (URL existence and Oembed). This
 	// results in much faster parsing.
@@ -40,6 +31,18 @@ type Parser struct {
 	// Domain will have domain specific settings, including basic auth if provided
 	// this will avoid strong quota limit imposed by code hosting platform
 	Domain Domain
+
+	// The name of the branch used to check for existence of the files referenced
+	// in the publiccode.yml
+	Branch string
+
+	// The URL used as based of relative files in publiccode.yml (eg. authorsFile)
+	// It can be a local file with the 'file' scheme.
+	baseURL *url.URL
+
+	// The URL pointing to the publiccode.yml file.
+	// It can be a local file with the 'file' scheme.
+	file    *url.URL
 }
 
 // Domain is a single code hosting service.
@@ -58,7 +61,7 @@ func (p *Parser) ParseInDomain(in []byte, host string, utf []string, ba []string
 		BasicAuth:   ba,
 	}
 
-	return p.Parse(in)
+	return p.ParseBytes(in)
 }
 
 func getNodes(key string, node *yaml.Node) (*yaml.Node, *yaml.Node) {
@@ -161,7 +164,7 @@ func toValidationError(errorText string, node yaml.Node) ValidationError {
 }
 
 // Parse loads the yaml bytes and tries to parse it. Return an error if fails.
-func (p *Parser) Parse(in []byte) error {
+func (p *Parser) ParseBytes(in []byte) error {
 	var ve ValidationErrors
 
 	if !utf8.Valid(in) {
@@ -240,6 +243,30 @@ func (p *Parser) Parse(in []byte) error {
 		}
 	}
 
+	// baseURL was not set to a local path, let's autodetect it from the
+	// publiccode.yml url key
+	//
+	// We need the baseURL to perform network checks.
+	if p.baseURL == nil && !p.DisableNetwork {
+		rawRoot, err := vcsurl.GetRawRoot((*url.URL)(p.PublicCode.URL), p.Branch)
+		if err != nil {
+			line, column := getPositionInFile("url", node)
+
+			ve = append(ve, ValidationError{
+				Key: "url",
+				Description: fmt.Sprintf("failed to get raw URL for code repository at %s: %s", p.PublicCode.URL, err),
+				Line: line,
+				Column: column,
+			})
+
+			// Return early because proceeding with no baseURL would result in a lot
+			// of duplicate errors stemming from its absence.
+			return ve
+		}
+
+		p.baseURL = rawRoot
+	}
+
 	err = p.validateFields()
 	if err != nil {
 		for _, err := range err.(ValidationErrors) {
@@ -256,45 +283,69 @@ func (p *Parser) Parse(in []byte) error {
 	return ve
 }
 
-// ParseFile loads a publiccode.yml file from a given file path.
-func (p *Parser) ParseFile(file string) error {
-	// Read data.
-	data, err := ioutil.ReadFile(file)
-	if err != nil {
-		return err
+func (p *Parser) Parse() error {
+	var data []byte
+	var err error
+
+	if p.file.Scheme == "file" {
+		data, err = ioutil.ReadFile(p.file.Path)
+		if err != nil {
+			return err
+		}
+	} else {
+		resp, err := http.Get(p.file.String())
+		if err != nil {
+			return err
+		}
+		defer resp.Body.Close()
+
+		data, err = ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return err
+		}
 	}
 
-	return p.Parse(data)
-}
-
-// ParseRemoteFile loads a publiccode.yml file from its raw URL.
-func (p *Parser) ParseRemoteFile(url string) error {
-	// Read data.
-	resp, err := http.Get(url)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-	data, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return err
-	}
-
-	return p.Parse(data)
+	return p.ParseBytes(data)
 }
 
 // NewParser initializes a new Parser object and returns it.
-func NewParser() *Parser {
+// TODO
+func NewParser(file string) (*Parser, error) {
+	return NewParserWithPath(file, "")
+}
+
+// TODO doc
+// empty string disables it and enables remote
+func NewParserWithPath(file string, path string) (*Parser, error) {
 	var p Parser
 
-	return &p
+	var err error
+	if p.file, err = toURL(file); err != nil {
+		return nil, err
+	}
+	if path != "" {
+		if p.baseURL, err = toURL(path); err != nil {
+			return nil, err
+		}
+	}
+
+	return &p, nil
 }
 
 // ToYAML converts parser.PublicCode into YAML again.
 func (p *Parser) ToYAML() ([]byte, error) {
-	// Make a copy and set the latest versions
-	pc2 := p.PublicCode
-	pc2.PubliccodeYamlVersion = Version
-	pc2.It.CountryExtensionVersion = ExtensionITVersion
-	return yaml.Marshal(pc2)
+	return yaml.Marshal(p.PublicCode)
+}
+
+// TODO doc
+func toURL(file string) (*url.URL, error) {
+	if _, u := urlutil.IsValidURL(file); u != nil {
+		return u, nil
+	}
+
+	if path, err := filepath.Abs(file); err == nil {
+		return &url.URL{Scheme: "file", Path: path }, nil
+	} else {
+		return nil, err
+	}
 }

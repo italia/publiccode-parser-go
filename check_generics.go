@@ -19,6 +19,8 @@ import (
 	"github.com/thoas/go-funk"
 	httpclient "github.com/italia/httpclient-lib-go"
 	vcsurl "github.com/alranel/go-vcsurl"
+
+	urlutil "github.com/italia/publiccode-parser-go/internal"
 )
 
 // Despite the spec requires at least 1000px, we temporarily release this constraint to 120px.
@@ -64,7 +66,7 @@ func getHeaderFromDomain(domain Domain, url string) map[string]string {
 
 // isReachable checks whether the URL resource is reachable.
 // An URL resource is reachable if it returns HTTP 200.
-func (p *Parser) isReachable(u *url.URL) (bool, error) {
+func (p *Parser) isReachable(u url.URL) (bool, error) {
 	if p.DisableNetwork {
 		return true, nil
 	}
@@ -87,113 +89,100 @@ func (p *Parser) isReachable(u *url.URL) (bool, error) {
 // toURL turns the passed string into an URL, trying to resolve
 // code hosting URLs to their raw URL.
 //
-// It supports relative paths and turns them remote URls or file:// URLs
-// depending on whether RemoteBaseURL is set
-func (p *Parser) toURL(file string) *url.URL {
+// It supports relative paths and turns them into remote URLs or file:// URLs
+// depending on the value of baseURL
+func (p *Parser) toURL(file string) url.URL {
 	// Check if file is an absolute URL
 	if uri, err := url.ParseRequestURI(file); err == nil {
 		if raw := vcsurl.GetRawFile(uri); raw != nil {
-			return raw
-		}
-		return uri
-	} else {
-		// If file is a relative path, let's try to compute its absolute filesystem path
-		// and remote URL by prepending the base paths, if provided.
-		var u *url.URL
-		var err error
-
-		if p.RemoteBaseURL != "" {
-			u, err = url.Parse(p.RemoteBaseURL)
-			u.Path = path.Join(u.Path, file)
-		} else {
-			wd, err := os.Getwd()
-			if err != nil {
-				return nil
-			}
-			u, err = url.Parse(fmt.Sprintf("file://%s", path.Join(wd, file)))
+			return *raw
 		}
 
-		if err != nil {
-			return nil
-		}
-		return u
-		
+		return *uri
 	}
+
+	// p.baseURL can be nil if we didn't autodetect it because
+	// of DisableNetwork == true.
+	if (p.baseURL != nil) {
+		// If file is a relative path, let's just append it to our baseURL
+		u := *p.baseURL
+		u.Path = path.Join(u.Path, file)
+
+		return u
+	}
+
+	// Let's construct a valid URL that will not be used anyway, because
+	// of DisableNetwork == true.
+	return url.URL{Scheme: "file", Path: file}
 }
 
 // fileExists returns true if the file resource exists.
-func (p *Parser) fileExists(file string) bool {
-	url := p.toURL(file);
-	if url == nil {
-		return false
-	}
-
+func (p *Parser) fileExists(u url.URL) bool {
 	// If we have an absolute local path, perform validation on it, otherwise do it
 	// on the remote URL if any. If none are available, validation is skipped.
-	if url.Scheme == "file" {
-		_, err := os.Stat(url.Path);
+	if u.Scheme == "file" {
+		_, err := os.Stat(u.Path);
 
 		return err == nil
 	}
 
-	reachable, _ := p.isReachable(url)
+	reachable, _ := p.isReachable(u)
 
 	return reachable
 }
 
 // isImageFile check whether the string is a valid image. It also checks if the file exists.
 // It returns true if it is an image or false if it's not and an error, if any
-func (p *Parser) isImageFile(value string) (bool, error) {
+func (p *Parser) isImageFile(u url.URL) (bool, error) {
 	validExt := []string{".jpg", ".png"}
-	ext := strings.ToLower(filepath.Ext(value))
+	ext := strings.ToLower(filepath.Ext(u.Path))
 
 	if !funk.Contains(validExt, ext) {
-		return false, fmt.Errorf("invalid file extension for: %s", value)
+		return false, fmt.Errorf("invalid file extension for: %s", urlutil.DisplayURL(&u))
 	}
-	exists := p.fileExists(value)
+	exists := p.fileExists(u)
 
-	return exists, fmt.Errorf("no such file : %s", value)
+	return exists, fmt.Errorf("no such file : %s", urlutil.DisplayURL(&u))
 }
 
 // validLogo returns true if the file path in value is a valid logo.
 // It also checks if the file exists.
 // Reference: https://github.com/publiccodenet/publiccode.yml/blob/develop/schema.md
-func (p *Parser) validLogo(value string) (bool, error) {
+func (p *Parser) validLogo(u url.URL) (bool, error) {
 	validExt := []string{".svg", ".svgz", ".png"}
-	ext := strings.ToLower(filepath.Ext(value))
+	ext := strings.ToLower(filepath.Ext(u.Path))
 
 	// Check for valid extension.
 	if !funk.Contains(validExt, ext) {
-		return false, fmt.Errorf("invalid file extension for: %s", value)
+		return false, fmt.Errorf("invalid file extension for: %s", urlutil.DisplayURL(&u))
 	}
 
-	if exists := p.fileExists(value); !exists {
-		return false, fmt.Errorf("no such file: %s", value)
+	if exists := p.fileExists(u); !exists {
+		return false, fmt.Errorf("no such file: %s", urlutil.DisplayURL(&u))
 	}
 
-	// Try to compute both a local absolute path and a remote URL pointing
-	// to this file, if we have enough information.
-	url := p.toURL(value)
-	if url == nil {
-		return false, fmt.Errorf("can't parse '%s' as URL", value)
-	}
-
+	var localPath string
 	// Remote. Create a temp dir, download and check the file. Remove the temp dir.
-	if url.Scheme != "file" {
+	if u.Scheme != "file" {
+		var err error
+
 		if p.DisableNetwork {
 			return true, nil
 		}
-		logoPath, err := downloadTmpFile(url, getHeaderFromDomain(p.Domain, url.String()))
+		localPath, err = downloadTmpFile(&u, getHeaderFromDomain(p.Domain, u.String()))
 		if err != nil {
 			return false, err
 		}
-		defer func() { os.Remove(path.Dir(logoPath)) }()
+
+		defer func() { os.Remove(path.Dir(localPath)) }()
+	} else {
+		localPath = u.Path
 	}
 
 	if ext == ".png" {
 		image.RegisterFormat("png", "png", png.Decode, png.DecodeConfig)
 
-		f, err := os.Open(url.Path)
+		f, err := os.Open(localPath)
 		if err != nil {
 			return false, err
 		}
@@ -202,7 +191,7 @@ func (p *Parser) validLogo(value string) (bool, error) {
 			return false, err
 		}
 		if image.Width < minLogoWidth {
-			return false, fmt.Errorf("invalid image size of %d (min %dpx of width): %s", image.Width, minLogoWidth, value)
+			return false, fmt.Errorf("invalid image size of %d (min %dpx of width): %s", image.Width, minLogoWidth, urlutil.DisplayURL(&u))
 		}
 	}
 

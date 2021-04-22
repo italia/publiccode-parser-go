@@ -4,10 +4,11 @@ import (
 	"bytes"
 	"fmt"
 	"net/url"
+	"os"
 	"path"
 	"path/filepath"
-	_ "strings"
 	"reflect"
+	"strings"
 	"testing"
 )
 
@@ -16,12 +17,18 @@ type testType struct {
 	err  error
 }
 
-// Parse the YAML file passed as argument.
+// Parse the YAML file passed as argument, using the current directory
+// as base path.
+//
 // Return nil if the parsing succeded or an error if it failed.
-func parse(path string) error {
-	p := NewParser()
-	p.RemoteBaseURL = ""
-	return p.ParseFile(path)
+func parse(file string) error {
+	var p *Parser
+	var err error
+	if p, err = NewParserWithPath(file, "."); err != nil {
+		return err
+	}
+
+	return p.Parse()
 }
 
 // Check all the YAML files matching the glob pattern and fail for each file
@@ -31,7 +38,7 @@ func checkValidFiles(pattern string, t *testing.T) {
 	for _, file := range testFiles {
 		t.Run(file, func(t *testing.T) {
 			err := parse(file)
-			if (err != nil) {
+			if err != nil {
 				t.Errorf("[%s] validation failed for valid file: %T - %s\n", file, err, err)
 			}
 		})
@@ -44,26 +51,31 @@ func checkParseErrors(t *testing.T, err error, test testType) {
 	} else if test.err != nil && err == nil {
 		t.Errorf("[%s] no error generated\n", test.file)
 	} else if test.err != nil && err != nil {
-		if ! reflect.DeepEqual(test.err, err) {
+		if !reflect.DeepEqual(test.err, err) {
 			t.Errorf("[%s] wrong error generated:\n%T - %s\n- instead of:\n%T - %s", test.file, err, err, test.err, test.err)
 		}
 	}
 }
 
 func TestInvalidTestcasesV0_2(t *testing.T) {
+	cwd, err := os.Getwd()
+	if err != nil {
+		t.Errorf("Can't get current working directory")
+	}
+
 	expected := map[string]error{
 		// publiccodeYmlVersion
-		"publiccodeYmlVersion_missing.yml":	ValidationErrors{ValidationError{"publiccodeYmlVersion", "required", 4, 1}},
-		"publiccodeYmlVersion_invalid.yml":	ValidationErrors{ValidationError{
+		"publiccodeYmlVersion_missing.yml": ValidationErrors{ValidationError{"publiccodeYmlVersion", "required", 4, 1}},
+		"publiccodeYmlVersion_invalid.yml": ValidationErrors{ValidationError{
 			"publiccodeYmlVersion", "must be one of the following: 0.2 0.2.2", 2, 1,
 		}},
-		"publiccodeYmlVersion_wrong_type.yml":	ValidationErrors{
+		"publiccodeYmlVersion_wrong_type.yml": ValidationErrors{
 			ValidationError{"publiccodeYmlVersion", "wrong type for this field", 2, 1},
 			ValidationError{"publiccodeYmlVersion", "required", 2, 1}},
 
 		// name
 		"name_missing.yml": ValidationErrors{ValidationError{"name", "required", 1, 1}},
-		"name_nil.yml": ValidationErrors{ValidationError{"name", "required", 4, 1}},
+		"name_nil.yml":     ValidationErrors{ValidationError{"name", "required", 4, 1}},
 		"name_wrong_type.yml": ValidationErrors{
 			ValidationError{"name", "wrong type for this field", 4, 1},
 			ValidationError{"name", "required", 4, 1},
@@ -124,10 +136,10 @@ func TestInvalidTestcasesV0_2(t *testing.T) {
 			ValidationError{"logo", "wrong type for this field", 18, 1},
 		},
 		"logo_unsupported_extension.yml": ValidationErrors{
-			ValidationError{"logo", "invalid file extension for: logo.mpg", 18, 1},
+			ValidationError{"logo", fmt.Sprintf("invalid file extension for: %s/logo.mpg", cwd), 18, 1},
 		},
 		"logo_missing_file.yml": ValidationErrors{
-			ValidationError{"logo", "no such file: no_such_file.png", 18, 1},
+			ValidationError{"logo", fmt.Sprintf("no such file: %s/no_such_file.png", cwd), 18, 1},
 		},
 		"logo_invalid_png.yml": ValidationErrors{
 			ValidationError{"logo", "image: unknown format", 18, 1},
@@ -138,10 +150,15 @@ func TestInvalidTestcasesV0_2(t *testing.T) {
 			ValidationError{"monochromeLogo", "wrong type for this field", 18, 1},
 		},
 		"monochromeLogo_unsupported_extension.yml": ValidationErrors{
-			ValidationError{"monochromeLogo", "invalid file extension for: monochromeLogo.mpg", 18, 1},
+			ValidationError{
+				"monochromeLogo",
+				fmt.Sprintf("invalid file extension for: %s/monochromeLogo.mpg", cwd),
+				18,
+				1,
+			},
 		},
 		"monochromeLogo_missing_file.yml": ValidationErrors{
-			ValidationError{"monochromeLogo", "no such file: no_such_file.png", 18, 1},
+			ValidationError{"monochromeLogo", fmt.Sprintf("no such file: %s/no_such_file.png", cwd), 18, 1},
 		},
 		"monochromeLogo_invalid_png.yml": ValidationErrors{
 			ValidationError{"monochromeLogo", "image: unknown format", 18, 1},
@@ -280,7 +297,12 @@ func TestInvalidTestcasesV0_2(t *testing.T) {
 			ValidationError{"description.eng.longDescription", "must be more or equal than 500", 34, 5},
 		},
 		"description_eng_screenshots_missing_file.yml": ValidationErrors{
-			ValidationError{"description.eng.screenshots[0]", "'no_such_file.png' is not an image: no such file : no_such_file.png", 25, 5},
+			ValidationError{
+				"description.eng.screenshots[0]",
+				fmt.Sprintf("'no_such_file.png' is not an image: no such file : %s/no_such_file.png", cwd),
+				25,
+				5,
+			},
 		},
 		"description_eng_awards_wrong_type.yml": ValidationErrors{
 			ValidationError{"description.eng.awards", "wrong type for this field", 46, 1},
@@ -301,7 +323,12 @@ func TestInvalidTestcasesV0_2(t *testing.T) {
 			"legal.license", "invalid license 'Invalid License'", 48, 3,
 		}},
 		"legal_authorsFile_missing_file.yml": ValidationErrors{
-			ValidationError{"legal.authorsFile", "file 'no_such_authors_file.txt' does not exist", 43, 3},
+			ValidationError{
+				"legal.authorsFile",
+				fmt.Sprintf("'%s/no_such_authors_file.txt' does not exist", cwd),
+				43,
+				3,
+			},
 		},
 
 		// maintenance
@@ -380,7 +407,7 @@ func TestInvalidTestcasesV0_2(t *testing.T) {
 		"file_encoding.yml": ValidationErrors{ValidationError{"", "Invalid UTF-8", 0, 0}},
 	}
 
-    testFiles, _ := filepath.Glob("testdata/v0.2/invalid/*yml")
+	testFiles, _ := filepath.Glob("testdata/v0.2/invalid/*yml")
 	for _, file := range testFiles {
 		baseName := path.Base(file)
 		if expected[baseName] == nil {
@@ -406,10 +433,13 @@ func TestDecodeValueErrorsRemote(t *testing.T) {
 
 	for _, test := range testRemoteFiles {
 		t.Run(fmt.Sprintf("%v", test.err), func(t *testing.T) {
-			// Parse data into pc struct.
-			p := NewParser()
-			p.RemoteBaseURL = "https://raw.githubusercontent.com/italia/publiccode-editor/master"
-			err := p.ParseRemoteFile(test.file)
+			var p *Parser
+			var err error
+
+			if p, err = NewParser(test.file); err != nil {
+				t.Errorf("Can't create parser for %s", test.file)
+			}
+			err = p.Parse()
 
 			checkParseErrors(t, err, test)
 		})
@@ -418,26 +448,33 @@ func TestDecodeValueErrorsRemote(t *testing.T) {
 
 // Test that relative paths are turned into absolute paths.
 func TestRelativePaths(t *testing.T) {
-	// Parse file into pc struct.
-	// TODO const url = "https://raw.githubusercontent.com/italia/18app/master/publiccode.yml"
-	// p := NewParser()
-	// p.RemoteBaseURL = "https://raw.githubusercontent.com/italia/18app/master"
-	// err := p.ParseRemoteFile(url)
-	// if err != nil {
-	// 	t.Errorf("Failed to parse remote file from %v: %v", url, err)
-	// }
+	const remoteFile = "https://raw.githubusercontent.com/italia/18app/master/publiccode.yml"
 
-	// if strings.Index(p.PublicCode.Description["it"].Screenshots[0], p.RemoteBaseURL) != 0 {
-	// 	t.Errorf("Relative path was not turned into absolute URL: %v", p.PublicCode.Description["it"].Screenshots[0])
-	// }
+	var p *Parser
+	var err error
+
+	if p, err = NewParser(remoteFile); err != nil {
+		t.Errorf("Can't create parser for %s", remoteFile)
+	}
+	err = p.Parse()
+
+	if err != nil {
+		t.Errorf("Failed to parse remote file from %v: %v", remoteFile, err)
+	}
+
+	fmt.Println(p.PublicCode.Description["it"].Screenshots[0])
+	if ! strings.HasPrefix(p.PublicCode.Description["it"].Screenshots[0], "http://") ||
+		! strings.HasPrefix(p.PublicCode.Description["it"].Screenshots[0], "https://") {
+		t.Errorf("Relative path was not turned into absolute URL: %v", p.PublicCode.Description["it"].Screenshots[0])
+	}
 }
 
 func TestIsReachable(t *testing.T) {
-	p := NewParser()
+	var p Parser
 	p.DisableNetwork = true
 
 	u, _ := url.Parse("https://google.com/404")
-	if reachable, _ := p.isReachable(u); !reachable {
+	if reachable, _ := p.isReachable(*u); !reachable {
 		t.Errorf("isReachable() returned false with DisableNetwork enabled")
 	}
 }
@@ -445,9 +482,14 @@ func TestIsReachable(t *testing.T) {
 // Test that the exported YAML passes validation again, and that re-exporting it
 // matches the first export (lossless roundtrip).
 func TestExport(t *testing.T) {
-	p := NewParser()
+	var p *Parser
+	var err error
+	if p, err = NewParser("testdata/v0.2/valid/valid.yml"); err != nil {
+		t.Errorf("Can't create Parser: %v", err)
+	}
 	p.DisableNetwork = true
-	err := p.ParseFile("testdata/v0.2/valid/valid.yml")
+
+	err = p.Parse()
 	if err != nil {
 		t.Errorf("Failed to parse valid file: %v", err)
 	}
@@ -457,9 +499,13 @@ func TestExport(t *testing.T) {
 		t.Errorf("Failed to export YAML: %v", err)
 	}
 
-	p2 := NewParser()
+	var p2 *Parser
+	if p2, err = NewParser("/dev/null"); err != nil {
+		t.Errorf("Can't create Parser: %v", err)
+	}
 	p2.DisableNetwork = true
-	err = p2.Parse(yaml1)
+
+	err = p2.ParseBytes(yaml1)
 	if err != nil {
 		t.Errorf("Failed to parse exported file: %v", err)
 	}
@@ -471,5 +517,32 @@ func TestExport(t *testing.T) {
 
 	if !bytes.Equal(yaml1, yaml2) {
 		t.Errorf("Exported YAML files do not match; roundtrip is not lossless")
+	}
+}
+
+// Test the toURL function
+func TestToURL(t *testing.T) {
+	cwd, err := os.Getwd()
+	if err != nil {
+		t.Errorf("Can't get current working directory")
+	}
+
+	expected := map[string]*url.URL{
+		"file.txt":                              &url.URL{Scheme: "file", Path: fmt.Sprintf("%s/file.txt", cwd)},
+		"/path/file.txt":                        &url.URL{Scheme: "file", Path: "/path/file.txt"},
+		"https://developers.italia.it/":         &url.URL{Scheme: "https", Host: "developers.italia.it", Path: "/"},
+		"https://developers.italia.it/file.txt": &url.URL{Scheme: "https", Host: "developers.italia.it", Path: "/file.txt"},
+		"http://developers.italia.it/":          &url.URL{Scheme: "http", Host: "developers.italia.it", Path: "/"},
+	}
+
+	for in, out := range expected {
+		var u *url.URL
+		if u, err = toURL(in); err != nil {
+			t.Errorf("%s: got error %v", in, err)
+		}
+
+		if *u != *out {
+			t.Errorf("%s: expected %v got %v", in, out, u)
+		}
 	}
 }
