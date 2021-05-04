@@ -3,7 +3,6 @@ package publiccode
 import (
 	"fmt"
 	"net/url"
-	"strings"
 
 	spdxValidator "github.com/alranel/go-spdx/spdx"
 	"github.com/alranel/go-vcsurl"
@@ -25,39 +24,6 @@ func (p *Parser) validateFields() error {
 		}
 		if !vcsurl.IsRepo((*url.URL)(p.PublicCode.URL)) {
 			ve = append(ve, newValidationError("url", "is not a valid code repository"))
-		}
-	}
-
-	// Check that the supplied URL matches the source repository, if known.
-	if p.baseURL.Scheme != "file" {
-		repo1 := vcsurl.GetRepo((*url.URL)(p.baseURL))
-		repo2 := vcsurl.GetRepo((*url.URL)(p.PublicCode.URL))
-		if repo1 == nil {
-			ve = append(ve, newValidationError(
-				"", "failed to detect a code repository at publiccode.yml's location: %s\n", p.baseURL),
-			)
-		}
-		if repo2 == nil {
-			ve = append(ve, newValidationError(
-				"url", "failed to detect a code repository at %s\n", p.PublicCode.URL),
-			)
-		}
-
-		if repo1 != nil && repo2 != nil {
-			// Let's ignore the schema when checking for equality.
-			//
-			// This is mainly to match repos regardless of whether they are served
-			// through HTTPS or HTTP.
-			repo1.Scheme, repo2.Scheme = "", ""
-
-			if !strings.EqualFold(repo1.String(), repo2.String()) {
-				ve = append(ve, newValidationError(
-					"",
-					"declared url (%s) and actual publiccode.yml location URL (%s) "+
-					"are not in the same repo: '%s' vs '%s'",
-					p.PublicCode.URL, p.baseURL, repo2, repo1,
-				))
-			}
 		}
 	}
 
@@ -177,15 +143,6 @@ func (p *Parser) validateFields() error {
 			}
 		}
 	}
-
-	// TODO Check if the URL matches the base URL.
-	// We don't allow absolute URLs not pointing to the same repository as the
-	// publiccode.yml file
-	// if strings.Index(file, p.RemoteBaseURL) != 0 {
-	// 	ve = append(ve, newValidationError(
-	// 		 "", fmt.Errorf("Absolute URL (%s) is outside the repository (%s)", file, p.RemoteBaseURL),
-	// 	))
-	// }
 
 	if (len(ve) == 0) {
 		return nil
