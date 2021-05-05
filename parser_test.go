@@ -8,7 +8,6 @@ import (
 	"path"
 	"path/filepath"
 	"reflect"
-	"strings"
 	"testing"
 )
 
@@ -443,29 +442,6 @@ func TestDecodeValueErrorsRemote(t *testing.T) {
 
 			checkParseErrors(t, err, test)
 		})
-	}
-}
-
-// Test that relative paths are turned into absolute paths.
-func TestRelativePaths(t *testing.T) {
-	const remoteFile = "https://raw.githubusercontent.com/italia/18app/master/publiccode.yml"
-
-	var p *Parser
-	var err error
-
-	if p, err = NewParser(remoteFile); err != nil {
-		t.Errorf("Can't create parser for %s", remoteFile)
-	}
-	err = p.Parse()
-
-	if err != nil {
-		t.Errorf("Failed to parse remote file from %v: %v", remoteFile, err)
-	}
-
-	fmt.Println(p.PublicCode.Description["it"].Screenshots[0])
-	if ! strings.HasPrefix(p.PublicCode.Description["it"].Screenshots[0], "http://") ||
-		! strings.HasPrefix(p.PublicCode.Description["it"].Screenshots[0], "https://") {
-		t.Errorf("Relative path was not turned into absolute URL: %v", p.PublicCode.Description["it"].Screenshots[0])
 	}
 }
 
