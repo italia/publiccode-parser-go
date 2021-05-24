@@ -14,6 +14,7 @@ import (
 	"path"
 	"path/filepath"
 	"regexp"
+	"runtime"
 	"strings"
 
 	"github.com/thoas/go-funk"
@@ -67,7 +68,9 @@ func getHeaderFromDomain(domain Domain, url string) map[string]string {
 // isReachable checks whether the URL resource is reachable.
 // An URL resource is reachable if it returns HTTP 200.
 func (p *Parser) isReachable(u url.URL) (bool, error) {
-	if p.DisableNetwork {
+	// Don't check if the network checks are disabled or if we are running in WASM
+	// because we'd most likely fail due to CORS errors.
+	if p.DisableNetwork || runtime.GOARCH == "wasm" {
 		return true, nil
 	}
 
