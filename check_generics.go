@@ -19,7 +19,7 @@ import (
 
 	"github.com/thoas/go-funk"
 	httpclient "github.com/italia/httpclient-lib-go"
-	vcsurl "github.com/alranel/go-vcsurl"
+	"github.com/alranel/go-vcsurl/v2"
 
 	urlutil "github.com/italia/publiccode-parser-go/internal"
 )

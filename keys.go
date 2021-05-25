@@ -5,7 +5,7 @@ import (
 	"net/url"
 
 	spdxValidator "github.com/alranel/go-spdx/spdx"
-	"github.com/alranel/go-vcsurl"
+	"github.com/alranel/go-vcsurl/v2"
 	"github.com/thoas/go-funk"
 
 	urlutil "github.com/italia/publiccode-parser-go/internal"

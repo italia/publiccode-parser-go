@@ -9,7 +9,7 @@ import (
 	"os"
 	"runtime/debug"
 
-	vcsurl "github.com/alranel/go-vcsurl"
+	"github.com/alranel/go-vcsurl/v2"
 
 	publiccode "github.com/italia/publiccode-parser-go"
 	urlutil "github.com/italia/publiccode-parser-go/internal"

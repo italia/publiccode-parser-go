@@ -14,7 +14,7 @@ import (
 
 	"gopkg.in/yaml.v3"
 	"github.com/go-playground/validator/v10"
-	"github.com/alranel/go-vcsurl"
+	"github.com/alranel/go-vcsurl/v2"
 
 	publiccodeValidator "github.com/italia/publiccode-parser-go/validators"
 	urlutil "github.com/italia/publiccode-parser-go/internal"
