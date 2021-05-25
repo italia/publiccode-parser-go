@@ -445,6 +445,31 @@ func TestDecodeValueErrorsRemote(t *testing.T) {
 	}
 }
 
+func TestUrlMissingWithoutPath(t *testing.T) {
+	expected := map[string]error{
+		"url_missing.yml": ValidationErrors{
+			ValidationError{"url", "required", 1, 1},
+		},
+	}
+
+	testFiles, _ := filepath.Glob("testdata/v0.2/invalid/url_missing.yml")
+	for _, file := range testFiles {
+		baseName := path.Base(file)
+		if expected[baseName] == nil {
+			t.Errorf("No expected data for file %s", baseName)
+		}
+		t.Run(file, func(t *testing.T) {
+			parser, err := NewParser(file)
+			if err != nil {
+				t.Errorf("Can't create parser for %s", file)
+			}
+			err = parser.Parse()
+
+			checkParseErrors(t, err, testType{file, expected[baseName]})
+		})
+	}
+}
+
 func TestIsReachable(t *testing.T) {
 	var p Parser
 	p.DisableNetwork = true

@@ -247,7 +247,7 @@ func (p *Parser) ParseBytes(in []byte) error {
 	// publiccode.yml url key
 	//
 	// We need the baseURL to perform network checks.
-	if p.baseURL == nil && !p.DisableNetwork {
+	if p.baseURL == nil && !p.DisableNetwork && p.PublicCode.URL != nil {
 		rawRoot, err := vcsurl.GetRawRoot((*url.URL)(p.PublicCode.URL), p.Branch)
 		if err != nil {
 			line, column := getPositionInFile("url", node)
