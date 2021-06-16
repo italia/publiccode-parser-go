@@ -137,8 +137,8 @@ func getKeyAtLine(parentNode yaml.Node, line int, path string) string {
 	return ""
 }
 
-func toValidationError(errorText string, node yaml.Node) ValidationError {
-	r := regexp.MustCompile(`^(line ([0-9]+): )`)
+func toValidationError(errorText string, node *yaml.Node) ValidationError {
+	r := regexp.MustCompile(`(line ([0-9]+): )`)
 	matches := r.FindStringSubmatch(errorText)
 
 	line := 0
@@ -153,7 +153,10 @@ func toValidationError(errorText string, node yaml.Node) ValidationError {
 		errorText = "wrong type for this field"
 	}
 
-	key := getKeyAtLine(node, line, "")
+	var key string
+	if node != nil {
+		key = getKeyAtLine(*node, line, "")
+	}
 
 	return ValidationError{
 		Key: key,
@@ -163,7 +166,7 @@ func toValidationError(errorText string, node yaml.Node) ValidationError {
 	}
 }
 
-// Parse loads the yaml bytes and tries to parse it. Return an error if fails.
+// ParseBytes loads the yaml bytes and tries to parse it. Return an error if fails.
 func (p *Parser) ParseBytes(in []byte) error {
 	var ve ValidationErrors
 
@@ -178,18 +181,25 @@ func (p *Parser) ParseBytes(in []byte) error {
 
 	d := yaml.NewDecoder(bytes.NewReader(in))
 	d.KnownFields(true)
-	d.Decode(&node)
+	err := d.Decode(&node)
 
-	node = *node.Content[0]
+	if err == nil && len(node.Content) > 0 {
+		node = *node.Content[0]
+	} else {
+		// YAML is malformed
+		ve = append(ve, toValidationError(err.Error(), nil))
+
+		return ve;
+	}
 
 	// Decode the YAML into a PublicCode structure, so we get type errors
 	d = yaml.NewDecoder(bytes.NewReader(in))
 	d.KnownFields(true)
-	if err := d.Decode(&p.PublicCode); err != nil {
+	if err = d.Decode(&p.PublicCode); err != nil {
 		switch err.(type) {
 			case *yaml.TypeError:
 				for _, errorText := range err.(*yaml.TypeError).Errors {
-					ve = append(ve, toValidationError(errorText, node))
+					ve = append(ve, toValidationError(errorText, &node))
 				}
 			default:
 				ve = append(ve, newValidationError("", err.Error()))
@@ -198,7 +208,7 @@ func (p *Parser) ParseBytes(in []byte) error {
 
 	validate := publiccodeValidator.New()
 
-	err := validate.Struct(p.PublicCode)
+	err = validate.Struct(p.PublicCode)
 	if err != nil {
 		tagMap := map[string]string{
 			"gt": "must be more than",

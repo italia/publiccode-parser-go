@@ -404,6 +404,7 @@ func TestInvalidTestcasesV0_2(t *testing.T) {
 
 		// misc
 		"file_encoding.yml": ValidationErrors{ValidationError{"", "Invalid UTF-8", 0, 0}},
+		"invalid_yaml.yml": ValidationErrors{ValidationError{"", "yaml: did not find expected key", 18, 1}},
 	}
 
 	testFiles, _ := filepath.Glob("testdata/v0.2/invalid/*yml")
