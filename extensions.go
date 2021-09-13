@@ -43,5 +43,6 @@ type ExtensionIT struct {
 		Pagopa bool `yaml:"pagopa"`
 		Cie    bool `yaml:"cie"`
 		Anpr   bool `yaml:"anpr"`
+		Io     bool `yaml:"io"`
 	} `yaml:"piattaforme"`
 }

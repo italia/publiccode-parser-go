@@ -32,6 +32,8 @@ func (p *Parser) decodeBool(key string, boolValue bool) (err error) {
 		p.PublicCode.It.Piattaforme.Cie = boolValue
 	case "it/piattaforme/anpr":
 		p.PublicCode.It.Piattaforme.Anpr = boolValue
+	case "it/piattaforme/io":
+		p.PublicCode.It.Piattaforme.Io = boolValue
 
 	default:
 		return newErrorInvalidValue(key, "Unexpected boolean key")

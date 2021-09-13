@@ -31,6 +31,7 @@ var renamedKeys = map[string]string{
 	"it/pagopa":                  "it/piattaforme/pagopa",
 	"it/cie":                     "it/piattaforme/cie",
 	"it/anpr":                    "it/piattaforme/anpr",
+	"it/io":                      "it/piattaforme/io",
 }
 
 // list of keys that were removed from the publiccode.yml spec
