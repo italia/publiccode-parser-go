@@ -1,0 +1,21 @@
+name: Check amministrazioni.txt freshness
+
+on:
+  schedule:
+    - cron: 15 8 * * *
+
+jobs:
+  check-file-freshness:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Setup repo
+        uses: actions/checkout@v2
+
+      - name: Setup Deno
+        uses: denoland/setup-deno@v1
+        with:
+          deno-version: v1.18
+      - run: deno run --allow-net --allow-env --allow-read .github/workflows/file-freshness.js
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
