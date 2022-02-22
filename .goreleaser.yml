@@ -40,9 +40,7 @@ dockers:
   -
     goos: linux
     goarch: amd64
-    binaries:
-      - pcvalidate
-    builds:
+    ids:
       - pcvalidate
     skip_push: false
     dockerfile: Dockerfile.goreleaser
