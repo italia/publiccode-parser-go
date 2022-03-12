@@ -4,36 +4,28 @@ import (
 	"bytes"
 	"compress/gzip"
 	"encoding/base64"
+	"fmt"
 	"image"
 	"image/png"
 	"io"
-	"io/ioutil"
 	"math/rand"
 	"net/url"
 	"os"
 	"path"
 	"path/filepath"
 	"regexp"
+	"runtime"
 	"strings"
-	"time"
 
-	httpclient "github.com/italia/httpclient-lib-go"
 	"github.com/thoas/go-funk"
+	httpclient "github.com/italia/httpclient-lib-go"
+	"github.com/alranel/go-vcsurl/v2"
+
+	urlutil "github.com/italia/publiccode-parser-go/v2/internal"
 )
 
 // Despite the spec requires at least 1000px, we temporarily release this constraint to 120px.
 const minLogoWidth = 120
-
-// checkEmail tells whether email is well formatted.
-// In general an email is valid if compile the regex: ^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,4}$
-func (p *Parser) checkEmail(key string, fn string) error {
-	re := regexp.MustCompile(`^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,4}$`)
-	if !re.MatchString(fn) {
-		return newErrorInvalidValue(key, "invalid email: %v", fn)
-	}
-
-	return nil
-}
 
 func getBasicAuth(domain Domain) string {
 	if len(domain.BasicAuth) > 0 {
@@ -73,321 +65,149 @@ func getHeaderFromDomain(domain Domain, url string) map[string]string {
 	return headers
 }
 
-// checkURL tells whether the URL resource is well formatted and reachable and return it as *url.URL.
-// An URL resource is well formatted if it's a valid URL and the scheme is not empty.
-// An URL resource is reachable if returns an http Status = 200 OK.
-func (p *Parser) checkURL(key string, value string) (string, *url.URL, error) {
-	// Check if URL is well formatted
-	u, err := url.Parse(value)
-	if err != nil {
-		return "", nil, newErrorInvalidValue(key, "not a valid URL: %s: %v", value, err)
+// isReachable checks whether the URL resource is reachable.
+// An URL resource is reachable if it returns HTTP 200.
+func (p *Parser) isReachable(u url.URL) (bool, error) {
+	// Don't check if the network checks are disabled or if we are running in WASM
+	// because we'd most likely fail due to CORS errors.
+	if p.DisableNetwork || runtime.GOARCH == "wasm" {
+		return true, nil
 	}
+
 	if u.Scheme == "" {
-		return "", nil, newErrorInvalidValue(key, "missing URL scheme: %s", value)
+		return false, fmt.Errorf("missing URL scheme")
 	}
 
-	if !p.DisableNetwork {
-		// Check whether URL is reachable
-		r, err := httpclient.GetURL(value, getHeaderFromDomain(p.Domain, value))
-		if err != nil {
-			return "", nil, newErrorInvalidValue(key, "HTTP GET failed for %s: %v", value, err)
-		}
-		if r.Status.Code != 200 {
-			return "", nil, newErrorInvalidValue(key, "HTTP GET returned %d for %s; 200 was expected", r.Status.Code, value)
-		}
-	}
-
-	return u.String(), u, nil
-}
-
-// getAbsolutePaths tries to compute both a local absolute path and a remote
-// URL pointing to the given file, if we have enough information.
-func (p *Parser) getAbsolutePaths(key, file string) (string, string, error) {
-	var LocalPath, RemoteURL string
-
-	// Check if file is an absolute URL
-	if _, err := url.ParseRequestURI(file); err == nil {
-		// If the base URL is set, we can perform validation and try to compute the local path
-		if p.RemoteBaseURL != "" {
-			// Let's be tolerant: turn GitHub non-raw URLs to raw URLs
-			var re = regexp.MustCompile(`^https://github.com/(.+?)/(.+?)/blob/(.+)$`)
-			file = re.ReplaceAllString(file, `https://raw.githubusercontent.com/$1/$2/$3`)
-
-			// Check if the URL matches the base URL.
-			// We don't allow absolute URLs not pointing to the same repository as the
-			// publiccode.yml file
-			if strings.Index(file, p.RemoteBaseURL) != 0 {
-				return "", "", newErrorInvalidValue(key, "Absolute URL (%s) is outside the repository (%s)", file, p.RemoteBaseURL)
-			}
-
-			// We can compute the local path by stripping the base URL.
-			if p.LocalBasePath != "" {
-				LocalPath = path.Join(p.LocalBasePath, strings.Replace(file, p.RemoteBaseURL, "", 1))
-			}
-		}
-		RemoteURL = file
-	} else {
-		// If file is a relative path, let's try to compute its absolute filesystem path
-		// and remote URL by prepending the base paths, if provided.
-		if p.LocalBasePath != "" {
-			LocalPath = path.Join(p.LocalBasePath, file)
-		}
-		if p.RemoteBaseURL != "" {
-			u, err := url.Parse(p.RemoteBaseURL)
-			if err != nil {
-				return "", "", err
-			}
-			u.Path = path.Join(u.Path, file)
-			RemoteURL = u.String()
-		}
-	}
-
-	// fmt.Printf("file = %s\n", file)
-	// fmt.Printf("  LocalPath = %s\n", LocalPath)
-	// fmt.Printf("  RemoteURL = %s\n", RemoteURL)
-
-	return LocalPath, RemoteURL, nil
-}
-
-// checkFile tells whether the file resource exists and return it.
-func (p *Parser) checkFile(key, file string) (string, error) {
-	// Try to compute both a local absolute path and a remote URL pointing
-	// to this file, if we have enough information.
-	LocalPath, RemoteURL, err := p.getAbsolutePaths(key, file)
+	r, err := httpclient.GetURL(u.String(), getHeaderFromDomain(p.Domain, u.String()))
 	if err != nil {
-		return "", err
+		return false, fmt.Errorf("HTTP GET failed for %s: %v", u.String(), err)
+	}
+	if r.Status.Code != 200 {
+		return false, fmt.Errorf("HTTP GET returned %d for %s; 200 was expected", r.Status.Code, u.String())
 	}
 
+	return true, nil
+}
+
+// toURL turns the passed string into an URL, trying to resolve
+// code hosting URLs to their raw URL.
+//
+// It supports relative paths and turns them into remote URLs or file:// URLs
+// depending on the value of baseURL
+func (p *Parser) toURL(file string) url.URL {
+	// Check if file is an absolute URL
+	if uri, err := url.ParseRequestURI(file); err == nil {
+		if raw := vcsurl.GetRawFile(uri); raw != nil {
+			return *raw
+		}
+
+		return *uri
+	}
+
+	// p.baseURL can be nil if we didn't autodetect it because
+	// of DisableNetwork == true.
+	if (p.baseURL != nil) {
+		// If file is a relative path, let's just append it to our baseURL
+		u := *p.baseURL
+		u.Path = path.Join(u.Path, file)
+
+		return u
+	}
+
+	// Let's construct a valid URL that will not be used anyway, because
+	// of DisableNetwork == true.
+	return url.URL{Scheme: "file", Path: file}
+}
+
+// fileExists returns true if the file resource exists.
+func (p *Parser) fileExists(u url.URL) bool {
 	// If we have an absolute local path, perform validation on it, otherwise do it
 	// on the remote URL if any. If none are available, validation is skipped.
-	if LocalPath != "" {
-		if _, err := os.Stat(LocalPath); err != nil {
-			return "", newErrorInvalidValue(key, "local file does not exist: %v", LocalPath)
-		}
-	} else if RemoteURL != "" {
-		_, _, err := p.checkURL(key, RemoteURL)
-		if err != nil {
-			return "", err
-		}
+	if u.Scheme == "file" {
+		_, err := os.Stat(u.Path);
+
+		return err == nil
 	}
 
-	// Return the absolute remote URL if any, or the original relative path
-	// (returning the local path would be pointless as we assume it's a temporary
-	// working directory)
-	if RemoteURL != "" {
-		return RemoteURL, nil
-	}
-	return file, nil
+	reachable, _ := p.isReachable(u)
+
+	return reachable
 }
 
-// checkDate tells whether the string in input is a date in the
-// format "YYYY-MM-DD", which is one of the ISO8601 allowed encoding, and return it as time.Time.
-func (p *Parser) checkDate(key string, value string) (string, time.Time, error) {
-	t, err := time.Parse("2006-01-02", value)
-	if err != nil {
-		return "", t, newErrorInvalidValue(key, "cannot parse date: %v", err)
-	}
-	return value, t, nil
-}
-
-// checkImage tells whether the string in a valid image. It also checks if the file exists.
-// Reference: https://github.com/publiccodenet/publiccode.yml/blob/develop/schema.md
-func (p *Parser) checkImage(key string, value string) (string, error) {
+// isImageFile check whether the string is a valid image. It also checks if the file exists.
+// It returns true if it is an image or false if it's not and an error, if any
+func (p *Parser) isImageFile(u url.URL) (bool, error) {
 	validExt := []string{".jpg", ".png"}
-	ext := strings.ToLower(filepath.Ext(value))
+	ext := strings.ToLower(filepath.Ext(u.Path))
 
-	// Check for valid extension.
 	if !funk.Contains(validExt, ext) {
-		return value, newErrorInvalidValue(key, "invalid file extension for: %s", value)
+		return false, fmt.Errorf("invalid file extension for: %s", urlutil.DisplayURL(&u))
 	}
+	exists := p.fileExists(u)
 
-	// Check existence of file.
-	file, err := p.checkFile(key, value)
-
-	return file, err
+	return exists, fmt.Errorf("no such file : %s", urlutil.DisplayURL(&u))
 }
 
-// checkLogo tells whether the string in a valid logo. It also checks if the file exists.
+// validLogo returns true if the file path in value is a valid logo.
+// It also checks if the file exists.
 // Reference: https://github.com/publiccodenet/publiccode.yml/blob/develop/schema.md
-func (p *Parser) checkLogo(key string, value string) (string, error) {
+func (p *Parser) validLogo(u url.URL) (bool, error) {
 	validExt := []string{".svg", ".svgz", ".png"}
-	ext := strings.ToLower(filepath.Ext(value))
+	ext := strings.ToLower(filepath.Ext(u.Path))
 
 	// Check for valid extension.
 	if !funk.Contains(validExt, ext) {
-		return value, newErrorInvalidValue(key, "invalid file extension for: %s", value)
+		return false, fmt.Errorf("invalid file extension for: %s", urlutil.DisplayURL(&u))
 	}
 
-	// Check existence of file.
-	file, err := p.checkFile(key, value)
-	if err != nil {
-		return value, err
+	if exists := p.fileExists(u); !exists {
+		return false, fmt.Errorf("no such file: %s", urlutil.DisplayURL(&u))
 	}
 
-	// Try to compute both a local absolute path and a remote URL pointing
-	// to this file, if we have enough information.
-	localPath, remoteURL, err := p.getAbsolutePaths(key, file)
-	if err != nil {
-		return "", err
-	}
-
+	var localPath string
 	// Remote. Create a temp dir, download and check the file. Remove the temp dir.
-	if localPath == "" && remoteURL != "" {
+	if u.Scheme != "file" {
+		var err error
+
 		if p.DisableNetwork {
-			return file, nil
+			return true, nil
 		}
-
-		localPath, err = downloadTmpFile(remoteURL, getHeaderFromDomain(p.Domain, remoteURL))
+		localPath, err = downloadTmpFile(&u, getHeaderFromDomain(p.Domain, u.String()))
 		if err != nil {
-			return file, err
+			return false, err
 		}
+
 		defer func() { os.Remove(path.Dir(localPath)) }()
+	} else {
+		localPath = u.Path
 	}
 
-	if localPath != "" {
-		// Check for image size if .png.
-		if ext == ".png" {
-			f, err := os.Open(localPath)
-			if err != nil {
-				return file, err
-			}
-			image, _, err := image.DecodeConfig(f)
-			if err != nil {
-				return file, err
-			}
+	if ext == ".png" {
+		image.RegisterFormat("png", "png", png.Decode, png.DecodeConfig)
 
-			if image.Width < minLogoWidth {
-				return file, newErrorInvalidValue(key, "invalid image size of %d (min %dpx of width): %s", image.Width, minLogoWidth, value)
-			}
+		f, err := os.Open(localPath)
+		if err != nil {
+			return false, err
+		}
+		image, _, err := image.DecodeConfig(f)
+		if err != nil {
+			return false, err
+		}
+		if image.Width < minLogoWidth {
+			return false, fmt.Errorf("invalid image size of %d (min %dpx of width): %s", image.Width, minLogoWidth, urlutil.DisplayURL(&u))
 		}
 	}
 
-	return file, nil
+	return true, nil
 }
 
-// checkLogo tells whether the string in a valid logo. It also checks if the file exists.
-// Reference: https://github.com/publiccodenet/publiccode.yml/blob/develop/schema.md
-func (p *Parser) checkMonochromeLogo(key string, value string) (string, error) {
-	validExt := []string{".svg", ".svgz", ".png"}
-	ext := strings.ToLower(filepath.Ext(value))
-
-	// Check for valid extension.
-	if !funk.Contains(validExt, ext) {
-		return value, newErrorInvalidValue(key, "invalid file extension for: %s", value)
-	}
-
-	// Check existence of file.
-	file, err := p.checkFile(key, value)
-	if err != nil {
-		return value, err
-	}
-
-	// Try to compute both a local absolute path and a remote URL pointing
-	// to this file, if we have enough information.
-	localPath, remoteURL, err := p.getAbsolutePaths(key, file)
-	if err != nil {
-		return "", err
-	}
-
-	// Remote. Create a temp dir, download and check the file. Remove the temp dir.
-	if localPath == "" && remoteURL != "" {
-		if p.DisableNetwork {
-			return file, nil
-		}
-		localPath, err = downloadTmpFile(remoteURL, getHeaderFromDomain(p.Domain, remoteURL))
-		if err != nil {
-			return file, err
-		}
-		defer func() { os.Remove(path.Dir(localPath)) }()
-	}
-
-	if localPath != "" {
-		// Check for image size if .png.
-		if ext == ".png" {
-			image.RegisterFormat("png", "png", png.Decode, png.DecodeConfig)
-
-			f, err := os.Open(localPath)
-			if err != nil {
-				return file, err
-			}
-			defer f.Close()
-
-			imgCfg, _, err := image.DecodeConfig(f)
-			if err != nil {
-				return file, err
-			}
-			width := imgCfg.Width
-			height := imgCfg.Height
-
-			if width < minLogoWidth {
-				return file, newErrorInvalidValue(key, "invalid image size of %d (min %dpx of width): %s", width, minLogoWidth, value)
-			}
-
-			// Check if monochrome (black). Pixel by pixel.
-			f.Seek(0, 0)
-			img, _, err := image.Decode(f)
-			if err != nil {
-				return file, err
-			}
-			for y := 0; y < width; y++ {
-				for x := 0; x < height; x++ {
-					r, g, b, _ := img.At(x, y).RGBA()
-					if r != 0 || g != 0 || b != 0 {
-						return file, newErrorInvalidValue(key, "the monochromeLogo is not monochrome (black): %s", value)
-					}
-				}
-			}
-		} else if ext == ".svg" {
-			// Regex for every hex color.
-			re := regexp.MustCompile("#(?:[0-9a-fA-F]{3}){1,2}")
-
-			// Read file data.
-			data, err := ioutil.ReadFile(localPath)
-			if err != nil {
-				return file, err
-			}
-
-			for _, color := range re.FindAllString(string(data), -1) {
-				if color != "#000" && color != "#000000" {
-					return file, newErrorInvalidValue(key, "the monochromeLogo is not monochrome (black): %s", value)
-				}
-			}
-		} else if ext == ".svgz" {
-			// Regex for every hex color.
-			re := regexp.MustCompile("#(?:[0-9a-fA-F]{3}){1,2}")
-
-			// Read file data.
-			data, err := ioutil.ReadFile(localPath)
-			if err != nil {
-				return file, err
-			}
-			data, err = gUnzipData(data)
-			if err != nil {
-				return file, err
-			}
-
-			for _, color := range re.FindAllString(string(data), -1) {
-				if color != "#000" && color != "#000000" {
-					return file, newErrorInvalidValue(key, "the monochromeLogo is not monochrome (black): %s", value)
-				}
-			}
-		}
-	}
-
-	return file, nil
-}
-
-// checkMIME tells whether the string in input is a well formatted MIME or not.
-func (p *Parser) checkMIME(key string, value string) error {
+// isMIME checks whether the string in input is a well formed MIME or not.
+func (p *Parser) isMIME(value string) bool {
 	// Regex for MIME.
 	// Reference: https://github.com/jshttp/media-typer/
 	re := regexp.MustCompile("^ *([A-Za-z0-9][A-Za-z0-9!#$&^_-]{0,126})/([A-Za-z0-9][A-Za-z0-9!#$&^_.+-]{0,126}) *$")
 
-	if !re.MatchString(value) {
-		return newErrorInvalidValue(key, " %s is not a valid MIME.", value)
-	}
-
-	return nil
+	return re.MatchString(value)
 }
 
 // gUnzipData g-unzip a list of bytes. (used for svgz unzip)

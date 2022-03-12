@@ -14,35 +14,30 @@ func (e ParseError) Error() string {
 	return e.Reason
 }
 
-// ErrorInvalidKey represents an error caused by an invalid key.
-type ErrorInvalidKey struct {
-	Key string
+type ValidationError struct {
+	Key string         `json:"key"`
+	Description string `json:"description"`
+	Line int           `json:"line"`
+	Column int         `json:"column"`
+}
+func (e ValidationError) Error() string {
+	key := ""
+	if e.Key != "" {
+		key = fmt.Sprintf("%s: ", e.Key)
+	}
+
+	return fmt.Sprintf("publiccode.yml:%d:%d: %s%s", e.Line, e.Column, key, e.Description)
 }
 
-func (e ErrorInvalidKey) Error() string {
-	return fmt.Sprintf("invalid key: %s", e.Key)
+func newValidationError(key string, description string, args ...interface{}) ValidationError {
+	return ValidationError{Key: key, Description: fmt.Sprintf(description, args...)}
 }
 
-// ErrorInvalidValue represents an error caused by an invalid value.
-type ErrorInvalidValue struct {
-	Key    string
-	Reason string
-}
+type ValidationErrors []ValidationError
 
-func (e ErrorInvalidValue) Error() string {
-	return fmt.Sprintf("%s: %s", e.Key, e.Reason)
-}
-
-func newErrorInvalidValue(key string, reason string, args ...interface{}) ErrorInvalidValue {
-	return ErrorInvalidValue{Key: key, Reason: fmt.Sprintf(reason, args...)}
-}
-
-// ErrorParseMulti represents an error caused by a multivalue key.
-type ErrorParseMulti []error
-
-func (es ErrorParseMulti) Error() string {
+func (ve ValidationErrors) Error() string {
 	var ss []string
-	for _, e := range es {
+	for _, e := range ve {
 		ss = append(ss, e.Error())
 	}
 	return strings.Join(ss, "\n")
