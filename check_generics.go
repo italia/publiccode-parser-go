@@ -21,7 +21,7 @@ import (
 	httpclient "github.com/italia/httpclient-lib-go"
 	"github.com/alranel/go-vcsurl/v2"
 
-	urlutil "github.com/italia/publiccode-parser-go/internal"
+	urlutil "github.com/italia/publiccode-parser-go/v2/internal"
 )
 
 // Despite the spec requires at least 1000px, we temporarily release this constraint to 120px.

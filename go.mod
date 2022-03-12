@@ -1,4 +1,4 @@
-module github.com/italia/publiccode-parser-go
+module github.com/italia/publiccode-parser-go/v2
 
 require (
 	github.com/Jeffail/gabs v1.4.0 // indirect

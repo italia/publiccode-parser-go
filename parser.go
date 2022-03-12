@@ -16,8 +16,8 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/alranel/go-vcsurl/v2"
 
-	publiccodeValidator "github.com/italia/publiccode-parser-go/validators"
-	urlutil "github.com/italia/publiccode-parser-go/internal"
+	publiccodeValidator "github.com/italia/publiccode-parser-go/v2/validators"
+	urlutil "github.com/italia/publiccode-parser-go/v2/internal"
 )
 
 // Parser is a helper class for parsing publiccode.yml files.
