@@ -111,9 +111,7 @@ at `/home/my-user/publiccodes/publiccode.yml`
 
 In order to update the assets, run this command:
 
-`go-bindata -o assets.go data/`
-
-And change the package name into `publiccode`
+`go-bindata -pkg assets -o assets/assets.go data/...`
 
 ## Contributing
 

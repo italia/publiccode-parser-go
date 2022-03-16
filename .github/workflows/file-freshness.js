@@ -1,9 +1,10 @@
 import { Octokit } from "https://cdn.skypack.dev/octokit?dts";
 import { Md5 } from "https://deno.land/std@0.126.0/hash/md5.ts";
+import { $ } from 'https://deno.land/x/zx_deno@1.2.2/mod.mjs'
 
 const AMMINISTRAZIONI_TXT_URL =
   "https://www.indicepa.gov.it/public-services/opendata-read-service.php?dstype=FS&filename=amministrazioni.txt";
-const LOCAL_FILE = "../../data/amministrazioni.txt";
+const LOCAL_FILE = "../../data/it/ipa_codes.txt";
 const ISSUE_MARKER = "#auto-issue-files-freshness-checker#";
 
 async function md5(url) {
@@ -23,10 +24,18 @@ const octokit = new Octokit({ auth: Deno.env.get("GITHUB_TOKEN") });
 
 const [ owner, repo ] = Deno.env.get("GITHUB_REPOSITORY").split("/");
 
-console.log("Checking ${LOCAL_FILE} freshness...")
+console.log(`Checking ${LOCAL_FILE} freshness...`);
 
-const currentHash = await md5(new URL(LOCAL_FILE, import.meta.url));
-const latestHash = await md5(AMMINISTRAZIONI_TXT_URL);
+const localFileURL = new URL(LOCAL_FILE, import.meta.url);
+const currentHash = await md5(localFileURL);
+
+await $`curl -sL ${AMMINISTRAZIONI_TXT_URL} |
+  tee /tmp/amministrazioni.txt |
+  tail -n +2 |
+  cut -f1 |
+  LC_COLLATE=C sort > /tmp/ipa_codes.txt.new`;
+
+const latestHash = await md5("file:///tmp/ipa_codes.txt.new");
 
 // See if we already have an issue opened about it
 const results = await octokit.rest.search.issuesAndPullRequests({
@@ -34,9 +43,21 @@ const results = await octokit.rest.search.issuesAndPullRequests({
   sort: "created",
   order: "desc",
 });
-
 console.log(`current: ${currentHash}`);
 console.log(`latest:  ${latestHash}`);
+
+let diff = ""
+
+try {
+  await $`diff -u ${localFileURL.pathname} /tmp/ipa_codes.txt.new`;
+} catch (p) {
+    if (p == 2) {
+        // Exit status 2 from "diff" means something went wrong
+        throw p.stderr;
+    }
+
+    diff = p.stdout;
+}
 
 // If we do, update the current issue
 if (new RegExp(ISSUE_MARKER).test(results?.data?.items[0]?.body)) {
@@ -62,8 +83,7 @@ if (new RegExp(ISSUE_MARKER).test(results?.data?.items[0]?.body)) {
   } else {
     params = {
       body: issue.data.body
-        .replace(/\(current-md5: .*\)/, `(current-md5: \`${currentHash}\`)`)
-        .replace(/\(latest-md5: .*\)/, `(latest-md5: \`${latestHash}\`)`),
+        .replace(/```diff[\s\S]*```/, `\`\`\`diff\n${diff}\n\`\`\``),
     };
   }
 
@@ -76,15 +96,28 @@ if (new RegExp(ISSUE_MARKER).test(results?.data?.items[0]?.body)) {
   });
 } else if (currentHash !== latestHash) {
   console.log("Creating new issue...");
+
   await octokit.rest.issues.create({
     owner,
     repo,
-    title: "Update amministrazioni.txt to the newest version",
+    title: "Update data/it/ipa_codes.txt to the newest version",
     body: `<!-- ${ISSUE_MARKER} -->
-A new version of \`amministrazioni.txt\` is available, we should update it.
+A new version of \`amministrazioni.txt\` is available, we should generate an updated [\`data/it/ipa_codes.txt\`](../blob/master/data/it/ipa_codes.txt) from it.
 
-* [Current file in the repo](../blob/master/data/amministrazioni.txt) (current-md5: \`${currentHash}\`)
-* [**Latest file available**](${AMMINISTRAZIONI_TXT_URL}) (latest-md5: \`${latestHash}\`)
+Run
+\`\`\`console
+curl -sL '${AMMINISTRAZIONI_TXT_URL}' |
+  tail -n +2 |
+  cut -f1 |
+  LC_COLLATE=C sort > data/it/ipa_codes.txt
+\`\`\`
+to generate an updated \`ipa_codes.txt\`.
+
+**What changed**
+
+\`\`\`diff
+${diff}
+\`\`\`
 `,
     labels: ["enhancement"],
   });

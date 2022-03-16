@@ -402,6 +402,11 @@ func TestInvalidTestcasesV0_2(t *testing.T) {
 			ValidationError{"dependsOn.open.optional", "wrong type for this field", 58, 1},
 		},
 
+		// it.*
+		"it_riuso_codiceIPA_invalid.yml": ValidationErrors{
+			ValidationError{"it.riuso.codiceIPA", "must be a valid Italian Public Administration Code (iPA)", 56, 5},
+		},
+
 		// misc
 		"file_encoding.yml": ValidationErrors{ValidationError{"", "Invalid UTF-8", 0, 0}},
 		"invalid_yaml.yml": ValidationErrors{ValidationError{"", "yaml: did not find expected key", 18, 1}},

@@ -219,6 +219,7 @@ func (p *Parser) ParseBytes(in []byte) error {
 			"umin": "must be more or equal than",
 			"is_category_v0_2": "must be a valid category",
 			"is_scope_v0_2": "must be a valid scope",
+			"is_italian_ipa_code": "must be a valid Italian Public Administration Code (iPA)",
 			"iso3166_1_alpha2_lowercase": "must be a valid lowercase ISO 3166-1 alpha-2 two-letter country code",
 			"bcp47": "must be a valid BCP 47 language",
 		}

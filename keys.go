@@ -81,13 +81,6 @@ func (p *Parser) validateFields() error {
 		))
 	}
 
-	if p.PublicCode.It.Riuso.CodiceIPA != "" {
-		err = p.isCodiceIPA(p.PublicCode.It.Riuso.CodiceIPA)
-		if err != nil {
-			ve = append(ve, newValidationError("it.riuso.codiceIPA", err.Error()))
-		}
-	}
-
 	for i, mimeType := range p.PublicCode.InputTypes {
 		if !p.isMIME(mimeType) {
 			ve = append(ve, newValidationError(

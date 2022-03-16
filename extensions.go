@@ -35,7 +35,7 @@ type ExtensionIT struct {
 	} `yaml:"conforme"`
 
 	Riuso struct {
-		CodiceIPA string `yaml:"codiceIPA,omitempty"`
+		CodiceIPA string `yaml:"codiceIPA,omitempty" validate:"omitempty,is_italian_ipa_code"`
 	} `yaml:"riuso,omitempty"`
 
 	Piattaforme struct {
