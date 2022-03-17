@@ -18,6 +18,8 @@ func New() *validator.Validate {
 	validate.RegisterValidation("is_category_v0_2", isCategory_v0_2)
 	validate.RegisterValidation("is_scope_v0_2", isScope_v0_2)
 
+	validate.RegisterValidation("is_italian_ipa_code", isItalianIpaCode)
+
 	validate.RegisterTagNameFunc(func(fld reflect.StructField) string {
 		name := strings.SplitN(fld.Tag.Get("yaml"), ",", 2)[0]
 		if name == "-" {

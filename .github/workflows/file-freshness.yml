@@ -1,4 +1,4 @@
-name: Check amministrazioni.txt freshness
+name: Check data files freshness
 
 on:
   schedule:
@@ -16,6 +16,6 @@ jobs:
         uses: denoland/setup-deno@v1
         with:
           deno-version: v1.18
-      - run: deno run --allow-net --allow-env --allow-read .github/workflows/file-freshness.js
+      - run: deno run --import-map=.github/workflows/import_map.json --unstable --allow-run --allow-net --allow-env --allow-read .github/workflows/file-freshness.js
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
