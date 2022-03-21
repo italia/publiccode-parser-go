@@ -10,7 +10,7 @@ files.
 should be placed at the root of Free/Libre and Open Source software repositories.
 
 This parser performs syntactic and semantic validation according to the
-[official spec](https://docs.italia.it/italia/developers-italia/publiccodeyml-en/en/master/index.html).
+[official spec](https://yml.publiccode.tools).
 
 ## Features
 
