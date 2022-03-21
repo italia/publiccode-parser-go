@@ -49,7 +49,7 @@ console.log(`latest:  ${latestHash}`);
 let diff = ""
 
 try {
-  await $`diff -u ${localFileURL.pathname} /tmp/ipa_codes.txt.new`;
+  await $`diff -u --label old --label new ${localFileURL.pathname} /tmp/ipa_codes.txt.new`;
 } catch (p) {
     if (p == 2) {
         // Exit status 2 from "diff" means something went wrong
