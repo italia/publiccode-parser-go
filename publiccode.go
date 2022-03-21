@@ -68,7 +68,7 @@ type PublicCode struct {
 		UnsupportedCountries *[]string `yaml:"unsupportedCountries,omitempty" validate:"omitempty,dive,iso3166_1_alpha2_lowercase"`
 	} `yaml:"intendedAudience,omitempty"`
 
-	Description map[string]Desc `yaml:"description" validate:"gt=0,dive,keys,bcp47,endkeys,dive"`
+	Description map[string]Desc `yaml:"description" validate:"gt=0,dive,keys,bcp47_language_tag,endkeys,dive"`
 
 	Legal struct {
 		License            string  `yaml:"license" validate:"required"`
@@ -85,7 +85,7 @@ type PublicCode struct {
 
 	Localisation struct {
 		LocalisationReady  *bool    `yaml:"localisationReady" validate:"required"`
-		AvailableLanguages []string `yaml:"availableLanguages" validate:"required,gt=0,dive,bcp47"`
+		AvailableLanguages []string `yaml:"availableLanguages" validate:"required,gt=0,dive,bcp47_language_tag"`
 	} `yaml:"localisation" validate:"required"`
 
 	DependsOn *struct {

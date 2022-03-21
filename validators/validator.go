@@ -11,7 +11,6 @@ func New() *validator.Validate {
 	validate := validator.New()
 	validate.RegisterValidation("date", isDate)
 	validate.RegisterValidation("iso3166_1_alpha2_lowercase", isIso3166Alpha2Lowercase)
-	validate.RegisterValidation("bcp47", isBcp47)
 	validate.RegisterValidation("umax", uMax)
 	validate.RegisterValidation("umin", uMin)
 

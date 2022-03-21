@@ -6,7 +6,6 @@ import (
 
 	"github.com/rivo/uniseg"
 	"github.com/go-playground/validator/v10"
-	"golang.org/x/text/language"
 )
 
 func isDate(fl validator.FieldLevel) bool {
@@ -26,14 +25,6 @@ func isIso3166Alpha2Lowercase(fl validator.FieldLevel) bool {
 	err = validate.Var(str, "iso3166_1_alpha2")
 
 	return err != nil
-}
-
-func isBcp47(fl validator.FieldLevel) bool {
-	str := fl.Field().String()
-
-	_, err := language.Parse(str)
-
-	return err == nil
 }
 
 func uMax(fl validator.FieldLevel) bool {
