@@ -380,6 +380,12 @@ func TestInvalidTestcasesV0_2(t *testing.T) {
 		"localisation_availableLanguages_invalid.yml": ValidationErrors{
 			ValidationError{"localisation.availableLanguages[0]", "must be a valid BCP 47 language", 56, 3},
 		},
+		// TODO: Enable this test when https://github.com/italia/publiccode-parser-go/issues/47
+		// is fixed
+		//
+		// "localisation_availableLanguages_invalid_bcp47.yml": ValidationErrors{
+		// 	ValidationError{"localisation.availableLanguages[0]", "must be a valid BCP 47 language", 56, 3},
+		// },
 		"localisation_localisationReady_missing.yml": ValidationErrors{
 			ValidationError{"localisation.localisationReady", "required", 58, 3},
 		},
