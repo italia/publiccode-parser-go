@@ -33,7 +33,8 @@ await $`curl -sL ${AMMINISTRAZIONI_TXT_URL} |
   tee /tmp/amministrazioni.txt |
   tail -n +2 |
   cut -f1 |
-  LC_COLLATE=C sort > /tmp/ipa_codes.txt.new`;
+  LC_COLLATE=C sort > /tmp/ipa_codes.txt.new &&
+  go-bindata -pkg assets -o assets/assets.go data/...`;
 
 const latestHash = await md5("file:///tmp/ipa_codes.txt.new");
 
