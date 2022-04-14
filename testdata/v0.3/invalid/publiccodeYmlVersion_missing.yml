@@ -1,5 +1,5 @@
 # Should NOT validate: publiccodeYmlVersion is missing
-# publiccodeYmlVersion: "0.2"
+# publiccodeYmlVersion: "0.3"
 
 name: Medusa
 url: "https://github.com/italia/developers.italia.it.git"
