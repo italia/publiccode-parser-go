@@ -2,15 +2,15 @@ package publiccode
 
 // Version of the latest PublicCode specs.
 // Source https://github.com/publiccodenet/publiccode.yml
-const Version = "0.2"
+const Version = "0.3"
 
 // SupportedVersions lists the publiccode.yml versions this parser supports.
-var SupportedVersions = []string{"0.2", "0.2.2"}
+var SupportedVersions = []string{"0.2", "0.2.0", "0.2.1", "0.2.2", "0.3", "0.3.0"}
 
 // PublicCode is a publiccode.yml file definition.
 // Reference: https://github.com/publiccodenet/publiccode.yml
 type PublicCode struct {
-	PubliccodeYamlVersion string `yaml:"publiccodeYmlVersion" validate:"required,oneof=0.2 0.2.2"`
+	PubliccodeYamlVersion string `yaml:"publiccodeYmlVersion" validate:"required,oneof=0.2 0.2.0 0.2.1 0.2.2 0.3 0.3.0"`
 
 	Name             string   `yaml:"name" validate:"required"`
 	ApplicationSuite string   `yaml:"applicationSuite,omitempty"`
