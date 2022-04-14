@@ -124,7 +124,7 @@ func (p *Parser) fileExists(u url.URL) bool {
 	// If we have an absolute local path, perform validation on it, otherwise do it
 	// on the remote URL if any. If none are available, validation is skipped.
 	if u.Scheme == "file" {
-		_, err := os.Stat(u.Path);
+		_, err := os.Stat(u.Path)
 
 		return err == nil
 	}

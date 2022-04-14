@@ -1,29 +1,5 @@
 package publiccode
 
-// list of keys that were renamed in the publiccode.yml spec
-var renamedKeys = map[string]string{
-	"publiccode-yaml-version":    "publiccodeYmlVersion",
-	"it/conforme/accessibile":    "it/conforme/lineeGuidaDesign",
-	"it/conforme/interoperabile": "it/conforme/modelloInteroperabilita",
-	"it/conforme/sicuro":         "it/conforme/misureMinimeSicurezza",
-	"it/conforme/privacy":        "it/conforme/gdpr",
-	"it/spid":                    "it/piattaforme/spid",
-	"it/pagopa":                  "it/piattaforme/pagopa",
-	"it/cie":                     "it/piattaforme/cie",
-	"it/anpr":                    "it/piattaforme/anpr",
-}
-
-// list of keys that were removed from the publiccode.yml spec
-var removedKeys = []string{
-	"tags",                     // deprecated in it:0.2
-	"intendedAudience/onlyFor", // deprecated in it:0.2
-	"it/designKit/seo",         // deprecated in it:0.2
-	"it/designKit/ui",          // deprecated in it:0.2
-	"it/designKit/web",         // deprecated in it:0.2
-	"it/designKit/content",     // deprecated in it:0.2
-	"it/ecosistemi",            // deprecated in it:0.2
-}
-
 // Version of the latest PublicCode specs.
 // Source https://github.com/publiccodenet/publiccode.yml
 const Version = "0.2"
