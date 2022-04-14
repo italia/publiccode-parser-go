@@ -56,7 +56,7 @@ func checkParseErrors(t *testing.T, err error, test testType) {
 	}
 }
 
-func TestInvalidTestcasesV0_2(t *testing.T) {
+func TestInvalidTestcasesV0_3(t *testing.T) {
 	cwd, err := os.Getwd()
 	if err != nil {
 		t.Errorf("Can't get current working directory")
@@ -66,7 +66,7 @@ func TestInvalidTestcasesV0_2(t *testing.T) {
 		// publiccodeYmlVersion
 		"publiccodeYmlVersion_missing.yml": ValidationErrors{ValidationError{"publiccodeYmlVersion", "required", 4, 1}},
 		"publiccodeYmlVersion_invalid.yml": ValidationErrors{ValidationError{
-			"publiccodeYmlVersion", "must be one of the following: 0.2 0.2.2", 2, 1,
+			"publiccodeYmlVersion", "must be one of the following: 0.2 0.2.2 0.3 0.3.0", 2, 1,
 		}},
 		"publiccodeYmlVersion_wrong_type.yml": ValidationErrors{
 			ValidationError{"publiccodeYmlVersion", "wrong type for this field", 2, 1},
@@ -418,7 +418,7 @@ func TestInvalidTestcasesV0_2(t *testing.T) {
 		"invalid_yaml.yml": ValidationErrors{ValidationError{"", "yaml: did not find expected key", 18, 1}},
 	}
 
-	testFiles, _ := filepath.Glob("testdata/v0.2/invalid/*yml")
+	testFiles, _ := filepath.Glob("testdata/v0.3/invalid/*yml")
 	for _, file := range testFiles {
 		baseName := path.Base(file)
 		if expected[baseName] == nil {
@@ -431,9 +431,9 @@ func TestInvalidTestcasesV0_2(t *testing.T) {
 	}
 }
 
-// Test v0.2 valid YAML testcases (testdata/v0.2/valid/).
-func TestValidTestcasesV0_2(t *testing.T) {
-	checkValidFiles("testdata/v0.2/valid/*.yml", t)
+// Test v0.3 valid YAML testcases (testdata/v0.3/valid/).
+func TestValidTestcasesV0_3(t *testing.T) {
+	checkValidFiles("testdata/v0.3/valid/*.yml", t)
 }
 
 // Test publiccode.yml remote files for key errors.
@@ -464,7 +464,7 @@ func TestUrlMissingWithoutPath(t *testing.T) {
 		},
 	}
 
-	testFiles, _ := filepath.Glob("testdata/v0.2/invalid/url_missing.yml")
+	testFiles, _ := filepath.Glob("testdata/v0.3/invalid/url_missing.yml")
 	for _, file := range testFiles {
 		baseName := path.Base(file)
 		if expected[baseName] == nil {
@@ -497,7 +497,7 @@ func TestIsReachable(t *testing.T) {
 func TestExport(t *testing.T) {
 	var p *Parser
 	var err error
-	if p, err = NewParser("testdata/v0.2/valid/valid.yml"); err != nil {
+	if p, err = NewParser("testdata/v0.3/valid/valid.yml"); err != nil {
 		t.Errorf("Can't create Parser: %v", err)
 	}
 	p.DisableNetwork = true
