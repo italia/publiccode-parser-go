@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/url"
 
-	spdxValidator "github.com/alranel/go-spdx/spdx"
+	spdxValidator "github.com/kyoh86/go-spdx/spdx"
 	"github.com/alranel/go-vcsurl/v2"
 	"github.com/thoas/go-funk"
 
