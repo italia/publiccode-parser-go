@@ -5,6 +5,7 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
+	"net/url"
 	"os"
 	"path"
 	"path/filepath"
@@ -13,7 +14,7 @@ import (
 )
 
 // downloadFile download the file in the path.
-func downloadFile(filepath string, url string, headers map[string]string) error {
+func downloadFile(filepath string, url *url.URL, headers map[string]string) error {
 	// Create the file.
 	out, err := os.Create(filepath)
 	if err != nil {
@@ -22,7 +23,7 @@ func downloadFile(filepath string, url string, headers map[string]string) error 
 	defer out.Close()
 
 	// Get the data from the url.
-	resp, err := httpclient.GetURL(url, headers)
+	resp, err := httpclient.GetURL(url.String(), headers)
 	if err != nil {
 		return err
 	}
@@ -36,7 +37,7 @@ func downloadFile(filepath string, url string, headers map[string]string) error 
 }
 
 // Caller is responsible for removing the temporary directory.
-func downloadTmpFile(url string, headers map[string]string) (string, error) {
+func downloadTmpFile(url *url.URL, headers map[string]string) (string, error) {
 	// Create a temp dir
 	tmpdir, err := ioutil.TempDir("", "publiccode.yml-parser-go")
 	if err != nil {
@@ -44,7 +45,7 @@ func downloadTmpFile(url string, headers map[string]string) (string, error) {
 	}
 
 	// Download the file in the temp dir.
-	tmpFile := filepath.Join(tmpdir, path.Base(url))
+	tmpFile := filepath.Join(tmpdir, path.Base(url.Path))
 	err = downloadFile(tmpFile, url, headers)
 	if err != nil {
 		return "", err

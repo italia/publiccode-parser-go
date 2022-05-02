@@ -1,25 +1,5 @@
 package publiccode
 
-import (
-	"net/url"
-	"time"
-)
-
-var mandatoryKeys = []string{
-	"publiccodeYmlVersion",
-	"name",
-	"url",
-	"developmentStatus",
-	"releaseDate",
-	"platforms",
-	"categories",
-	"softwareType",
-	"legal/license",
-	"maintenance/type",
-	"localisation/localisationReady",
-	"localisation/availableLanguages",
-}
-
 // list of keys that were renamed in the publiccode.yml spec
 var renamedKeys = map[string]string{
 	"publiccode-yaml-version":    "publiccodeYmlVersion",
@@ -50,73 +30,69 @@ var removedKeys = []string{
 const Version = "0.2"
 
 // SupportedVersions lists the publiccode.yml versions this parser supports.
-var SupportedVersions = []string{"0.1", "0.2"}
+var SupportedVersions = []string{"0.2", "0.2.2"}
 
 // PublicCode is a publiccode.yml file definition.
 // Reference: https://github.com/publiccodenet/publiccode.yml
 type PublicCode struct {
-	PubliccodeYamlVersion string `yaml:"publiccodeYmlVersion"`
+	PubliccodeYamlVersion string `yaml:"publiccodeYmlVersion" validate:"required,oneof=0.2 0.2.2"`
 
-	Name             string   `yaml:"name"`
+	Name             string   `yaml:"name" validate:"required"`
 	ApplicationSuite string   `yaml:"applicationSuite,omitempty"`
-	URL              *url.URL `yaml:"-"`
-	URLString        string   `yaml:"url"`
-	LandingURL       *url.URL `yaml:"-"`
-	LandingURLString string   `yaml:"landingURL,omitempty"`
+	URL              *URL 	  `yaml:"url" validate:"required"`
+	LandingURL       *URL     `yaml:"landingURL,omitempty"`
 
-	IsBasedOn         []string  `yaml:"isBasedOn,omitempty"`
-	SoftwareVersion   string    `yaml:"softwareVersion,omitempty"`
-	ReleaseDate       time.Time `yaml:"-"`
-	ReleaseDateString string    `yaml:"releaseDate"`
-	Logo              string    `yaml:"logo,omitempty"`
-	MonochromeLogo    string    `yaml:"monochromeLogo,omitempty"`
+	IsBasedOn         UrlOrUrlArray `yaml:"isBasedOn,omitempty"`
+	SoftwareVersion   string        `yaml:"softwareVersion,omitempty"`
+	ReleaseDate       string        `yaml:"releaseDate" validate:"required,date"`
+	Logo              string        `yaml:"logo,omitempty"`
+	MonochromeLogo    string        `yaml:"monochromeLogo,omitempty"`
 
 	InputTypes  []string `yaml:"inputTypes,omitempty"`
 	OutputTypes []string `yaml:"outputTypes,omitempty"`
 
-	Platforms []string `yaml:"platforms"`
+	Platforms []string `yaml:"platforms" validate:"gt=0"`
 
-	Categories []string `yaml:"categories"`
+	Categories []string `yaml:"categories" validate:"required,gt=0,dive,is_category_v0_2"`
 
-	UsedBy []string `yaml:"usedBy,omitempty"`
+	UsedBy *[]string `yaml:"usedBy,omitempty"`
 
-	Roadmap       *url.URL `yaml:"-"`
-	RoadmapString string   `yaml:"roadmap,omitempty"`
+	Roadmap *URL `yaml:"roadmap,omitempty"`
 
-	DevelopmentStatus string `yaml:"developmentStatus"`
+	DevelopmentStatus string `yaml:"developmentStatus" validate:"required,oneof=concept development beta stable obsolete"`
 
-	SoftwareType string `yaml:"softwareType"`
+	SoftwareType string `yaml:"softwareType" validate:"required,oneof=standalone/mobile standalone/iot standalone/desktop standalone/web standalone/backend standalone/other addon library configurationFiles"`
 
-	IntendedAudience struct {
-		Scope                []string `yaml:"scope,omitempty"`
-		Countries            []string `yaml:"countries,omitempty"`
-		UnsupportedCountries []string `yaml:"unsupportedCountries,omitempty"`
-	} `yaml:"intendedAudience"`
+	IntendedAudience *struct {
+		Scope                *[]string `yaml:"scope,omitempty" validate:"omitempty,dive,is_scope_v0_2"`
+		Countries            *[]string `yaml:"countries,omitempty" validate:"omitempty,dive,iso3166_1_alpha2_lowercase"`
+		UnsupportedCountries *[]string `yaml:"unsupportedCountries,omitempty" validate:"omitempty,dive,iso3166_1_alpha2_lowercase"`
+	} `yaml:"intendedAudience,omitempty"`
 
-	Description map[string]Desc `yaml:"description"`
+	Description map[string]Desc `yaml:"description" validate:"gt=0,dive,keys,bcp47_language_tag,endkeys,dive"`
 
 	Legal struct {
-		License            string `yaml:"license"`
-		MainCopyrightOwner string `yaml:"mainCopyrightOwner,omitempty"`
-		RepoOwner          string `yaml:"repoOwner,omitempty"`
-		AuthorsFile        string `yaml:"authorsFile,omitempty"`
-	} `yaml:"legal"`
+		License            string  `yaml:"license" validate:"required"`
+		MainCopyrightOwner *string `yaml:"mainCopyrightOwner,omitempty"`
+		RepoOwner          *string `yaml:"repoOwner,omitempty"`
+		AuthorsFile        *string `yaml:"authorsFile,omitempty"`
+	} `yaml:"legal" validate:"required"`
 
 	Maintenance struct {
-		Type        string       `yaml:"type"`
-		Contractors []Contractor `yaml:"contractors,omitempty"`
-		Contacts    []Contact    `yaml:"contacts,omitempty"`
+		Type        string        `yaml:"type" validate:"required,oneof=internal contract community none"`
+		Contractors []Contractor `yaml:"contractors,omitempty" validate:"required_if=Type contract,dive"`
+		Contacts    []Contact    `yaml:"contacts,omitempty" validate:"required_if=Type community,required_if=Type internal,dive"`
 	} `yaml:"maintenance"`
 
 	Localisation struct {
-		LocalisationReady  bool     `yaml:"localisationReady"`
-		AvailableLanguages []string `yaml:"availableLanguages"`
-	} `yaml:"localisation"`
+		LocalisationReady  *bool    `yaml:"localisationReady" validate:"required"`
+		AvailableLanguages []string `yaml:"availableLanguages" validate:"required,gt=0,dive,bcp47_language_tag"`
+	} `yaml:"localisation" validate:"required"`
 
-	DependsOn struct {
-		Open        []Dependency `yaml:"open,omitempty"`
-		Proprietary []Dependency `yaml:"proprietary,omitempty"`
-		Hardware    []Dependency `yaml:"hardware,omitempty"`
+	DependsOn *struct {
+		Open        *[]Dependency `yaml:"open,omitempty" validate:"omitempty,dive"`
+		Proprietary *[]Dependency `yaml:"proprietary,omitempty" validate:"omitempty,dive"`
+		Hardware    *[]Dependency `yaml:"hardware,omitempty" validate:"omitempty,dive"`
 	} `yaml:"dependsOn,omitempty"`
 
 	It ExtensionIT `yaml:"it"`
@@ -125,47 +101,42 @@ type PublicCode struct {
 // Desc is a general description of the software.
 // Reference: https://github.com/publiccodenet/publiccode.yml/blob/develop/schema.md#section-description
 type Desc struct {
-	LocalisedName          string     `yaml:"localisedName,omitempty"`
-	GenericName            string     `yaml:"genericName"`
-	ShortDescription       string     `yaml:"shortDescription"`
-	LongDescription        string     `yaml:"longDescription,omitempty"`
-	Documentation          *url.URL   `yaml:"-"`
-	DocumentationString    string     `yaml:"documentation,omitempty"`
-	APIDocumentation       *url.URL   `yaml:"-"`
-	APIDocumentationString string     `yaml:"apiDocumentation,omitempty"`
-	Features               []string   `yaml:"features,omitempty"`
-	Screenshots            []string   `yaml:"screenshots,omitempty"`
-	Videos                 []*url.URL `yaml:"-"`
-	VideosStrings          []string   `yaml:"videos,omitempty"`
-	Awards                 []string   `yaml:"awards,omitempty"`
+	LocalisedName          *string   `yaml:"localisedName,omitempty"`
+	GenericName            string    `yaml:"genericName" validate:"required,umax=35"`
+	ShortDescription       string    `yaml:"shortDescription" validate:"required,umax=150"`
+	LongDescription        string    `yaml:"longDescription,omitempty" validate:"required,umin=500,umax=10000"`
+	Documentation          *URL      `yaml:"documentation,omitempty"`
+	APIDocumentation       *URL      `yaml:"apiDocumentation,omitempty"`
+	Features               *[]string `yaml:"features,omitempty" validate:"gt=0,dive,umax=100"`
+	Screenshots            []string  `yaml:"screenshots,omitempty"`
+	Videos                 []*URL    `yaml:"videos,omitempty"`
+	Awards                 []string  `yaml:"awards,omitempty"`
 }
 
 // Contractor is an entity or entities, if any, that are currently contracted for maintaining the software.
 // Reference: https://github.com/publiccodenet/publiccode.yml/blob/develop/schema.md#contractor
 type Contractor struct {
-	Name          string    `yaml:"name"`
-	Email         string    `yaml:"email,omitempty"`
-	Website       *url.URL  `yaml:"-"`
-	WebsiteString string    `yaml:"website,omitempty"`
-	Until         time.Time `yaml:"-"`
-	UntilString   string    `yaml:"until,omitempty"`
+	Name          string  `yaml:"name" validate:"required"`
+	Email         *string `yaml:"email,omitempty" validate:"omitempty,email"`
+	Website       *URL    `yaml:"website,omitempty"`
+	Until         string  `yaml:"until" validate:"required,date"`
 }
 
 // Contact is a contact info maintaining the software.
 // Reference: https://github.com/publiccodenet/publiccode.yml/blob/develop/schema.md#contact
 type Contact struct {
-	Name        string `yaml:"name"`
-	Email       string `yaml:"email,omitempty"`
-	Affiliation string `yaml:"affiliation,omitempty"`
-	Phone       string `yaml:"phone,omitempty"`
+	Name        string  `yaml:"name" validate:"required"`
+	Email       *string `yaml:"email,omitempty" validate:"omitempty,email"`
+	Affiliation *string `yaml:"affiliation,omitempty"`
+	Phone       *string `yaml:"phone,omitempty" validate:"omitempty"`
 }
 
 // Dependency describe system-level dependencies required to install and use this software.
 // Reference: https://github.com/publiccodenet/publiccode.yml/blob/develop/schema.md#section-dependencies
 type Dependency struct {
-	Name       string `yaml:"name"`
-	VersionMin string `yaml:"versionMin"`
-	VersionMax string `yaml:"versionMax"`
-	Optional   bool   `yaml:"optional"`
-	Version    string `yaml:"version"`
+	Name       string  `yaml:"name" validate:"required,gt=0"`
+	VersionMin *string `yaml:"versionMin,omitempty"`
+	VersionMax *string `yaml:"versionMax,omitempty"`
+	Optional   *bool   `yaml:"optional,omitempty"`
+	Version    *string `yaml:"version,omitempty"`
 }

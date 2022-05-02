@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
 	"io/ioutil"
@@ -8,8 +9,10 @@ import (
 	"os"
 	"runtime/debug"
 
-	vcsurl "github.com/alranel/go-vcsurl"
-	publiccode "github.com/italia/publiccode-parser-go"
+	"github.com/alranel/go-vcsurl/v2"
+
+	publiccode "github.com/italia/publiccode-parser-go/v2"
+	urlutil "github.com/italia/publiccode-parser-go/v2/internal"
 )
 
 var (
@@ -34,11 +37,10 @@ func main() {
 		fmt.Fprintf(flag.CommandLine.Output(), "Usage: %s [ OPTIONS ] publiccode.yml\n", os.Args[0])
 		flag.PrintDefaults()
 	}
-	remoteBaseURLPtr := flag.String("remote-base-url", "", "The URL pointing to the directory where the publiccode.yml file is located.")
-	localBasePathPtr := flag.String("path", "", "An absolute or relative path pointing to a locally cloned repository where the publiccode.yml is located.")
+	localBasePathPtr := flag.String("path", "", "Use this local directory as base path when checking for files existence instead of using the `url` key in publiccode.yml")
 	disableNetworkPtr := flag.Bool("no-network", false, "Disables checks that require network connections (URL existence and oEmbed). This makes validation much faster.")
 	exportPtr := flag.String("export", "", "Export the normalized publiccode.yml file to the given path.")
-	noStrictPtr := flag.Bool("no-strict", false, "Disable strict mode.")
+	jsonOutputPtr := flag.Bool("json", false, "Output the validation errors as a JSON list.")
 	helpPtr := flag.Bool("help", false, "Display command line usage.")
 	versionPtr := flag.Bool("version", false, "Display current software version.")
 	flag.Parse()
@@ -53,34 +55,48 @@ func main() {
 		return
 	}
 
-	p := publiccode.NewParser()
-	p.RemoteBaseURL = *remoteBaseURLPtr
-	p.LocalBasePath = *localBasePathPtr
-	p.DisableNetwork = *disableNetworkPtr
-	p.Strict = !*noStrictPtr
+	var publiccodeFile = flag.Args()[0]
 
-	var err error
-	if ok, url := isValidURL(flag.Args()[0]); ok {
+	if ok, url := urlutil.IsValidURL(publiccodeFile); ok {
 		// supplied argument looks like an URL
-		rawUrl := vcsurl.GetRawFile(url)
-		if rawUrl == nil {
+		if vcsurl.GetRawFile(url) == nil {
 			fmt.Fprintf(os.Stderr, "Code hosting provider not supported for %s\n", url)
 			os.Exit(1)
 		}
-		if p.RemoteBaseURL == "" {
-			p.RemoteBaseURL = vcsurl.GetRawRoot(rawUrl).String()
+	}
+
+	var p *publiccode.Parser
+	var err error
+	if *localBasePathPtr != "" {
+		p, err = publiccode.NewParserWithPath(publiccodeFile, *localBasePathPtr)
+	} else {
+		p, err = publiccode.NewParser(publiccodeFile)
+	}
+	p.DisableNetwork = *disableNetworkPtr
+
+	err = p.Parse()
+
+	if *jsonOutputPtr {
+		if err == nil {
+			fmt.Println("[]")
+			os.Exit(0)
 		}
 
-		err = p.ParseRemoteFile(rawUrl.String())
+		out, jsonerr := json.MarshalIndent(err, "", "    ")
+		if (jsonerr != nil) {
+			fmt.Fprintf(os.Stderr, "Error encoding JSON\n")
+			os.Exit(1)
+		}
+
+		fmt.Println(string(out))
+
+		return
 	} else {
-		// supplied argument looks like a file path
-		err = p.ParseFile(flag.Args()[0])
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
 	}
-	if err != nil {
-		fmt.Printf("validation ko:\n%v\n", err)
-		os.Exit(1)
-	}
-	fmt.Println("validation ok")
 
 	if *exportPtr != "" {
 		yaml, err := p.ToYAML()

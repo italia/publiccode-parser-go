@@ -1,7 +1,7 @@
 # publiccode.yml parser for Go
 
 [![Join the #publiccode channel](https://img.shields.io/badge/Slack%20channel-%23publiccode-blue.svg?logo=slack)](https://developersitalia.slack.com/messages/CAM3F785T)
-[![Get invited](https://slack.developers.italia.it/badge.svg)](https://slack.developers.italia.it/) [![CircleCI](https://circleci.com/gh/italia/publiccode-parser-go.svg?style=svg)](https://circleci.com/gh/italia/publiccode-parser-go)
+[![Get invited](https://slack.developers.italia.it/badge.svg)](https://slack.developers.italia.it/)
 
 A Go parser and validator for [publiccode.yml](https://github.com/italia/publiccode.yml)
 files.
@@ -10,7 +10,7 @@ files.
 should be placed at the root of Free/Libre and Open Source software repositories.
 
 This parser performs syntactic and semantic validation according to the
-[official spec](https://docs.italia.it/italia/developers-italia/publiccodeyml-en/en/master/index.html).
+[official spec](https://yml.publiccode.tools).
 
 ## Features
 
@@ -21,20 +21,20 @@ This parser performs syntactic and semantic validation according to the
 - Validate oembed video links and retrieve HTML for easy embedding
 - Validate SPDX licenses. Without WITH keyword.
 - Check tags
-- Strict and non-strict modes (use non-strict when you want to be tolerant, such as in a crawler, but use strict in editors and validators)
 
 ## Example
 
 ```go
-parser := publiccode.NewParser()
+parser := publiccode.NewParser("file:///path/to/local/dir/publiccode.yml")
+// OR
+// parser := publiccode.NewParser("https://github.com/example/example//publiccode.yml")
 
 // all these settings are optional:
-parser.LocalBasePath = "/path/to/local/clone"
-parser.RemoteBaseURL = "https://raw.githubusercontent.com/gith002/Medusa/master"
-parser.DisableNetwork = false
+parser.DisableNetwork = true
+parser.Branch = "mybranch"
 
-err := parser.ParseRemoteFile(url)
-pc := parser.PublicCode
+err := parser.Parse()
+publiccode := parser.PublicCode
 ```
 
 ## Validation from command line
@@ -45,7 +45,7 @@ This repository also contains `pcvalidate` which can be used for validating a
 To get the latest development version use:
 
 ```shell
-go get github.com/italia/publiccode-parser-go/pcvalidate
+go get github.com/italia/publiccode-parser-go/v2/pcvalidate
 pcvalidate mypubliccode.yml
 ```
 
@@ -83,23 +83,22 @@ at `/home/my-user/publiccodes/publiccode.yml`
   docker run -i italia/publiccode-parser-go -export /dev/stdout /dev/stdin < publiccode.yml
   ```
 
-- Validate a publiccode file named `publiccode.yml` (default)
+- Validate a publiccode file named `publiccode.yml` in `/home/user`
 
   ```shell
-  docker run -v /home/my-user/publiccodes:/files italia/publiccode-parser-go
+  docker run -v /home/user:/go/src/files italia/publiccode-parser-go
   ```
 
 - Validate a publiccode file named `/opt/publiccodes/my-amazing-code.yaml`
 
   ```shell
-  docker run -v /opt/publiccodes:/files italia/publiccode-parser-go my-amazing-code.yaml
+  docker run -v /opt/publiccodes:/go/src/files italia/publiccode-parser-go my-amazing-code.yaml
   ```
 
-- Do extra validations of the local `publiccode.yml` file against the
-  corresponding remote repository
+- Validate `publiccode.yml` without using the network (fe. checking URLs are reachable)
 
   ```shell
-  docker run -v /opt/publiccodes/publiccodes:/files italia/publiccode-parser-go -remote-base-url https://raw.githubusercontent.com/USER/REPO/master/
+  docker run -v /opt/publiccodes/publiccodes:/files italia/publiccode-parser-go -no-network publiccode.yml
   ```
 
 - Debugging, access the container interactive shell, overriding the entrypoint
@@ -110,14 +109,9 @@ at `/home/my-user/publiccodes/publiccode.yml`
 
 ## Assets
 
-- [data/amministrazioni.txt](data/amministrazioni.txt) updated on: _2018-07-12_.
-- [data/oembed_providers.json](data/oembed_providers.json) updated on: _2018-07-12_.
-
 In order to update the assets, run this command:
 
-`go-bindata -o assets.go data/`
-
-And change the package name into `publiccode`
+`go-bindata -pkg assets -o assets/assets.go data/...`
 
 ## Contributing
 

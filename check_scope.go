@@ -2,13 +2,8 @@ package publiccode
 
 import funk "github.com/thoas/go-funk"
 
-// checkScope tells whether the supplied value is a valid scope or not and returns it.
-func (p *Parser) checkScope(key, scope string) (string, error) {
-	if funk.Contains(supportedScopes, scope) {
-		return scope, nil
-	}
-
-	return "", newErrorInvalidValue(key, "unknown scope: %s", scope)
+func (p *Parser) isScope(scope string) (bool) {
+	return funk.Contains(supportedScopes, scope)
 }
 
 var supportedScopes = []string{

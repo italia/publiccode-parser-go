@@ -28,15 +28,15 @@ type ExtensionIT struct {
 	CountryExtensionVersion string `yaml:"countryExtensionVersion"`
 
 	Conforme struct {
-		LineeGuidaDesign        bool `yaml:"lineeGuidaDesign"`
+		LineeGuidaDesign        bool `yaml:"lineeGuidaDesign,omitempty"`
 		ModelloInteroperabilita bool `yaml:"modelloInteroperabilita"`
 		MisureMinimeSicurezza   bool `yaml:"misureMinimeSicurezza"`
 		GDPR                    bool `yaml:"gdpr"`
 	} `yaml:"conforme"`
 
 	Riuso struct {
-		CodiceIPA string `yaml:"codiceIPA,omitempty"`
-	} `yaml:"riuso"`
+		CodiceIPA string `yaml:"codiceIPA,omitempty" validate:"omitempty,is_italian_ipa_code"`
+	} `yaml:"riuso,omitempty"`
 
 	Piattaforme struct {
 		Spid   bool `yaml:"spid"`
