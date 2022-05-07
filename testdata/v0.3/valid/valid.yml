@@ -12,7 +12,6 @@ isBasedOn: "https://github.com/italia/developers.italia.it.git"
 softwareVersion: "1.0"
 releaseDate: 2017-04-15
 logo: testdata/img/logo.png
-monochromeLogo: testdata/img/logo-mono.svg
 
 inputTypes:
   - text/plain

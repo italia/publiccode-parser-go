@@ -51,6 +51,8 @@ func (p *Parser) validateFields() error {
 		}
 	}
 	if (p.PublicCode.MonochromeLogo != "") {
+		ve = append(ve, ValidationWarning{"monochromeLogo", "This key is DEPRECATED and will be removed in the future", 0, 0})
+
 		if validLogo, err := p.validLogo(p.toURL(p.PublicCode.MonochromeLogo)); !validLogo {
 			ve = append(ve, newValidationError("monochromeLogo", err.Error()))
 		}

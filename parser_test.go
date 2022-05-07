@@ -160,6 +160,7 @@ func TestInvalidTestcasesV0_3(t *testing.T) {
 			ValidationError{"monochromeLogo", "wrong type for this field", 18, 1},
 		},
 		"monochromeLogo_unsupported_extension.yml": ValidationResults{
+			ValidationWarning{"monochromeLogo", "This key is DEPRECATED and will be removed in the future", 18, 1},
 			ValidationError{
 				"monochromeLogo",
 				fmt.Sprintf("invalid file extension for: %s/monochromeLogo.mpg", cwd),
@@ -168,9 +169,11 @@ func TestInvalidTestcasesV0_3(t *testing.T) {
 			},
 		},
 		"monochromeLogo_missing_file.yml": ValidationResults{
+			ValidationWarning{"monochromeLogo", "This key is DEPRECATED and will be removed in the future", 18, 1},
 			ValidationError{"monochromeLogo", fmt.Sprintf("no such file: %s/no_such_file.png", cwd), 18, 1},
 		},
 		"monochromeLogo_invalid_png.yml": ValidationResults{
+			ValidationWarning{"monochromeLogo", "This key is DEPRECATED and will be removed in the future", 18, 1},
 			ValidationError{"monochromeLogo", "image: unknown format", 18, 1},
 		},
 
