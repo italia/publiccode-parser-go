@@ -13,9 +13,9 @@ import (
 
 // validateFields validates publiccode with additional rules not validatable
 // with a simple YAML schema.
-// It returns any error encountered as ValidationErrors.
+// It returns any error encountered as ValidationResults.
 func (p *Parser) validateFields() error {
-	var ve ValidationErrors
+	var ve ValidationResults
 	var err error
 
 	if (p.PublicCode.URL != nil) {
