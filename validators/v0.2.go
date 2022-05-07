@@ -37,6 +37,7 @@ func isCategory_v0_2(fl validator.FieldLevel) bool {
 		"donor-management",
 		"e-commerce",
 		"e-signature",
+		"educational-content",
 		"email-management",
 		"email-marketing",
 		"employee-management",
@@ -104,6 +105,7 @@ func isCategory_v0_2(fl validator.FieldLevel) bool {
 		"warehouse-management",
 		"web-collaboration",
 		"web-conferencing",
+		"whistleblowing",
 		"website-builder",
 		"workflow-management",
 	}
