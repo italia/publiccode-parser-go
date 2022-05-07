@@ -82,7 +82,7 @@ type Desc struct {
 	LongDescription        string    `yaml:"longDescription,omitempty" validate:"required,umin=500,umax=10000"`
 	Documentation          *URL      `yaml:"documentation,omitempty"`
 	APIDocumentation       *URL      `yaml:"apiDocumentation,omitempty"`
-	Features               *[]string `yaml:"features,omitempty" validate:"gt=0,dive,umax=100"`
+	Features               *[]string `yaml:"features,omitempty" validate:"gt=0,dive"`
 	Screenshots            []string  `yaml:"screenshots,omitempty"`
 	Videos                 []*URL    `yaml:"videos,omitempty"`
 	Awards                 []string  `yaml:"awards,omitempty"`
