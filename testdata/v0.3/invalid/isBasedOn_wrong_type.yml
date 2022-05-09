@@ -22,7 +22,6 @@ softwareType: "standalone/other"
 description:
   eng:
     localisedName: Medusa
-    genericName: Text Editor
     shortDescription: >
           A rather short description which
           is probably useless

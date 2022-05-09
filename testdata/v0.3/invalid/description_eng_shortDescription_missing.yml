@@ -18,7 +18,6 @@ softwareType: "standalone/other"
 description:
   eng:
     localisedName: Medusa
-    genericName: Text Editor
     # Should NOT validate: shortDescription is missing
     # shortDescription: ""
     longDescription: >

@@ -18,7 +18,6 @@ softwareType: "standalone/other"
 description:
   eng:
     localisedName: Name
-    genericName: Text Editor
     shortDescription: >
           A rather short description which
           is probably useless

@@ -20,7 +20,6 @@ description:
     # Should NOT validate: features is missing
     # features: []
     localisedName: Medusa
-    genericName: Text Editor
     shortDescription: >
           A rather short description which
           is probably useless

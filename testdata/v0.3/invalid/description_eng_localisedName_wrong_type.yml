@@ -19,7 +19,6 @@ description:
   eng:
     # Should NOT validate: localisedName is not a string
     localisedName: []
-    genericName: Text Editor
     shortDescription: >
           A rather short description which
           is probably useless

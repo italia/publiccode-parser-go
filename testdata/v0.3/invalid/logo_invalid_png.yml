@@ -20,7 +20,6 @@ logo: "testdata/img/not-an-image.png"
 description:
   eng:
     localisedName: Medusa
-    genericName: Text Editor
     shortDescription: >
           A rather short description which
           is probably useless

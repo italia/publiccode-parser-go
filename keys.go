@@ -110,6 +110,13 @@ func (p *Parser) validateFields() error {
 			p.PublicCode.Description = make(map[string]Desc)
 		}
 
+		if len(desc.GenericName) > 0 {
+			ve = append(ve, ValidationWarning{
+				fmt.Sprintf("description.%s.genericName", lang),
+				"This key is DEPRECATED and will be removed in the future", 0, 0,
+			})
+		}
+
 		if (desc.Documentation != nil) {
 			if reachable, err := p.isReachable(*(*url.URL)(desc.Documentation)); !reachable {
 				ve = append(ve, newValidationError(

@@ -20,7 +20,6 @@ logo: "no_such_file.png"
 description:
   eng:
     localisedName: Medusa
-    genericName: Text Editor
     shortDescription: >
           A rather short description which
           is probably useless
