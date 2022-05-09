@@ -30,7 +30,7 @@ description:
 
     # Should NOT validate
     # This is 135 (122 boy emojis + 13 newlines) characters long and
-    # below this field's minimum of 500 characters.
+    # below this field's minimum of 150 characters.
     longDescription: >
           👦👦👦👦👦👦👦👦👦👦
           👦👦👦👦👦👦👦👦👦👦

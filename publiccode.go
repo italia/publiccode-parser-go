@@ -79,7 +79,7 @@ type Desc struct {
 	LocalisedName          *string   `yaml:"localisedName,omitempty"`
 	GenericName            string    `yaml:"genericName" validate:"required,umax=35"`
 	ShortDescription       string    `yaml:"shortDescription" validate:"required,umax=150"`
-	LongDescription        string    `yaml:"longDescription,omitempty" validate:"required,umin=500,umax=10000"`
+	LongDescription        string    `yaml:"longDescription,omitempty" validate:"required,umin=150,umax=10000"`
 	Documentation          *URL      `yaml:"documentation,omitempty"`
 	APIDocumentation       *URL      `yaml:"apiDocumentation,omitempty"`
 	Features               *[]string `yaml:"features,omitempty" validate:"gt=0,dive"`

@@ -304,10 +304,10 @@ func TestInvalidTestcasesV0_3(t *testing.T) {
 			ValidationError{"description.eng.longDescription", "must be less or equal than 10000", 33, 5},
 		},
 		"description_eng_longDescription_too_short.yml": ValidationResults{
-			ValidationError{"description.eng.longDescription", "must be more or equal than 500", 33, 5},
+			ValidationError{"description.eng.longDescription", "must be more or equal than 150", 33, 5},
 		},
 		"description_eng_longDescription_too_short_grapheme_clusters.yml": ValidationResults{
-			ValidationError{"description.eng.longDescription", "must be more or equal than 500", 34, 5},
+			ValidationError{"description.eng.longDescription", "must be more or equal than 150", 34, 5},
 		},
 		"description_eng_screenshots_missing_file.yml": ValidationResults{
 			ValidationError{
