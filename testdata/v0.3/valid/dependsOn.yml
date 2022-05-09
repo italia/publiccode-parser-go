@@ -10,11 +10,6 @@ softwareVersion: "1.0"                                        # Last stable vers
 releaseDate: 2017-04-15                     # Date of last stable software release
 # monochromeLogo: assets/icons/dt-logo.svg
 
-inputTypes:
-  - text/plain
-outputTypes:
-  - text/plain
-
 platforms:                   # or Windows, Mac, Linux, etc.
   - android
   - ios

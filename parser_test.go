@@ -179,6 +179,7 @@ func TestInvalidTestcasesV0_3(t *testing.T) {
 
 		// inputTypes
 		"inputTypes_invalid.yml": ValidationResults{
+			ValidationWarning{"inputTypes", "This key is DEPRECATED and will be removed in the future", 14, 1},
 			ValidationError{"inputTypes[1]", "'foobar' is not a MIME type", 1, 1},
 		},
 		"inputTypes_wrong_type.yml": ValidationResults{
@@ -187,6 +188,7 @@ func TestInvalidTestcasesV0_3(t *testing.T) {
 
 		// outputTypes
 		"outputTypes_invalid.yml": ValidationResults{
+			ValidationWarning{"outputTypes", "This key is DEPRECATED and will be removed in the future", 14, 1},
 			ValidationError{"outputTypes[1]", "'foobar' is not a MIME type", 1, 1},
 		},
 		"outputTypes_wrong_type.yml": ValidationResults{
@@ -196,8 +198,8 @@ func TestInvalidTestcasesV0_3(t *testing.T) {
 		// platforms
 		"platforms_missing.yml": ValidationResults{ValidationError{"platforms", "must be more than 0", 1, 1}},
 		"platforms_wrong_type.yml": ValidationResults{
-			ValidationError{"platforms", "wrong type for this field", 14, 1},
-			ValidationError{"platforms", "must be more than 0", 14, 1},
+			ValidationError{"platforms", "wrong type for this field", 9, 1},
+			ValidationError{"platforms", "must be more than 0", 9, 1},
 		},
 
 		// categories
@@ -205,10 +207,10 @@ func TestInvalidTestcasesV0_3(t *testing.T) {
 			ValidationError{"categories", "required", 1, 1},
 		},
 		"categories_nil.yml": ValidationResults{
-			ValidationError{"categories", "required", 17, 1},
+			ValidationError{"categories", "required", 12, 1},
 		},
 		"categories_empty.yml": ValidationResults{
-			ValidationError{"categories", "must be more than 0", 17, 1},
+			ValidationError{"categories", "must be more than 0", 12, 1},
 		},
 		"categories_invalid.yml": ValidationResults{ValidationError{"categories[0]", "must be a valid category", 1, 1}},
 
@@ -231,11 +233,11 @@ func TestInvalidTestcasesV0_3(t *testing.T) {
 			ValidationError{"developmentStatus", "required", 1, 1},
 		},
 		"developmentStatus_invalid.yml": ValidationResults{
-			ValidationError{"developmentStatus", "must be one of the following: concept development beta stable obsolete", 21, 1},
+			ValidationError{"developmentStatus", "must be one of the following: concept development beta stable obsolete", 16, 1},
 		},
 		"developmentStatus_wrong_type.yml": ValidationResults{
-			ValidationError{"developmentStatus", "wrong type for this field", 21, 1},
-			ValidationError{"developmentStatus", "required", 21, 1},
+			ValidationError{"developmentStatus", "wrong type for this field", 16, 1},
+			ValidationError{"developmentStatus", "required", 16, 1},
 		},
 
 		// softwareType
@@ -243,11 +245,11 @@ func TestInvalidTestcasesV0_3(t *testing.T) {
 			ValidationError{"softwareType", "required", 1, 1},
 		},
 		"softwareType_invalid.yml": ValidationResults{
-			ValidationError{"softwareType", "must be one of the following: standalone/mobile standalone/iot standalone/desktop standalone/web standalone/backend standalone/other addon library configurationFiles", 22, 1},
+			ValidationError{"softwareType", "must be one of the following: standalone/mobile standalone/iot standalone/desktop standalone/web standalone/backend standalone/other addon library configurationFiles", 17, 1},
 		},
 		"softwareType_wrong_type.yml": ValidationResults{
-			ValidationError{"softwareType", "wrong type for this field", 22, 1},
-			ValidationError{"softwareType", "required", 22, 1},
+			ValidationError{"softwareType", "wrong type for this field", 17, 1},
+			ValidationError{"softwareType", "required", 17, 1},
 		},
 
 		// intendedAudience
@@ -277,51 +279,51 @@ func TestInvalidTestcasesV0_3(t *testing.T) {
 		// description
 		// description.*
 		"description_eng_features_missing.yml": ValidationResults{
-			ValidationError{"description.eng.features", "must be more than 0", 27, 5},
+			ValidationError{"description.eng.features", "must be more than 0", 22, 5},
 		},
 		"description_eng_features_empty.yml": ValidationResults{
-			ValidationError{"description.eng.features", "must be more than 0", 45, 5},
+			ValidationError{"description.eng.features", "must be more than 0", 40, 5},
 		},
 		"description_eng_localisedName_wrong_type.yml": ValidationResults{
-			ValidationError{"description.eng.localisedName", "wrong type for this field", 26, 1},
+			ValidationError{"description.eng.localisedName", "wrong type for this field", 21, 1},
 		},
 		"description_eng_genericName_missing.yml": ValidationResults{
-			ValidationError{"description.eng.genericName", "required", 25, 5},
+			ValidationError{"description.eng.genericName", "required", 20, 5},
 		},
 		"description_eng_genericName_too_long.yml": ValidationResults{
-			ValidationError{"description.eng.genericName", "must be less or equal than 35", 27, 5},
+			ValidationError{"description.eng.genericName", "must be less or equal than 35", 22, 5},
 		},
 		"description_eng_shortDescription_missing.yml": ValidationResults{
-			ValidationError{"description.eng.shortDescription", "required", 25, 5},
+			ValidationError{"description.eng.shortDescription", "required", 20, 5},
 		},
 		"description_eng_shortDescription_too_short.yml": ValidationResults{
-			ValidationError{"description.eng.shortDescription", "required", 25, 5},
+			ValidationError{"description.eng.shortDescription", "required", 20, 5},
 		},
 		"description_eng_longDescription_missing.yml": ValidationResults{
-			ValidationError{"description.eng.longDescription", "required", 25, 5},
+			ValidationError{"description.eng.longDescription", "required", 20, 5},
 		},
 		"description_eng_longDescription_too_long.yml": ValidationResults{
-			ValidationError{"description.eng.longDescription", "must be less or equal than 10000", 33, 5},
+			ValidationError{"description.eng.longDescription", "must be less or equal than 10000", 28, 5},
 		},
 		"description_eng_longDescription_too_short.yml": ValidationResults{
-			ValidationError{"description.eng.longDescription", "must be more or equal than 150", 33, 5},
+			ValidationError{"description.eng.longDescription", "must be more or equal than 150", 28, 5},
 		},
 		"description_eng_longDescription_too_short_grapheme_clusters.yml": ValidationResults{
-			ValidationError{"description.eng.longDescription", "must be more or equal than 150", 34, 5},
+			ValidationError{"description.eng.longDescription", "must be more or equal than 150", 29, 5},
 		},
 		"description_eng_screenshots_missing_file.yml": ValidationResults{
 			ValidationError{
 				"description.eng.screenshots[0]",
 				fmt.Sprintf("'no_such_file.png' is not an image: no such file : %s/no_such_file.png", cwd),
-				25,
+				20,
 				5,
 			},
 		},
 		"description_eng_awards_wrong_type.yml": ValidationResults{
-			ValidationError{"description.eng.awards", "wrong type for this field", 46, 1},
+			ValidationError{"description.eng.awards", "wrong type for this field", 41, 1},
 		},
 		"description_eng_videos_invalid.yml": ValidationResults{
-			ValidationError{"description.eng.videos[0]", "'https://google.com' is not a valid video URL supporting oEmbed: invalid oembed link: https://google.com", 25, 5},
+			ValidationError{"description.eng.videos[0]", "'https://google.com' is not a valid video URL supporting oEmbed: invalid oembed link: https://google.com", 20, 5},
 		},
 
 		// legal
@@ -331,9 +333,9 @@ func TestInvalidTestcasesV0_3(t *testing.T) {
 			ValidationError{"legal", "wrong type for this field", 47, 1},
 			ValidationError{"legal.license", "required", 47, 8},
 		},
-		"legal_license_missing.yml": ValidationResults{ValidationError{"legal.license", "required", 47, 3}},
+		"legal_license_missing.yml": ValidationResults{ValidationError{"legal.license", "required", 42, 3}},
 		"legal_license_invalid.yml": ValidationResults{ValidationError{
-			"legal.license", "invalid license 'Invalid License'", 48, 3,
+			"legal.license", "invalid license 'Invalid License'", 43, 3,
 		}},
 		"legal_authorsFile_missing_file.yml": ValidationResults{
 			ValidationError{
@@ -347,16 +349,16 @@ func TestInvalidTestcasesV0_3(t *testing.T) {
 		// maintenance
 		// maintenance.*
 		"maintenance_type_missing.yml": ValidationResults{
-			ValidationError{"maintenance.type", "required", 53, 3},
+			ValidationError{"maintenance.type", "required", 48, 3},
 		},
 		"maintenance_type_invalid.yml": ValidationResults{
-			ValidationError{"maintenance.type", "must be one of the following: internal contract community none", 51, 3},
+			ValidationError{"maintenance.type", "must be one of the following: internal contract community none", 46, 3},
 		},
 		"maintenance_contacts_missing_with_type_community.yml": ValidationResults{
-			ValidationError{"maintenance.contacts", "required_if Type community", 50, 3},
+			ValidationError{"maintenance.contacts", "required_if Type community", 45, 3},
 		},
 		"maintenance_contacts_missing_with_type_internal.yml": ValidationResults{
-			ValidationError{"maintenance.contacts", "required_if Type internal", 50, 3},
+			ValidationError{"maintenance.contacts", "required_if Type internal", 45, 3},
 		},
 		"maintenance_contacts_name_missing.yml": ValidationResults{
 			ValidationError{"maintenance.contacts[0].name", "required", 0, 0},
@@ -365,11 +367,11 @@ func TestInvalidTestcasesV0_3(t *testing.T) {
 			ValidationError{"maintenance.contacts[0].email", "must be a valid email", 0, 0},
 		},
 		"maintenance_contractors_missing_with_type_contract.yml": ValidationResults{
-			ValidationError{"maintenance.contractors", "required_if Type contract", 50, 3},
+			ValidationError{"maintenance.contractors", "required_if Type contract", 45, 3},
 		},
 		"maintenance_contractors_invalid_type.yml": ValidationResults{
-			ValidationError{"maintenance.contractors", "wrong type for this field", 53, 1},
-			ValidationError{"maintenance.contractors", "required_if Type contract", 53, 3},
+			ValidationError{"maintenance.contractors", "wrong type for this field", 48, 1},
+			ValidationError{"maintenance.contractors", "required_if Type contract", 48, 3},
 		},
 		"maintenance_contractors_name_missing.yml": ValidationResults{
 			ValidationError{"maintenance.contractors[0].name", "required", 0, 0},
@@ -386,13 +388,13 @@ func TestInvalidTestcasesV0_3(t *testing.T) {
 
 		// localisation
 		"localisation_availableLanguages_missing.yml": ValidationResults{
-			ValidationError{"localisation.availableLanguages", "required", 56, 3},
+			ValidationError{"localisation.availableLanguages", "required", 51, 3},
 		},
 		"localisation_availableLanguages_empty.yml": ValidationResults{
-			ValidationError{"localisation.availableLanguages", "must be more than 0", 58, 3},
+			ValidationError{"localisation.availableLanguages", "must be more than 0", 53, 3},
 		},
 		"localisation_availableLanguages_invalid.yml": ValidationResults{
-			ValidationError{"localisation.availableLanguages[0]", "must be a valid BCP 47 language", 56, 3},
+			ValidationError{"localisation.availableLanguages[0]", "must be a valid BCP 47 language", 51, 3},
 		},
 		// TODO: Enable this test when https://github.com/italia/publiccode-parser-go/issues/47
 		// is fixed
@@ -401,7 +403,7 @@ func TestInvalidTestcasesV0_3(t *testing.T) {
 		// 	ValidationError{"localisation.availableLanguages[0]", "must be a valid BCP 47 language", 56, 3},
 		// },
 		"localisation_localisationReady_missing.yml": ValidationResults{
-			ValidationError{"localisation.localisationReady", "required", 58, 3},
+			ValidationError{"localisation.localisationReady", "required", 53, 3},
 		},
 
 		// dependsOn

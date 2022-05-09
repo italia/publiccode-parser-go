@@ -5,11 +5,6 @@ url: "https://github.com/italia/developers.italia.it.git"
 softwareVersion: "dev"
 releaseDate: "2017-04-15"
 
-inputTypes:
-  - application/x.empty
-outputTypes:
-  - application/x.empty
-
 platforms:
   - web
 

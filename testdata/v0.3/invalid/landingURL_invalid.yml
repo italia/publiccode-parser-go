@@ -10,12 +10,6 @@ landingURL: "???"
 isBasedOn: "https://github.com/italia/developers.italia.it.git"
 softwareVersion: "1.0"
 releaseDate: 2017-04-15
-logo: testdata/img/logo.png
-
-inputTypes:
-  - text/plain
-outputTypes:
-  - text/plain
 
 platforms:
   - android
