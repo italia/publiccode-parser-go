@@ -1,0 +1,244 @@
+# This is a valid publiccode.yml that uses as many fields and combinations
+# as possible.
+
+publiccodeYmlVersion: "0.3"
+
+name: Medusa
+applicationSuite: MegaProductivitySuite
+url: "https://github.com/italia/developers.italia.it.git"
+landingURL: "https://developers.italia.it"
+
+isBasedOn: "https://github.com/italia/developers.italia.it.git"
+softwareVersion: "1.0"
+releaseDate: 2017-04-15
+logo: testdata/img/logo.png
+
+platforms:
+  - android
+  - ios
+  - custom_platform
+
+categories:
+  - accounting
+  - agile-project-management
+  - applicant-tracking
+  - application-development
+  - appointment-scheduling
+  - backup
+  - billing-and-invoicing
+  - blog
+  - budgeting
+  - business-intelligence
+  - business-process-management
+  - cad
+  - call-center-management
+  - cloud-management
+  - collaboration
+  - communications
+  - compliance-management
+  - contact-management
+  - content-management
+  - crm
+  - customer-service-and-support
+  - data-analytics
+  - data-collection
+  - data-visualization
+  - digital-asset-management
+  - digital-citizenship
+  - document-management
+  - donor-management
+  - e-commerce
+  - e-signature
+  - educational-content
+  - email-management
+  - email-marketing
+  - employee-management
+  - enterprise-project-management
+  - enterprise-social-networking
+  - erp
+  - event-management
+  - facility-management
+  - feedback-and-reviews-management
+  - financial-reporting
+  - fleet-management
+  - fundraising
+  - gamification
+  - geographic-information-systems
+  - grant-management
+  - graphic-design
+  - help-desk
+  - hr
+  - ide
+  - identity-management
+  - instant-messaging
+  - inventory-management
+  - it-asset-management
+  - it-development
+  - it-management
+  - it-security
+  - it-service-management
+  - knowledge-management
+  - learning-management-system
+  - marketing
+  - mind-mapping
+  - mobile-marketing
+  - mobile-payment
+  - network-management
+  - office
+  - online-booking
+  - online-community
+  - payment-gateway
+  - payroll
+  - predictive-analysis
+  - procurement
+  - productivity-suite
+  - project-collaboration
+  - project-management
+  - property-management
+  - real-estate-management
+  - remote-support
+  - resource-management
+  - sales-management
+  - seo
+  - service-desk
+  - social-media-management
+  - survey
+  - talent-management
+  - task-management
+  - taxes-management
+  - test-management
+  - time-management
+  - time-tracking
+  - translation
+  - video-conferencing
+  - video-editing
+  - visitor-management
+  - voip
+  - warehouse-management
+  - web-collaboration
+  - web-conferencing
+  - whistleblowing
+  - website-builder
+  - workflow-management
+
+usedBy:
+  - Comune di Firenze
+  - Comune di Roma
+
+roadmap: "https://designers.italia.it/roadmap/"
+
+developmentStatus: development
+
+softwareType: "standalone/other"
+
+intendedAudience:
+  countries:
+    - it
+    - de
+  unsupportedCountries:
+    - us
+
+description:
+  eng:
+    localisedName: Medusa
+    shortDescription: "A really interesting software."
+    longDescription: >
+          Very long description of this software, also split
+          on multiple rows. You should note what the software
+          is and why one should need it. This is 158 characters.
+          Very long description of this software, also split
+          on multiple rows. You should note what the software
+          is and why one should need it. This is 316 characters.
+          Very long description of this software, also split
+          on multiple rows. You should note what the software
+          is and why one should need it. This is 474 characters.
+          Very long description of this software, also split
+          on multiple rows. You should note what the software
+          is and why one should need it. This is 632 characters.
+
+    documentation: "https://docs.italia.it"
+    apiDocumentation: "https://developers.italia.it/it/api"
+
+    features:
+       - Very important feature
+       - Will run without a problem
+       - Has zero bugs
+       - Solves all the problems of the world
+    screenshots:
+       - testdata/img/sshot1.png
+       - testdata/img/sshot2.png
+       - testdata/img/sshot3.png
+    videos:
+       - https://www.youtube.com/watch?v=RaHmGbBOP84
+    awards:
+       - 1st Price Software of the year
+
+legal:
+  license: AGPL-3.0-or-later
+  mainCopyrightOwner: City of Chicago
+  repoOwner: City of Chicago
+  authorsFile: testdata/AUTHORS
+
+maintenance:
+  type: "contract"
+
+  contractors:
+    - name: "Fornitore Privato SPA"
+      website: "https://developers.italia.it"
+      until: "2019-01-01"
+
+  contacts:
+    - name: Francesco Rossi
+      email: "francesco.rossi@example.org"
+      affiliation: Comune di Reggio Emilia
+      phone: +39 231 13215112
+    - name: Dario Bianchi
+      email: "dario.bianchi@example.org"
+      affiliation: Fornitore Privato S.P.A.
+      phone: +39 16 24231322
+    - name: Giancarlo Verdi
+      email: "dario.bianchi@example.org"
+      affiliation: Fornitore Privato S.P.A.
+      phone: +39 16 24231322
+
+localisation:
+  localisationReady: true
+  availableLanguages:
+    - eng
+    - ita
+    - fra
+    - deu
+    - sl-IT-nedis
+
+dependsOn:
+  open:
+    - name: MySQL
+      versionMin: "1.1"
+      versionMax: "1.3"
+      optional: true
+    - name: PostgreSQL
+      version: "3.2"
+      optional: true
+  proprietary:
+    - name: Oracle
+      versionMin: "11.4"
+    - name: IBM SoftLayer
+  hardware:
+    - name: NFC Reader
+      optional: true
+
+it:
+  conforme:
+    lineeGuidaDesign: true
+    modelloInteroperabilita: true
+    misureMinimeSicurezza: true
+    gdpr: true
+
+  riuso:
+    codiceIPA: c_h501
+
+  piattaforme:
+    spid: true
+    pagopa: true
+    cie: true
+    anpr: true

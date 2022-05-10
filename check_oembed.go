@@ -6,7 +6,7 @@ import (
 	"net/url"
 
 	"github.com/dyatlov/go-oembed/oembed"
-	"github.com/italia/publiccode-parser-go/v2/assets"
+	"github.com/italia/publiccode-parser-go/v3/assets"
 )
 
 // checkOembed tells whether the link is hosted on a valid oembed provider.
