@@ -62,7 +62,7 @@ func TestValidPreviousStandardVersion(t *testing.T) {
 		err := parse(file)
 		checkParseErrors(t, err, testType{
 			file, ValidationResults{
-				ValidationWarning{"publiccodeYmlVersion", "'0.2' is not the latest version, use '0.3'", 1, 1},
+				ValidationWarning{"publiccodeYmlVersion", "v0.2 is not the latest version, use '0.3'. Parsing this file as v0.3.", 1, 1},
 			},
 		})
 	})
@@ -475,7 +475,9 @@ func TestValidWithWarningsTestcasesV0_3(t *testing.T) {
 func TestDecodeValueErrorsRemote(t *testing.T) {
 	testRemoteFiles := []testType{
 		{"https://raw.githubusercontent.com/italia/publiccode-editor/master/publiccode.yml", ValidationResults{
-			ValidationWarning{"publiccodeYmlVersion", "'0.2' is not the latest version, use '0.3'", 1, 1},
+			ValidationWarning{
+				"publiccodeYmlVersion", "v0.2 is not the latest version, use '0.3'. Parsing this file as v0.3.", 1, 1,
+			},
 			ValidationWarning{"description.it.genericName", "This key is DEPRECATED and will be removed in the future", 12, 5},
 		}},
 	}

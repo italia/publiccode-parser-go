@@ -204,7 +204,12 @@ func (p *Parser) ParseBytes(in []byte) error {
 
 		ve = append(ve, ValidationWarning{
 			Key: "publiccodeYmlVersion",
-			Description: fmt.Sprintf("'%s' is not the latest version, use '%s'", version.Value, Version),
+			Description: fmt.Sprintf(
+				"v%s is not the latest version, use '%s'. Parsing this file as v%s.",
+				version.Value,
+				Version,
+				Version,
+			),
 			Line: line,
 			Column: column,
 		})
