@@ -242,3 +242,4 @@ it:
     pagopa: true
     cie: true
     anpr: true
+    io: true
