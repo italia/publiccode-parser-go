@@ -15,21 +15,21 @@ import (
 // with a simple YAML schema.
 // It returns any error encountered as ValidationResults.
 func (p *Parser) validateFields() error {
-	var ve ValidationResults
+	var vr ValidationResults
 	var err error
 
 	if (p.PublicCode.URL != nil) {
 		if reachable, err := p.isReachable(*(*url.URL)(p.PublicCode.URL)); !reachable {
-			ve = append(ve, newValidationError("url", "'%s' not reachable: %s", p.PublicCode.URL, err.Error()))
+			vr =  append(vr, newValidationError("url", "'%s' not reachable: %s", p.PublicCode.URL, err.Error()))
 		}
 		if !vcsurl.IsRepo((*url.URL)(p.PublicCode.URL)) {
-			ve = append(ve, newValidationError("url", "is not a valid code repository"))
+			vr =  append(vr, newValidationError("url", "is not a valid code repository"))
 		}
 	}
 
 	if p.PublicCode.LandingURL != nil {
 		if reachable, err := p.isReachable(*(*url.URL)(p.PublicCode.LandingURL)); !reachable {
-			ve = append(ve, newValidationError(
+			vr =  append(vr, newValidationError(
 				"landingURL",
 				"'%s' not reachable: %s", p.PublicCode.LandingURL, err.Error(),
 			))
@@ -38,7 +38,7 @@ func (p *Parser) validateFields() error {
 
 	if p.PublicCode.Roadmap != nil {
 		if reachable, err := p.isReachable(*(*url.URL)(p.PublicCode.Roadmap)); !reachable {
-			ve = append(ve, newValidationError(
+			vr =  append(vr, newValidationError(
 				"roadmap",
 				"'%s' not reachable: %s", p.PublicCode.Roadmap, err.Error(),
 			))
@@ -47,27 +47,27 @@ func (p *Parser) validateFields() error {
 
 	if (p.PublicCode.Logo != "") {
 		if validLogo, err := p.validLogo(p.toURL(p.PublicCode.Logo)); !validLogo {
-			ve = append(ve, newValidationError("logo", err.Error()))
+			vr =  append(vr, newValidationError("logo", err.Error()))
 		}
 	}
 	if (p.PublicCode.MonochromeLogo != "") {
-		ve = append(ve, ValidationWarning{"monochromeLogo", "This key is DEPRECATED and will be removed in the future", 0, 0})
+		vr =  append(vr, ValidationWarning{"monochromeLogo", "This key is DEPRECATED and will be removed in the future", 0, 0})
 
 		if validLogo, err := p.validLogo(p.toURL(p.PublicCode.MonochromeLogo)); !validLogo {
-			ve = append(ve, newValidationError("monochromeLogo", err.Error()))
+			vr =  append(vr, newValidationError("monochromeLogo", err.Error()))
 		}
 	}
 
 	if p.PublicCode.Legal.AuthorsFile != nil && !p.fileExists(p.toURL(*p.PublicCode.Legal.AuthorsFile)) {
 		u := p.toURL(*p.PublicCode.Legal.AuthorsFile)
 
-		ve = append(ve, newValidationError("legal.authorsFile", "'%s' does not exist", urlutil.DisplayURL(&u)))
+		vr =  append(vr, newValidationError("legal.authorsFile", "'%s' does not exist", urlutil.DisplayURL(&u)))
 	}
 
 	if p.PublicCode.Legal.License != "" {
 		_, err = spdxValidator.Parse(p.PublicCode.Legal.License)
 		if err != nil {
-			ve = append(ve, newValidationError(
+			vr =  append(vr, newValidationError(
 				"legal.license",
 				"invalid license '%s'", p.PublicCode.Legal.License,
 			))
@@ -77,29 +77,29 @@ func (p *Parser) validateFields() error {
 	if p.PublicCode.It.CountryExtensionVersion != "" &&
 		!funk.Contains(ExtensionITSupportedVersions, p.PublicCode.It.CountryExtensionVersion) {
 
-		ve = append(ve, newValidationError(
+		vr =  append(vr, newValidationError(
 			"it.countryExtensionVersion",
 			"version %s not supported for 'it' extension", p.PublicCode.It.CountryExtensionVersion,
 		))
 	}
 
 	if len(p.PublicCode.InputTypes) > 0 {
-		ve = append(ve, ValidationWarning{"inputTypes", "This key is DEPRECATED and will be removed in the future", 0, 0})
+		vr =  append(vr, ValidationWarning{"inputTypes", "This key is DEPRECATED and will be removed in the future", 0, 0})
 	}
 	for i, mimeType := range p.PublicCode.InputTypes {
 		if !p.isMIME(mimeType) {
-			ve = append(ve, newValidationError(
+			vr =  append(vr, newValidationError(
 				fmt.Sprintf("inputTypes[%d]", i), "'%s' is not a MIME type", mimeType,
 			))
 		}
 	}
 
 	if len(p.PublicCode.OutputTypes) > 0 {
-		ve = append(ve, ValidationWarning{"outputTypes", "This key is DEPRECATED and will be removed in the future", 0, 0})
+		vr =  append(vr, ValidationWarning{"outputTypes", "This key is DEPRECATED and will be removed in the future", 0, 0})
 	}
 	for i, mimeType := range p.PublicCode.OutputTypes {
 		if !p.isMIME(mimeType) {
-			ve = append(ve, newValidationError(
+			vr =  append(vr, newValidationError(
 				fmt.Sprintf("outputTypes[%d]", i), "'%s' is not a MIME type", mimeType,
 			))
 		}
@@ -111,7 +111,7 @@ func (p *Parser) validateFields() error {
 		}
 
 		if len(desc.GenericName) > 0 {
-			ve = append(ve, ValidationWarning{
+			vr =  append(vr, ValidationWarning{
 				fmt.Sprintf("description.%s.genericName", lang),
 				"This key is DEPRECATED and will be removed in the future", 0, 0,
 			})
@@ -119,7 +119,7 @@ func (p *Parser) validateFields() error {
 
 		if (desc.Documentation != nil) {
 			if reachable, err := p.isReachable(*(*url.URL)(desc.Documentation)); !reachable {
-				ve = append(ve, newValidationError(
+				vr =  append(vr, newValidationError(
 					fmt.Sprintf("description.%s.documentation", lang),
 					"'%s' not reachable: %s", desc.Documentation, err.Error(),
 				))
@@ -127,7 +127,7 @@ func (p *Parser) validateFields() error {
 		}
 		if desc.APIDocumentation != nil {
 			if reachable, err := p.isReachable(*(*url.URL)(desc.APIDocumentation)); !reachable {
-				ve = append(ve, newValidationError(
+				vr =  append(vr, newValidationError(
 					fmt.Sprintf("description.%s.apiDocumentation", lang),
 					"'%s' not reachable: %s", desc.APIDocumentation, err.Error(),
 				))
@@ -136,7 +136,7 @@ func (p *Parser) validateFields() error {
 
 		for i, v := range desc.Screenshots {
 			if isImage, err := p.isImageFile(p.toURL(v)); !isImage {
-				ve = append(ve, newValidationError(
+				vr =  append(vr, newValidationError(
 					fmt.Sprintf("description.%s.screenshots[%d]", lang, i),
 					"'%s' is not an image: %s", v, err.Error(),
 				))
@@ -145,7 +145,7 @@ func (p *Parser) validateFields() error {
 		for i, v := range desc.Videos {
 			_, err := p.isOembedURL((*url.URL)(v))
 			if err != nil {
-				ve = append(ve, newValidationError(
+				vr =  append(vr, newValidationError(
 					fmt.Sprintf("description.%s.videos[%d]", lang, i),
 					"'%s' is not a valid video URL supporting oEmbed: %s", v, err.Error(),
 				))
@@ -153,9 +153,9 @@ func (p *Parser) validateFields() error {
 		}
 	}
 
-	if (len(ve) == 0) {
+	if (len(vr) == 0) {
 		return nil
 	}
 
-	return ve
+	return vr
 }
