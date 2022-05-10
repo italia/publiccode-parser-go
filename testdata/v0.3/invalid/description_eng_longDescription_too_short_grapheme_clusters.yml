@@ -1,0 +1,57 @@
+publiccodeYmlVersion: "0.3"
+
+name: Medusa
+url: "https://github.com/italia/developers.italia.it.git"
+softwareVersion: "dev"
+releaseDate: "2017-04-15"
+
+platforms:
+  - web
+
+categories:
+  - cloud-management
+
+developmentStatus: development
+
+softwareType: "standalone/other"
+
+description:
+  eng:
+    localisedName: Medusa
+    shortDescription: >
+          A rather short description which
+          is probably useless
+
+    # Should NOT validate
+    # This is 135 (122 boy emojis + 13 newlines) characters long and
+    # below this field's minimum of 150 characters.
+    longDescription: >
+          👦👦👦👦👦👦👦👦👦👦
+          👦👦👦👦👦👦👦👦👦👦
+          👦👦👦👦👦👦👦👦👦👦
+          👦👦👦👦👦👦👦👦👦👦
+          👦👦👦👦👦👦👦👦👦👦
+          👦👦👦👦👦👦👦👦👦👦
+          👦👦👦👦👦👦👦👦👦👦
+          👦👦👦👦👦👦👦👦👦👦
+          👦👦👦👦👦👦👦👦👦👦
+          👦👦👦👦👦👦👦👦👦👦
+          👦👦👦👦👦👦👦👦👦👦
+          👦👦👦👦👦👦👦👦👦👦
+          👦👦
+    features:
+       - Just one feature
+
+legal:
+  license: AGPL-3.0-or-later
+
+maintenance:
+  type: "community"
+
+  contacts:
+    - name: Francesco Rossi
+
+localisation:
+  localisationReady: true
+  availableLanguages:
+    - eng

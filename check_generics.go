@@ -21,7 +21,7 @@ import (
 	httpclient "github.com/italia/httpclient-lib-go"
 	"github.com/alranel/go-vcsurl/v2"
 
-	urlutil "github.com/italia/publiccode-parser-go/v2/internal"
+	urlutil "github.com/italia/publiccode-parser-go/v3/internal"
 )
 
 // Despite the spec requires at least 1000px, we temporarily release this constraint to 120px.
@@ -124,7 +124,7 @@ func (p *Parser) fileExists(u url.URL) bool {
 	// If we have an absolute local path, perform validation on it, otherwise do it
 	// on the remote URL if any. If none are available, validation is skipped.
 	if u.Scheme == "file" {
-		_, err := os.Stat(u.Path);
+		_, err := os.Stat(u.Path)
 
 		return err == nil
 	}

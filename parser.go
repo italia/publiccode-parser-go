@@ -15,9 +15,10 @@ import (
 	"gopkg.in/yaml.v3"
 	"github.com/go-playground/validator/v10"
 	"github.com/alranel/go-vcsurl/v2"
+	"github.com/thoas/go-funk"
 
-	publiccodeValidator "github.com/italia/publiccode-parser-go/v2/validators"
-	urlutil "github.com/italia/publiccode-parser-go/v2/internal"
+	publiccodeValidator "github.com/italia/publiccode-parser-go/v3/validators"
+	urlutil "github.com/italia/publiccode-parser-go/v3/internal"
 )
 
 // Parser is a helper class for parsing publiccode.yml files.
@@ -168,7 +169,7 @@ func toValidationError(errorText string, node *yaml.Node) ValidationError {
 
 // ParseBytes loads the yaml bytes and tries to parse it. Return an error if fails.
 func (p *Parser) ParseBytes(in []byte) error {
-	var ve ValidationErrors
+	var ve ValidationResults
 
 	if !utf8.Valid(in) {
 		ve = append(ve,newValidationError("", "Invalid UTF-8"))
@@ -190,6 +191,28 @@ func (p *Parser) ParseBytes(in []byte) error {
 		ve = append(ve, toValidationError(err.Error(), nil))
 
 		return ve;
+	}
+
+	_, version := getNodes("publiccodeYmlVersion", &node)
+	if version == nil {
+		ve = append(ve, newValidationError("publiccodeYmlVersion", "required"))
+
+		return ve
+	}
+	if funk.Contains(SupportedVersions, version.Value) && strings.HasPrefix(version.Value, "0.2") {
+		line, column := getPositionInFile("publiccodeYmlVersion", node)
+
+		ve = append(ve, ValidationWarning{
+			Key: "publiccodeYmlVersion",
+			Description: fmt.Sprintf(
+				"v%s is not the latest version, use '%s'. Parsing this file as v%s.",
+				version.Value,
+				Version,
+				Version,
+			),
+			Line: line,
+			Column: column,
+		})
 	}
 
 	// Decode the YAML into a PublicCode structure, so we get type errors
@@ -280,10 +303,15 @@ func (p *Parser) ParseBytes(in []byte) error {
 
 	err = p.validateFields()
 	if err != nil {
-		for _, err := range err.(ValidationErrors) {
-			err.Line, err.Column = getPositionInFile(err.Key, node)
-
-			ve = append(ve, err)
+		for _, err := range err.(ValidationResults) {
+			switch err := err.(type) {
+			case ValidationError:
+				err.Line, err.Column = getPositionInFile(err.Key, node)
+				ve = append(ve, err)
+			case ValidationWarning:
+				err.Line, err.Column = getPositionInFile(err.Key, node)
+				ve = append(ve, err)
+			}
 		}
 	}
 

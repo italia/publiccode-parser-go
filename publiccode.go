@@ -1,41 +1,16 @@
 package publiccode
 
-// list of keys that were renamed in the publiccode.yml spec
-var renamedKeys = map[string]string{
-	"publiccode-yaml-version":    "publiccodeYmlVersion",
-	"it/conforme/accessibile":    "it/conforme/lineeGuidaDesign",
-	"it/conforme/interoperabile": "it/conforme/modelloInteroperabilita",
-	"it/conforme/sicuro":         "it/conforme/misureMinimeSicurezza",
-	"it/conforme/privacy":        "it/conforme/gdpr",
-	"it/spid":                    "it/piattaforme/spid",
-	"it/pagopa":                  "it/piattaforme/pagopa",
-	"it/cie":                     "it/piattaforme/cie",
-	"it/anpr":                    "it/piattaforme/anpr",
-	"it/io":                      "it/piattaforme/io",
-}
-
-// list of keys that were removed from the publiccode.yml spec
-var removedKeys = []string{
-	"tags",                     // deprecated in it:0.2
-	"intendedAudience/onlyFor", // deprecated in it:0.2
-	"it/designKit/seo",         // deprecated in it:0.2
-	"it/designKit/ui",          // deprecated in it:0.2
-	"it/designKit/web",         // deprecated in it:0.2
-	"it/designKit/content",     // deprecated in it:0.2
-	"it/ecosistemi",            // deprecated in it:0.2
-}
-
 // Version of the latest PublicCode specs.
 // Source https://github.com/publiccodenet/publiccode.yml
-const Version = "0.2"
+const Version = "0.3"
 
 // SupportedVersions lists the publiccode.yml versions this parser supports.
-var SupportedVersions = []string{"0.2", "0.2.2"}
+var SupportedVersions = []string{"0.2", "0.2.0", "0.2.1", "0.2.2", "0.3", "0.3.0"}
 
 // PublicCode is a publiccode.yml file definition.
 // Reference: https://github.com/publiccodenet/publiccode.yml
 type PublicCode struct {
-	PubliccodeYamlVersion string `yaml:"publiccodeYmlVersion" validate:"required,oneof=0.2 0.2.2"`
+	PubliccodeYamlVersion string `yaml:"publiccodeYmlVersion" validate:"required,oneof=0.2 0.2.0 0.2.1 0.2.2 0.3 0.3.0"`
 
 	Name             string   `yaml:"name" validate:"required"`
 	ApplicationSuite string   `yaml:"applicationSuite,omitempty"`
@@ -102,12 +77,12 @@ type PublicCode struct {
 // Reference: https://github.com/publiccodenet/publiccode.yml/blob/develop/schema.md#section-description
 type Desc struct {
 	LocalisedName          *string   `yaml:"localisedName,omitempty"`
-	GenericName            string    `yaml:"genericName" validate:"required,umax=35"`
+	GenericName            string    `yaml:"genericName" validate:"umax=35"`
 	ShortDescription       string    `yaml:"shortDescription" validate:"required,umax=150"`
-	LongDescription        string    `yaml:"longDescription,omitempty" validate:"required,umin=500,umax=10000"`
+	LongDescription        string    `yaml:"longDescription,omitempty" validate:"required,umin=150,umax=10000"`
 	Documentation          *URL      `yaml:"documentation,omitempty"`
 	APIDocumentation       *URL      `yaml:"apiDocumentation,omitempty"`
-	Features               *[]string `yaml:"features,omitempty" validate:"gt=0,dive,umax=100"`
+	Features               *[]string `yaml:"features,omitempty" validate:"gt=0,dive"`
 	Screenshots            []string  `yaml:"screenshots,omitempty"`
 	Videos                 []*URL    `yaml:"videos,omitempty"`
 	Awards                 []string  `yaml:"awards,omitempty"`
