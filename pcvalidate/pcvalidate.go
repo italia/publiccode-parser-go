@@ -94,8 +94,12 @@ func main() {
 	} else {
 		if err != nil {
 			fmt.Println(err)
+		}
+		if hasValidationErrors(err) {
 			os.Exit(1)
 		}
+
+		os.Exit(0)
 	}
 
 	if *exportPtr != "" {
@@ -106,6 +110,21 @@ func main() {
 		}
 		fmt.Printf("publiccode written to %s\n", *exportPtr)
 	}
+}
+
+func hasValidationErrors(results error) bool {
+	if results == nil {
+		return false
+	}
+
+	for _, res := range results.(publiccode.ValidationResults) {
+		switch res.(type) {
+		case publiccode.ValidationError:
+			return true
+		}
+	}
+
+	return false
 }
 
 // isValidURL tests a string to determine if it is a well-structured url or not.
