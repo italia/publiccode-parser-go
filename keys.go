@@ -8,7 +8,7 @@ import (
 	"github.com/alranel/go-vcsurl/v2"
 	"github.com/thoas/go-funk"
 
-	urlutil "github.com/italia/publiccode-parser-go/v2/internal"
+	urlutil "github.com/italia/publiccode-parser-go/v3/internal"
 )
 
 // validateFields validates publiccode with additional rules not validatable

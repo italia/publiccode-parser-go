@@ -11,8 +11,8 @@ import (
 
 	"github.com/alranel/go-vcsurl/v2"
 
-	publiccode "github.com/italia/publiccode-parser-go/v2"
-	urlutil "github.com/italia/publiccode-parser-go/v2/internal"
+	publiccode "github.com/italia/publiccode-parser-go/v3"
+	urlutil "github.com/italia/publiccode-parser-go/v3/internal"
 )
 
 var (
