@@ -1,13 +1,10 @@
 package publiccode
 
 import (
-	"bytes"
-	"compress/gzip"
 	"encoding/base64"
 	"fmt"
 	"image"
 	"image/png"
-	"io"
 	"math/rand"
 	"net/url"
 	"os"
@@ -49,10 +46,7 @@ func isHostInDomain(domain Domain, u string) bool {
 		return false
 	}
 	urlP, _ := url.Parse(u)
-	if stringInSlice(urlP.Host, domain.UseTokenFor) {
-		return true
-	}
-	return false
+	return stringInSlice(urlP.Host, domain.UseTokenFor)
 }
 
 func getHeaderFromDomain(domain Domain, url string) map[string]string {
@@ -208,23 +202,4 @@ func (p *Parser) isMIME(value string) bool {
 	re := regexp.MustCompile("^ *([A-Za-z0-9][A-Za-z0-9!#$&^_-]{0,126})/([A-Za-z0-9][A-Za-z0-9!#$&^_.+-]{0,126}) *$")
 
 	return re.MatchString(value)
-}
-
-// gUnzipData g-unzip a list of bytes. (used for svgz unzip)
-func gUnzipData(data []byte) (resData []byte, err error) {
-	b := bytes.NewBuffer(data)
-
-	var r io.Reader
-	r, err = gzip.NewReader(b)
-	if err != nil {
-		return nil, err
-	}
-
-	var resB bytes.Buffer
-	_, err = resB.ReadFrom(r)
-	if err != nil {
-		return nil, err
-	}
-
-	return resB.Bytes(), nil
 }

@@ -219,9 +219,9 @@ func (p *Parser) ParseBytes(in []byte) error {
 	d = yaml.NewDecoder(bytes.NewReader(in))
 	d.KnownFields(true)
 	if err = d.Decode(&p.PublicCode); err != nil {
-		switch err.(type) {
+		switch err := err.(type) {
 			case *yaml.TypeError:
-				for _, errorText := range err.(*yaml.TypeError).Errors {
+				for _, errorText := range err.Errors {
 					ve = append(ve, toValidationError(errorText, &node))
 				}
 			default:

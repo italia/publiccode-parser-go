@@ -22,7 +22,7 @@ func (p *Parser) isOembedURL(url *url.URL) (bool, error) {
 		panic("error reading oembed providers list")
 	}
 	oe := oembed.NewOembed()
-	oe.ParseProviders(bytes.NewReader(providers))
+	_ = oe.ParseProviders(bytes.NewReader(providers))
 
 	link := url.String()
 	item := oe.FindItem(link)
