@@ -1,7 +1,14 @@
+#
+# This is the Docker image that gets published to DockerHub.
+# Goreleaser takes care of building the binary.
+#
 FROM alpine:3
 
-COPY pcvalidate /
+COPY pcvalidate /usr/local/bin/pcvalidate
 
-# Run the compiled binary.
-ENTRYPOINT ["/pcvalidate"]
+# git and openssh-client are needed by CircleCI when using
+# publiccode-parser-orb, which uses on this image.
+RUN apk --no-cache add git openssh-client
+
+ENTRYPOINT ["/usr/local/bin/pcvalidate"]
 CMD ["files/publiccode.yml"]
