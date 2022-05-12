@@ -1,3 +1,8 @@
+#
+# This is for local development only.
+# See Dockerfile.goreleaser for the image published on release.
+#
+
 # Accept the Go version for the image to be set as a build argument.
 ARG GO_VERSION=1.16-alpine
 
@@ -14,10 +19,5 @@ FROM alpine:3
 
 COPY --from=build /go/src/pcvalidate/pcvalidate /usr/local/bin/pcvalidate
 
-# git and openssh-client are needed by CircleCI when using
-# publiccode-parser-orb, which uses on this image.
-RUN apk --no-cache add git openssh-client
-
 ENTRYPOINT ["/usr/local/bin/pcvalidate"]
-
 CMD ["files/publiccode.yml"]
