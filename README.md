@@ -45,7 +45,7 @@ This repository also contains `pcvalidate` which can be used for validating a
 To get the latest development version use:
 
 ```shell
-go get github.com/italia/publiccode-parser-go/v3/pcvalidate
+go install github.com/italia/publiccode-parser-go/v3/pcvalidate@latest
 pcvalidate mypubliccode.yml
 ```
 
