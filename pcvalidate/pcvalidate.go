@@ -72,6 +72,11 @@ func main() {
 	} else {
 		p, err = publiccode.NewParser(publiccodeFile)
 	}
+	if (err != nil) {
+		fmt.Fprintf(os.Stderr, "Error creating Parser: %s\n", err.Error())
+		os.Exit(1)
+	}
+
 	p.DisableNetwork = *disableNetworkPtr
 
 	err = p.Parse()
