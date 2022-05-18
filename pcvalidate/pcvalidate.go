@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"net/url"
 	"os"
 	"runtime/debug"
@@ -39,7 +38,7 @@ func main() {
 	}
 	localBasePathPtr := flag.String("path", "", "Use this local directory as base path when checking for files existence instead of using the `url` key in publiccode.yml")
 	disableNetworkPtr := flag.Bool("no-network", false, "Disables checks that require network connections (URL existence and oEmbed). This makes validation much faster.")
-	exportPtr := flag.String("export", "", "Export the normalized publiccode.yml file to the given path.")
+	_ = flag.String("export", "", "(DEPRECATED) Provided for backward compatibility only")
 	jsonOutputPtr := flag.Bool("json", false, "Output the validation errors as a JSON list.")
 	helpPtr := flag.Bool("help", false, "Display command line usage.")
 	versionPtr := flag.Bool("version", false, "Display current software version.")
@@ -100,15 +99,6 @@ func main() {
 		}
 
 		os.Exit(0)
-	}
-
-	if *exportPtr != "" {
-		yaml, err := p.ToYAML()
-		err = ioutil.WriteFile(*exportPtr, yaml, 0644)
-		if err != nil {
-			panic(err)
-		}
-		fmt.Printf("publiccode written to %s\n", *exportPtr)
 	}
 }
 
