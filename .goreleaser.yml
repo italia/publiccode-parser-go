@@ -7,14 +7,19 @@ before:
     # you may remove this if you don't need go generate
     - go generate ./...
 builds:
-- 
+-
   id: pcvalidate
   binary: pcvalidate
   main: ./pcvalidate/pcvalidate.go
   ldflags:
     - -s -w -X main.version={{.Version}} -X main.date={{.Date}}
   env:
-  - CGO_ENABLED=0
+    - CGO_ENABLED=0
+  goos:
+    - linux
+    - darwin
+    - windows
+
   # https://github.com/italia/publiccode-parser-go/issues/50
   ignore:
   - goos: darwin
