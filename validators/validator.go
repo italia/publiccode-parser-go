@@ -9,15 +9,15 @@ import (
 
 func New() *validator.Validate {
 	validate := validator.New()
-	validate.RegisterValidation("date", isDate)
-	validate.RegisterValidation("iso3166_1_alpha2_lowercase", isIso3166Alpha2Lowercase)
-	validate.RegisterValidation("umax", uMax)
-	validate.RegisterValidation("umin", uMin)
+	_ = validate.RegisterValidation("date", isDate)
+	_ = validate.RegisterValidation("iso3166_1_alpha2_lowercase", isIso3166Alpha2Lowercase)
+	_ = validate.RegisterValidation("umax", uMax)
+	_ = validate.RegisterValidation("umin", uMin)
 
-	validate.RegisterValidation("is_category_v0_2", isCategory_v0_2)
-	validate.RegisterValidation("is_scope_v0_2", isScope_v0_2)
+	_ = validate.RegisterValidation("is_category_v0_2", isCategory_v0_2)
+	_ = validate.RegisterValidation("is_scope_v0_2", isScope_v0_2)
 
-	validate.RegisterValidation("is_italian_ipa_code", isItalianIpaCode)
+	_ = validate.RegisterValidation("is_italian_ipa_code", isItalianIpaCode)
 
 	validate.RegisterTagNameFunc(func(fld reflect.StructField) string {
 		name := strings.SplitN(fld.Tag.Get("yaml"), ",", 2)[0]
