@@ -6,7 +6,7 @@ require (
 	github.com/dyatlov/go-oembed v0.0.0-20180429203341-4bc5ab7a42e9
 	github.com/go-playground/validator/v10 v10.10.1
 	github.com/italia/httpclient-lib-go v0.0.0-20201009133728-9044482688d7
-	github.com/kyoh86/go-spdx v0.0.5-0.20220421143955-2f42f2d4c410
+	github.com/kyoh86/go-spdx v0.0.5-0.20220518012447-4d195d3a5da1
 	github.com/rivo/uniseg v0.1.0
 	github.com/thoas/go-funk v0.4.0
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
