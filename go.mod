@@ -9,7 +9,7 @@ require (
 	github.com/kyoh86/go-spdx v0.0.5-0.20220518012447-4d195d3a5da1
 	github.com/rivo/uniseg v0.1.0
 	github.com/thoas/go-funk v0.4.0
-	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
+	gopkg.in/yaml.v3 v3.0.0
 )
 
 go 1.13
