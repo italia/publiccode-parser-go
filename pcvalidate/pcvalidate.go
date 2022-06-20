@@ -112,11 +112,17 @@ func hasValidationErrors(results error) bool {
 		return false
 	}
 
-	for _, res := range results.(publiccode.ValidationResults) {
-		switch res.(type) {
-		case publiccode.ValidationError:
-			return true
+
+	switch e := results.(type) {
+	case publiccode.ValidationResults:
+		for _, res := range e {
+			switch res.(type) {
+			case publiccode.ValidationError:
+				return true
+			}
 		}
+	case error:
+		return true
 	}
 
 	return false
