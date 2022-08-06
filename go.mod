@@ -2,7 +2,7 @@ module github.com/italia/publiccode-parser-go/v3
 
 require (
 	github.com/Jeffail/gabs v1.4.0 // indirect
-	github.com/alranel/go-vcsurl/v2 v2.0.1
+	github.com/alranel/go-vcsurl/v2 v2.0.2
 	github.com/dyatlov/go-oembed v0.0.0-20180429203341-4bc5ab7a42e9
 	github.com/go-playground/validator/v10 v10.10.1
 	github.com/italia/httpclient-lib-go v0.0.0-20201009133728-9044482688d7
