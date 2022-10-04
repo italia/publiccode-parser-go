@@ -6,7 +6,7 @@ import (
 	"net/url"
 
 	"github.com/dyatlov/go-oembed/oembed"
-	"github.com/italia/publiccode-parser-go/v3/assets"
+	"github.com/italia/publiccode-parser-go/v3/data"
 )
 
 // checkOembed tells whether the link is hosted on a valid oembed provider.
@@ -17,12 +17,9 @@ func (p *Parser) isOembedURL(url *url.URL) (bool, error) {
 	}
 
 	// Load oembed library and providers.js on from base64 variable
-	providers, err := assets.Asset("data/oembed_providers.json")
-	if err != nil {
-		panic("error reading oembed providers list")
-	}
+	b := data.OembedProviders
 	oe := oembed.NewOembed()
-	_ = oe.ParseProviders(bytes.NewReader(providers))
+	_ = oe.ParseProviders(bytes.NewReader(b))
 
 	link := url.String()
 	item := oe.FindItem(link)
