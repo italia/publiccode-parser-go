@@ -1,6 +1,7 @@
 name: Check data files freshness
 
 on:
+  workflow_dispatch:
   schedule:
     - cron: 15 8 * * *
 
