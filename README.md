@@ -14,20 +14,17 @@ This parser performs syntactic and semantic validation according to the
 
 ## Features
 
-- Support for the Italian extension
-- Check ISO 3166-1 alpha-2 and alpha-3 country codes
-- Validate emails, URLs (http scheme, valid status code), local and remote files, dates as "YYYY-MM-DD", images (colors, mimes)
-- Check pa-types
-- Validate oembed video links and retrieve HTML for easy embedding
-- Validate SPDX licenses. Without WITH keyword.
-- Check tags
+- Go library and CLI tool (`publiccode-parser`)
+- Supports the latest version of the `publiccode.yml` Standard
+- `publiccode-parser` can output validation errors as JSON or in [errorformat](https://vim-jp.org/vimdoc-en/quickfix.html#error-file-format) friendly way
+- Verifies the existence of URLs by checking the response for URL fields (can be disabled)
 
 ## Example
 
 ```go
 parser := publiccode.NewParser("file:///path/to/local/dir/publiccode.yml")
 // OR
-// parser := publiccode.NewParser("https://github.com/example/example//publiccode.yml")
+// parser := publiccode.NewParser("https://github.com/example/example/publiccode.yml")
 
 // all these settings are optional:
 parser.DisableNetwork = true
@@ -126,7 +123,7 @@ This software is maintained by the
 
 ## License
 
-© 2018-2020 Team per la Trasformazione Digitale - Presidenza del Consiglio dei Minstri
+© 2018-present Team per la Trasformazione Digitale - Presidenza del Consiglio dei Minstri
 
-Licensed under the EUPL.
+Licensed under the EUPL 1.2.
 The version control system provides attribution for specific lines of code.
