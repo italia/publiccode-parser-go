@@ -1,4 +1,4 @@
-import { Octokit } from "https://cdn.skypack.dev/octokit?dts";
+import { Octokit } from "https://esm.sh/octokit?dts";
 import { Md5 } from "https://deno.land/std@0.126.0/hash/md5.ts";
 import { $ } from 'https://deno.land/x/zx_deno@1.2.2/mod.mjs'
 
