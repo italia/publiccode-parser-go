@@ -4,20 +4,22 @@
 #
 
 # Accept the Go version for the image to be set as a build argument.
-ARG GO_VERSION=1.16-alpine
+ARG GO_VERSION=1.18-alpine
 
-FROM golang:${GO_VERSION} as build
+FROM docker.io/golang:${GO_VERSION} as build
 
 WORKDIR /go/src
 
 COPY . .
 
-RUN cd pcvalidate && \
-  go build -ldflags="-s -w" pcvalidate.go
+RUN cd publiccode-parser && go build -ldflags="-s -w"
 
-FROM alpine:3
+FROM docker.io/alpine:3
 
-COPY --from=build /go/src/pcvalidate/pcvalidate /usr/local/bin/pcvalidate
+COPY --from=build /go/src/publiccode-parser/publiccode-parser /usr/local/bin/publiccode-parser
 
-ENTRYPOINT ["/usr/local/bin/pcvalidate"]
+# Keep the old name for backward compatibility
+RUN ln -s /usr/local/bin/publiccode-parser /usr/local/bin/pcvalidate
+
+ENTRYPOINT ["/usr/local/bin/publiccode-parser"]
 CMD ["files/publiccode.yml"]

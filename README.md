@@ -39,20 +39,20 @@ publiccode := parser.PublicCode
 
 ## Validation from command line
 
-This repository also contains `pcvalidate` which can be used for validating a
-`publiccode.yml` from the command line.
+The `publiccode-parser` binary which be used for validating a `publiccode.yml`
+from the command line.
 
 To get the latest development version use:
 
 ```shell
-go install github.com/italia/publiccode-parser-go/v3/pcvalidate@latest
-pcvalidate mypubliccode.yml
+go install github.com/italia/publiccode-parser-go/v3/publiccode-parser@latest
+publiccode-parser mypubliccode.yml
 ```
 
 To get the latest stable version go to the [release page](https://github.com/italia/publiccode-parser-go/releases/latest)
 and grab the one for your arch.
 
-Run `pcvalidate --help` for the available command line flags.
+Run `publiccode-parser --help` for the available command line flags.
 
 The tool returns 0 in case of successful validation, 1 otherwise.
 

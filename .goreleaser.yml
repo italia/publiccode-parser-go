@@ -8,9 +8,9 @@ before:
     - go generate ./...
 builds:
 -
-  id: pcvalidate
-  binary: pcvalidate
-  main: ./pcvalidate/pcvalidate.go
+  id: publiccode-parser
+  binary: publiccode-parser
+  main: ./publiccode-parser/publiccode_parser.go
   ldflags:
     - -s -w -X main.version={{.Version}} -X main.date={{.Date}}
   env:
@@ -46,7 +46,7 @@ dockers:
     goos: linux
     goarch: amd64
     ids:
-      - pcvalidate
+      - publiccode-parser
     skip_push: false
     dockerfile: Dockerfile.goreleaser
     image_templates:
