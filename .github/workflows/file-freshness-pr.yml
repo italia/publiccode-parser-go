@@ -1,0 +1,22 @@
+name: Update external files
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: 15 8 * * *
+
+jobs:
+  update-external-files:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - run: >
+          curl -sL 'https://www.indicepa.gov.it/public-services/opendata-read-service.php?dstype=FS&filename=amministrazioni.txt'
+          | tail -n +2
+          | cut -f1
+          | LC_COLLATE=C sort > data/it/ipa_codes.txt
+      - uses: peter-evans/create-pull-request@v5
+        with:
+            commit-message: "chore: update it/ipa_codes.txt"
+            title: "chore: update it/ipa_codes.txt"
+            body: ""
+            branch: update-external-files
