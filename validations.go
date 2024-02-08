@@ -1,6 +1,7 @@
 package publiccode
 
 import (
+	"bytes"
 	"encoding/base64"
 	"fmt"
 	"image"
@@ -18,7 +19,9 @@ import (
 	httpclient "github.com/italia/httpclient-lib-go"
 	"github.com/alranel/go-vcsurl/v2"
 
-	urlutil "github.com/italia/publiccode-parser-go/v3/internal"
+	"github.com/italia/publiccode-parser-go/v3/data"
+	"github.com/dyatlov/go-oembed/oembed"
+	netutil "github.com/italia/publiccode-parser-go/v3/internal"
 )
 
 // Despite the spec requires at least 1000px, we temporarily release this constraint to 120px.
@@ -135,27 +138,26 @@ func (p *Parser) isImageFile(u url.URL) (bool, error) {
 	ext := strings.ToLower(filepath.Ext(u.Path))
 
 	if !funk.Contains(validExt, ext) {
-		return false, fmt.Errorf("invalid file extension for: %s", urlutil.DisplayURL(&u))
+		return false, fmt.Errorf("invalid file extension for: %s", netutil.DisplayURL(&u))
 	}
 	exists := p.fileExists(u)
 
-	return exists, fmt.Errorf("no such file : %s", urlutil.DisplayURL(&u))
+	return exists, fmt.Errorf("no such file : %s", netutil.DisplayURL(&u))
 }
 
 // validLogo returns true if the file path in value is a valid logo.
 // It also checks if the file exists.
-// Reference: https://github.com/publiccodenet/publiccode.yml/blob/develop/schema.md
 func (p *Parser) validLogo(u url.URL) (bool, error) {
 	validExt := []string{".svg", ".svgz", ".png"}
 	ext := strings.ToLower(filepath.Ext(u.Path))
 
 	// Check for valid extension.
 	if !funk.Contains(validExt, ext) {
-		return false, fmt.Errorf("invalid file extension for: %s", urlutil.DisplayURL(&u))
+		return false, fmt.Errorf("invalid file extension for: %s", netutil.DisplayURL(&u))
 	}
 
 	if exists := p.fileExists(u); !exists {
-		return false, fmt.Errorf("no such file: %s", urlutil.DisplayURL(&u))
+		return false, fmt.Errorf("no such file: %s", netutil.DisplayURL(&u))
 	}
 
 	var localPath string
@@ -166,7 +168,7 @@ func (p *Parser) validLogo(u url.URL) (bool, error) {
 		if p.DisableNetwork {
 			return true, nil
 		}
-		localPath, err = downloadTmpFile(&u, getHeaderFromDomain(p.Domain, u.String()))
+		localPath, err = netutil.DownloadTmpFile(&u, getHeaderFromDomain(p.Domain, u.String()))
 		if err != nil {
 			return false, err
 		}
@@ -188,7 +190,7 @@ func (p *Parser) validLogo(u url.URL) (bool, error) {
 			return false, err
 		}
 		if image.Width < minLogoWidth {
-			return false, fmt.Errorf("invalid image size of %d (min %dpx of width): %s", image.Width, minLogoWidth, urlutil.DisplayURL(&u))
+			return false, fmt.Errorf("invalid image size of %d (min %dpx of width): %s", image.Width, minLogoWidth, netutil.DisplayURL(&u))
 		}
 	}
 
@@ -202,4 +204,33 @@ func (p *Parser) isMIME(value string) bool {
 	re := regexp.MustCompile("^ *([A-Za-z0-9][A-Za-z0-9!#$&^_-]{0,126})/([A-Za-z0-9][A-Za-z0-9!#$&^_.+-]{0,126}) *$")
 
 	return re.MatchString(value)
+}
+
+// isOembedURL returns whether the link is hosted on a valid oembed provider.
+// Reference: https://oembed.com/providers.json
+func (p *Parser) isOembedURL(url *url.URL) (bool, error) {
+	if p.DisableNetwork {
+		return true, nil
+	}
+
+	// Load oembed library and providers.js on from base64 variable
+	b := data.OembedProviders
+	oe := oembed.NewOembed()
+	_ = oe.ParseProviders(bytes.NewReader(b))
+
+	link := url.String()
+	item := oe.FindItem(link)
+	if item == nil {
+		return false, fmt.Errorf("invalid oembed link: %s", link)
+	}
+
+	info, err := item.FetchOembed(oembed.Options{URL: link})
+	if err != nil {
+		return false, fmt.Errorf("invalid oembed link: %s", err)
+	}
+	if info.Status >= 300 {
+		return false, fmt.Errorf("invalid oembed link Status: %d", info.Status)
+	}
+
+	return true, nil
 }

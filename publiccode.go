@@ -1,14 +1,12 @@
 package publiccode
 
 // Version of the latest PublicCode specs.
-// Source https://github.com/publiccodenet/publiccode.yml
 const Version = "0.3"
 
 // SupportedVersions lists the publiccode.yml versions this parser supports.
 var SupportedVersions = []string{"0.2", "0.2.0", "0.2.1", "0.2.2", "0.3", "0.3.0"}
 
 // PublicCode is a publiccode.yml file definition.
-// Reference: https://github.com/publiccodenet/publiccode.yml
 type PublicCode struct {
 	PubliccodeYamlVersion string `yaml:"publiccodeYmlVersion" validate:"required,oneof=0.2 0.2.0 0.2.1 0.2.2 0.3 0.3.0"`
 
@@ -74,7 +72,6 @@ type PublicCode struct {
 }
 
 // Desc is a general description of the software.
-// Reference: https://github.com/publiccodenet/publiccode.yml/blob/develop/schema.md#section-description
 type Desc struct {
 	LocalisedName          *string   `yaml:"localisedName,omitempty"`
 	GenericName            string    `yaml:"genericName" validate:"umax=35"`
@@ -89,7 +86,6 @@ type Desc struct {
 }
 
 // Contractor is an entity or entities, if any, that are currently contracted for maintaining the software.
-// Reference: https://github.com/publiccodenet/publiccode.yml/blob/develop/schema.md#contractor
 type Contractor struct {
 	Name          string  `yaml:"name" validate:"required"`
 	Email         *string `yaml:"email,omitempty" validate:"omitempty,email"`
@@ -98,7 +94,6 @@ type Contractor struct {
 }
 
 // Contact is a contact info maintaining the software.
-// Reference: https://github.com/publiccodenet/publiccode.yml/blob/develop/schema.md#contact
 type Contact struct {
 	Name        string  `yaml:"name" validate:"required"`
 	Email       *string `yaml:"email,omitempty" validate:"omitempty,email"`
@@ -107,11 +102,51 @@ type Contact struct {
 }
 
 // Dependency describe system-level dependencies required to install and use this software.
-// Reference: https://github.com/publiccodenet/publiccode.yml/blob/develop/schema.md#section-dependencies
 type Dependency struct {
 	Name       string  `yaml:"name" validate:"required,gt=0"`
 	VersionMin *string `yaml:"versionMin,omitempty"`
 	VersionMax *string `yaml:"versionMax,omitempty"`
 	Optional   *bool   `yaml:"optional,omitempty"`
 	Version    *string `yaml:"version,omitempty"`
+}
+
+// Country-specific sections
+//
+// While the standard is structured to be meaningful on an international level,
+// there are additional information that can be added that makes sense in specific
+// countries, such as declaring compliance with local laws or regulations.
+//
+// All country-specific sections are contained in a section named with
+// the two-letter lowercase ISO 3166-1 alpha-2 country code.
+
+// ExtensionITVersion declares the latest supported version of the 'it' section
+var ExtensionITVersion = "0.2"
+
+// ExtensionITSupportedVersions declares the versions of the 'it' extension
+// supported by this parser. We also support legacy publiccode.yml files
+// which did not contain the it/countryExtensionVersion key.
+var ExtensionITSupportedVersions = []string{"0.2"}
+
+// ExtensionIT is the country-specific section for Italy.
+type ExtensionIT struct {
+	CountryExtensionVersion string `yaml:"countryExtensionVersion"`
+
+	Conforme struct {
+		LineeGuidaDesign        bool `yaml:"lineeGuidaDesign,omitempty"`
+		ModelloInteroperabilita bool `yaml:"modelloInteroperabilita"`
+		MisureMinimeSicurezza   bool `yaml:"misureMinimeSicurezza"`
+		GDPR                    bool `yaml:"gdpr"`
+	} `yaml:"conforme"`
+
+	Riuso struct {
+		CodiceIPA string `yaml:"codiceIPA,omitempty" validate:"omitempty,is_italian_ipa_code"`
+	} `yaml:"riuso,omitempty"`
+
+	Piattaforme struct {
+		Spid   bool `yaml:"spid"`
+		Pagopa bool `yaml:"pagopa"`
+		Cie    bool `yaml:"cie"`
+		Anpr   bool `yaml:"anpr"`
+		Io     bool `yaml:"io"`
+	} `yaml:"piattaforme"`
 }
