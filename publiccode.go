@@ -23,8 +23,8 @@ type PublicCode struct {
 	Logo              string        `yaml:"logo,omitempty"`
 	MonochromeLogo    string        `yaml:"monochromeLogo,omitempty"`
 
-	InputTypes  []string `yaml:"inputTypes,omitempty"`
-	OutputTypes []string `yaml:"outputTypes,omitempty"`
+	InputTypes  []string `yaml:"inputTypes,omitempty" validate:"omitempty,dive,is_mime_type"`
+	OutputTypes []string `yaml:"outputTypes,omitempty" validate:"omitempty,dive,is_mime_type"`
 
 	Platforms []string `yaml:"platforms" validate:"gt=0"`
 

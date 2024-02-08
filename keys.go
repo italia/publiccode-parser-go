@@ -86,24 +86,10 @@ func (p *Parser) validateFields() error {
 	if len(p.PublicCode.InputTypes) > 0 {
 		vr =  append(vr, ValidationWarning{"inputTypes", "This key is DEPRECATED and will be removed in the future", 0, 0})
 	}
-	for i, mimeType := range p.PublicCode.InputTypes {
-		if !p.isMIME(mimeType) {
-			vr =  append(vr, newValidationError(
-				fmt.Sprintf("inputTypes[%d]", i), "'%s' is not a MIME type", mimeType,
-			))
-		}
-	}
-
 	if len(p.PublicCode.OutputTypes) > 0 {
 		vr =  append(vr, ValidationWarning{"outputTypes", "This key is DEPRECATED and will be removed in the future", 0, 0})
 	}
-	for i, mimeType := range p.PublicCode.OutputTypes {
-		if !p.isMIME(mimeType) {
-			vr =  append(vr, newValidationError(
-				fmt.Sprintf("outputTypes[%d]", i), "'%s' is not a MIME type", mimeType,
-			))
-		}
-	}
+
 
 	for lang, desc := range p.PublicCode.Description {
 		if p.PublicCode.Description == nil {

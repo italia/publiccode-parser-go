@@ -238,6 +238,7 @@ func (p *Parser) ParseBytes(in []byte) error {
 			"oneof": "must be one of the following:",
 			"email": "must be a valid email",
 			"date": "must be a date with format 'YYYY-MM-DD'",
+			"is_mime_type": "is not a MIME type",
 			"umax": "must be less or equal than",
 			"umin": "must be more or equal than",
 			"is_category_v0_2": "must be a valid category",
