@@ -1,6 +1,7 @@
 package validators;
 
 import (
+	"regexp"
 	"strconv"
 	"time"
 
@@ -39,4 +40,12 @@ func uMin(fl validator.FieldLevel) bool {
 	min , _ := strconv.Atoi(fl.Param())
 
 	return length >= min
+}
+
+// isMIMEType checks whether the string in input is a well formed MIME type or not.
+func isMIMEType(fl validator.FieldLevel) bool {
+	// Reference: https://github.com/jshttp/media-typer/
+	re := regexp.MustCompile("^ *([A-Za-z0-9][A-Za-z0-9!#$&^_-]{0,126})/([A-Za-z0-9][A-Za-z0-9!#$&^_.+-]{0,126}) *$")
+
+	return re.MatchString(fl.Field().String())
 }

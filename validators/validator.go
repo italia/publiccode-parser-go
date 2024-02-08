@@ -10,6 +10,7 @@ import (
 func New() *validator.Validate {
 	validate := validator.New()
 	_ = validate.RegisterValidation("date", isDate)
+	_ = validate.RegisterValidation("is_mime_type", isMIMEType)
 	_ = validate.RegisterValidation("iso3166_1_alpha2_lowercase", isIso3166Alpha2Lowercase)
 	_ = validate.RegisterValidation("umax", uMax)
 	_ = validate.RegisterValidation("umin", uMin)
