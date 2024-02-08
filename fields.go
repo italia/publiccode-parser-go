@@ -74,24 +74,8 @@ func validateFieldsV0(publiccode PublicCode, parser Parser, network bool) error 
 		vr = append(vr, ValidationWarning{"inputTypes", "This key is DEPRECATED and will be removed in the future", 0, 0})
 	}
 
-	for i, mimeType := range publiccodev0.InputTypes {
-		if !isMIME(mimeType) {
-			vr = append(vr, newValidationError(
-				fmt.Sprintf("inputTypes[%d]", i), "'%s' is not a MIME type", mimeType,
-			))
-		}
-	}
-
 	if len(publiccodev0.OutputTypes) > 0 {
 		vr = append(vr, ValidationWarning{"outputTypes", "This key is DEPRECATED and will be removed in the future", 0, 0})
-	}
-
-	for i, mimeType := range publiccodev0.OutputTypes {
-		if !isMIME(mimeType) {
-			vr = append(vr, newValidationError(
-				fmt.Sprintf("outputTypes[%d]", i), "'%s' is not a MIME type", mimeType,
-			))
-		}
 	}
 
 	for lang, desc := range publiccodev0.Description {
