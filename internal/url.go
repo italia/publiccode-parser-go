@@ -1,4 +1,4 @@
-package urlutil
+package netutil
 
 import (
 	"net/url"

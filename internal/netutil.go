@@ -1,4 +1,4 @@
-package publiccode
+package netutil
 
 import (
 	"bytes"
@@ -37,7 +37,7 @@ func downloadFile(filepath string, url *url.URL, headers map[string]string) erro
 }
 
 // Caller is responsible for removing the temporary directory.
-func downloadTmpFile(url *url.URL, headers map[string]string) (string, error) {
+func DownloadTmpFile(url *url.URL, headers map[string]string) (string, error) {
 	// Create a temp dir
 	tmpdir, err := ioutil.TempDir("", "publiccode.yml-parser-go")
 	if err != nil {
