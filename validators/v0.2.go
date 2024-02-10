@@ -1,8 +1,9 @@
 package validators;
 
 import (
+	"slices"
+
 	"github.com/go-playground/validator/v10"
-	"github.com/thoas/go-funk"
 )
 
 func isCategory_v0_2(fl validator.FieldLevel) bool {
@@ -110,7 +111,7 @@ func isCategory_v0_2(fl validator.FieldLevel) bool {
 		"workflow-management",
 	}
 
-	return funk.Contains(supportedCategories, fl.Field().String())
+	return slices.Contains(supportedCategories, fl.Field().String())
 }
 
 func isScope_v0_2(fl validator.FieldLevel) bool {
@@ -141,5 +142,5 @@ func isScope_v0_2(fl validator.FieldLevel) bool {
 		"welfare",
 	}
 
-	return funk.Contains(supportedScopes, fl.Field().String())
+	return slices.Contains(supportedScopes, fl.Field().String())
 }

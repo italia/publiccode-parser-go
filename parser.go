@@ -2,11 +2,13 @@ package publiccode
 
 import (
 	"bytes"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/url"
+	"os"
 	"path/filepath"
 	"regexp"
+	"slices"
 	"strconv"
 	"strings"
 	"unicode/utf8"
@@ -15,7 +17,6 @@ import (
 	"gopkg.in/yaml.v3"
 	"github.com/go-playground/validator/v10"
 	"github.com/alranel/go-vcsurl/v2"
-	"github.com/thoas/go-funk"
 
 	publiccodeValidator "github.com/italia/publiccode-parser-go/v3/validators"
 	urlutil "github.com/italia/publiccode-parser-go/v3/internal"
@@ -199,7 +200,7 @@ func (p *Parser) ParseBytes(in []byte) error {
 
 		return ve
 	}
-	if funk.Contains(SupportedVersions, version.Value) && strings.HasPrefix(version.Value, "0.2") {
+	if slices.Contains(SupportedVersions, version.Value) && strings.HasPrefix(version.Value, "0.2") {
 		line, column := getPositionInFile("publiccodeYmlVersion", node)
 
 		ve = append(ve, ValidationWarning{
@@ -327,7 +328,7 @@ func (p *Parser) Parse() error {
 	var err error
 
 	if p.file.Scheme == "file" {
-		data, err = ioutil.ReadFile(p.file.Path)
+		data, err = os.ReadFile(p.file.Path)
 		if err != nil {
 			return err
 		}
@@ -338,7 +339,7 @@ func (p *Parser) Parse() error {
 		}
 		defer resp.Body.Close()
 
-		data, err = ioutil.ReadAll(resp.Body)
+		data, err = io.ReadAll(resp.Body)
 		if err != nil {
 			return err
 		}

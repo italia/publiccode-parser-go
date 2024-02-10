@@ -13,9 +13,9 @@ import (
 	"path/filepath"
 	"regexp"
 	"runtime"
+	"slices"
 	"strings"
 
-	"github.com/thoas/go-funk"
 	httpclient "github.com/italia/httpclient-lib-go"
 	"github.com/alranel/go-vcsurl/v2"
 
@@ -137,7 +137,7 @@ func (p *Parser) isImageFile(u url.URL) (bool, error) {
 	validExt := []string{".jpg", ".png"}
 	ext := strings.ToLower(filepath.Ext(u.Path))
 
-	if !funk.Contains(validExt, ext) {
+	if !slices.Contains(validExt, ext) {
 		return false, fmt.Errorf("invalid file extension for: %s", netutil.DisplayURL(&u))
 	}
 	exists := p.fileExists(u)
@@ -152,7 +152,7 @@ func (p *Parser) validLogo(u url.URL) (bool, error) {
 	ext := strings.ToLower(filepath.Ext(u.Path))
 
 	// Check for valid extension.
-	if !funk.Contains(validExt, ext) {
+	if !slices.Contains(validExt, ext) {
 		return false, fmt.Errorf("invalid file extension for: %s", netutil.DisplayURL(&u))
 	}
 

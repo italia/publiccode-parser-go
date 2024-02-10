@@ -3,10 +3,10 @@ package publiccode
 import (
 	"fmt"
 	"net/url"
+	"slices"
 
 	spdxValidator "github.com/kyoh86/go-spdx/spdx"
 	"github.com/alranel/go-vcsurl/v2"
-	"github.com/thoas/go-funk"
 
 	urlutil "github.com/italia/publiccode-parser-go/v3/internal"
 )
@@ -75,7 +75,7 @@ func (p *Parser) validateFields() error {
 	}
 
 	if p.PublicCode.It.CountryExtensionVersion != "" &&
-		!funk.Contains(ExtensionITSupportedVersions, p.PublicCode.It.CountryExtensionVersion) {
+		!slices.Contains(ExtensionITSupportedVersions, p.PublicCode.It.CountryExtensionVersion) {
 
 		vr =  append(vr, newValidationError(
 			"it.countryExtensionVersion",
