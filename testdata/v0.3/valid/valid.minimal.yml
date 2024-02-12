@@ -15,7 +15,7 @@ developmentStatus: development
 softwareType: "standalone/other"
 
 description:
-  eng:
+  en_GB:
     localisedName: Medusa
     shortDescription: >
           A rather short description which

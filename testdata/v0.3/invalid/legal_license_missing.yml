@@ -38,7 +38,7 @@ description:
        - Just one feature
 
 legal:
-  authorsFile: testdata/AUTHORS
+  repoOwner: foobar
   # Should NOT validate: license is missing
 
 maintenance:

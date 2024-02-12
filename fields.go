@@ -3,111 +3,112 @@ package publiccode
 import (
 	"fmt"
 	"net/url"
-	"slices"
 
 	spdxValidator "github.com/kyoh86/go-spdx/spdx"
 	"github.com/alranel/go-vcsurl/v2"
 
-	urlutil "github.com/italia/publiccode-parser-go/v3/internal"
+	urlutil "github.com/italia/publiccode-parser-go/v4/internal"
 )
+
+type validateFn func (publiccode PublicCode, parser Parser, network bool) error
 
 // validateFields validates publiccode with additional rules not validatable
 // with a simple YAML schema.
 // It returns any error encountered as ValidationResults.
-func (p *Parser) validateFields() error {
+func validateFieldsV0(publiccode PublicCode, parser Parser, network bool) error {
+	publiccodev0 := publiccode.(PublicCodeV0)
+
 	var vr ValidationResults
 	var err error
 
-	if (p.PublicCode.URL != nil) {
-		if reachable, err := p.isReachable(*(*url.URL)(p.PublicCode.URL)); !reachable {
-			vr =  append(vr, newValidationError("url", "'%s' not reachable: %s", p.PublicCode.URL, err.Error()))
+	if (publiccodev0.URL != nil && network) {
+		if reachable, err := parser.isReachable(*(*url.URL)(publiccodev0.URL), network); !reachable {
+			vr =  append(vr, newValidationError("url", "'%s' not reachable: %s", publiccodev0.URL, err.Error()))
 		}
-		if !vcsurl.IsRepo((*url.URL)(p.PublicCode.URL)) {
+		if !vcsurl.IsRepo((*url.URL)(publiccodev0.URL)) {
 			vr =  append(vr, newValidationError("url", "is not a valid code repository"))
 		}
 	}
 
-	if p.PublicCode.LandingURL != nil {
-		if reachable, err := p.isReachable(*(*url.URL)(p.PublicCode.LandingURL)); !reachable {
+	if publiccodev0.LandingURL != nil {
+		if reachable, err := parser.isReachable(*(*url.URL)(publiccodev0.LandingURL), network); !reachable {
 			vr =  append(vr, newValidationError(
 				"landingURL",
-				"'%s' not reachable: %s", p.PublicCode.LandingURL, err.Error(),
+				"'%s' not reachable: %s", publiccodev0.LandingURL, err.Error(),
 			))
 		}
 	}
 
-	if p.PublicCode.Roadmap != nil {
-		if reachable, err := p.isReachable(*(*url.URL)(p.PublicCode.Roadmap)); !reachable {
+	if publiccodev0.Roadmap != nil {
+		if reachable, err := parser.isReachable(*(*url.URL)(publiccodev0.Roadmap), network); !reachable {
 			vr =  append(vr, newValidationError(
 				"roadmap",
-				"'%s' not reachable: %s", p.PublicCode.Roadmap, err.Error(),
+				"'%s' not reachable: %s", publiccodev0.Roadmap, err.Error(),
 			))
 		}
 	}
 
-	if (p.PublicCode.Logo != "") {
-		if validLogo, err := p.validLogo(p.toURL(p.PublicCode.Logo)); !validLogo {
+	if (publiccodev0.Logo != "") {
+		if validLogo, err := parser.validLogo(toCodeHostingURL(publiccodev0.Logo, parser.baseURL), parser, network); !validLogo {
 			vr =  append(vr, newValidationError("logo", err.Error()))
 		}
 	}
-	if (p.PublicCode.MonochromeLogo != "") {
+	if (publiccodev0.MonochromeLogo != "") {
 		vr =  append(vr, ValidationWarning{"monochromeLogo", "This key is DEPRECATED and will be removed in the future", 0, 0})
 
-		if validLogo, err := p.validLogo(p.toURL(p.PublicCode.MonochromeLogo)); !validLogo {
+		if validLogo, err := parser.validLogo(toCodeHostingURL(publiccodev0.MonochromeLogo, parser.baseURL), parser, network); !validLogo {
 			vr =  append(vr, newValidationError("monochromeLogo", err.Error()))
 		}
 	}
 
-	if p.PublicCode.Legal.AuthorsFile != nil && !p.fileExists(p.toURL(*p.PublicCode.Legal.AuthorsFile)) {
-		u := p.toURL(*p.PublicCode.Legal.AuthorsFile)
+	if publiccodev0.Legal.AuthorsFile != nil && !parser.fileExists(toCodeHostingURL(*publiccodev0.Legal.AuthorsFile, parser.baseURL), network) {
+		u := toCodeHostingURL(*publiccodev0.Legal.AuthorsFile, parser.baseURL)
 
 		vr =  append(vr, newValidationError("legal.authorsFile", "'%s' does not exist", urlutil.DisplayURL(&u)))
 	}
 
-	if p.PublicCode.Legal.License != "" {
-		_, err = spdxValidator.Parse(p.PublicCode.Legal.License)
+	if publiccodev0.Legal.License != "" {
+		_, err = spdxValidator.Parse(publiccodev0.Legal.License)
 		if err != nil {
 			vr =  append(vr, newValidationError(
 				"legal.license",
-				"invalid license '%s'", p.PublicCode.Legal.License,
+				"invalid license '%s'", publiccodev0.Legal.License,
 			))
 		}
 	}
 
-	if p.PublicCode.It.CountryExtensionVersion != "" &&
-		!slices.Contains(ExtensionITSupportedVersions, p.PublicCode.It.CountryExtensionVersion) {
-
+	if publiccodev0.It.CountryExtensionVersion != "" && publiccodev0.It.CountryExtensionVersion != "0.2" {
 		vr =  append(vr, newValidationError(
 			"it.countryExtensionVersion",
-			"version %s not supported for 'it' extension", p.PublicCode.It.CountryExtensionVersion,
+			"version %s not supported for country-specific section 'it'", publiccodev0.It.CountryExtensionVersion,
 		))
 	}
 
-	if len(p.PublicCode.InputTypes) > 0 {
+	if len(publiccodev0.InputTypes) > 0 {
 		vr =  append(vr, ValidationWarning{"inputTypes", "This key is DEPRECATED and will be removed in the future", 0, 0})
 	}
-	for i, mimeType := range p.PublicCode.InputTypes {
-		if !p.isMIME(mimeType) {
+	for i, mimeType := range publiccodev0.InputTypes {
+		if !isMIME(mimeType) {
 			vr =  append(vr, newValidationError(
 				fmt.Sprintf("inputTypes[%d]", i), "'%s' is not a MIME type", mimeType,
 			))
 		}
 	}
 
-	if len(p.PublicCode.OutputTypes) > 0 {
+	if len(publiccodev0.OutputTypes) > 0 {
 		vr =  append(vr, ValidationWarning{"outputTypes", "This key is DEPRECATED and will be removed in the future", 0, 0})
 	}
-	for i, mimeType := range p.PublicCode.OutputTypes {
-		if !p.isMIME(mimeType) {
+	for i, mimeType := range publiccodev0.OutputTypes {
+		if !isMIME(mimeType) {
 			vr =  append(vr, newValidationError(
 				fmt.Sprintf("outputTypes[%d]", i), "'%s' is not a MIME type", mimeType,
 			))
 		}
 	}
 
-	for lang, desc := range p.PublicCode.Description {
-		if p.PublicCode.Description == nil {
-			p.PublicCode.Description = make(map[string]Desc)
+	for lang, desc := range publiccodev0.Description {
+		if publiccodev0.Description == nil {
+			publiccodev0.Description = make(map[string]DescV0)
 		}
 
 		if len(desc.GenericName) > 0 {
@@ -117,16 +118,16 @@ func (p *Parser) validateFields() error {
 			})
 		}
 
-		if (desc.Documentation != nil) {
-			if reachable, err := p.isReachable(*(*url.URL)(desc.Documentation)); !reachable {
+		if network && desc.Documentation != nil {
+			if reachable, err := parser.isReachable(*(*url.URL)(desc.Documentation), network); !reachable {
 				vr =  append(vr, newValidationError(
 					fmt.Sprintf("description.%s.documentation", lang),
 					"'%s' not reachable: %s", desc.Documentation, err.Error(),
 				))
 			}
 		}
-		if desc.APIDocumentation != nil {
-			if reachable, err := p.isReachable(*(*url.URL)(desc.APIDocumentation)); !reachable {
+		if network && desc.APIDocumentation != nil {
+			if reachable, err := parser.isReachable(*(*url.URL)(desc.APIDocumentation), network); !reachable {
 				vr =  append(vr, newValidationError(
 					fmt.Sprintf("description.%s.apiDocumentation", lang),
 					"'%s' not reachable: %s", desc.APIDocumentation, err.Error(),
@@ -135,7 +136,7 @@ func (p *Parser) validateFields() error {
 		}
 
 		for i, v := range desc.Screenshots {
-			if isImage, err := p.isImageFile(p.toURL(v)); !isImage {
+			if isImage, err := parser.isImageFile(toCodeHostingURL(v, parser.baseURL), network); !isImage {
 				vr =  append(vr, newValidationError(
 					fmt.Sprintf("description.%s.screenshots[%d]", lang, i),
 					"'%s' is not an image: %s", v, err.Error(),
@@ -143,7 +144,7 @@ func (p *Parser) validateFields() error {
 			}
 		}
 		for i, v := range desc.Videos {
-			_, err := p.isOEmbedURL((*url.URL)(v))
+			_, err := parser.isOEmbedURL((*url.URL)(v))
 			if err != nil {
 				vr =  append(vr, newValidationError(
 					fmt.Sprintf("description.%s.videos[%d]", lang, i),
