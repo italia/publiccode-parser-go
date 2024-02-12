@@ -143,7 +143,7 @@ func (p *Parser) validateFields() error {
 			}
 		}
 		for i, v := range desc.Videos {
-			_, err := p.isOembedURL((*url.URL)(v))
+			_, err := p.isOEmbedURL((*url.URL)(v))
 			if err != nil {
 				vr =  append(vr, newValidationError(
 					fmt.Sprintf("description.%s.videos[%d]", lang, i),
