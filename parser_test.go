@@ -321,7 +321,7 @@ func TestInvalidTestcasesV0_3(t *testing.T) {
 			ValidationError{"description.eng.awards", "wrong type for this field", 40, 1},
 		},
 		"description_eng_videos_invalid.yml": ValidationResults{
-			ValidationError{"description.eng.videos[0]", "'https://google.com' is not a valid video URL supporting oEmbed: invalid oembed link: https://google.com", 20, 5},
+			ValidationError{"description.eng.videos[0]", "'https://google.com' is not a valid video URL supporting oEmbed: invalid oEmbed link: https://google.com", 20, 5},
 		},
 
 		// legal

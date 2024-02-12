@@ -206,30 +206,16 @@ func (p *Parser) isMIME(value string) bool {
 	return re.MatchString(value)
 }
 
-// isOembedURL returns whether the link is hosted on a valid oembed provider.
+// isOembedURL returns whether the link is from a valid oEmbed provider.
 // Reference: https://oembed.com/providers.json
-func (p *Parser) isOembedURL(url *url.URL) (bool, error) {
-	if p.DisableNetwork {
-		return true, nil
-	}
-
-	// Load oembed library and providers.js on from base64 variable
+func (p *Parser) isOEmbedURL(url *url.URL) (bool, error) {
 	b := data.OembedProviders
 	oe := oembed.NewOembed()
 	_ = oe.ParseProviders(bytes.NewReader(b))
 
 	link := url.String()
-	item := oe.FindItem(link)
-	if item == nil {
-		return false, fmt.Errorf("invalid oembed link: %s", link)
-	}
-
-	info, err := item.FetchOembed(oembed.Options{URL: link})
-	if err != nil {
-		return false, fmt.Errorf("invalid oembed link: %s", err)
-	}
-	if info.Status >= 300 {
-		return false, fmt.Errorf("invalid oembed link Status: %d", info.Status)
+	if item := oe.FindItem(link); item == nil {
+		return false, fmt.Errorf("invalid oEmbed link: %s", link)
 	}
 
 	return true, nil
