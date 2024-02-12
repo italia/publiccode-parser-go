@@ -16,12 +16,12 @@ import (
 	"slices"
 	"strings"
 
-	httpclient "github.com/italia/httpclient-lib-go"
 	"github.com/alranel/go-vcsurl/v2"
+	httpclient "github.com/italia/httpclient-lib-go"
 
-	"github.com/italia/publiccode-parser-go/v3/data"
 	"github.com/dyatlov/go-oembed/oembed"
-	netutil "github.com/italia/publiccode-parser-go/v3/internal"
+	"github.com/italia/publiccode-parser-go/v4/data"
+	netutil "github.com/italia/publiccode-parser-go/v4/internal"
 )
 
 // Despite the spec requires at least 1000px, we temporarily release this constraint to 120px.
@@ -64,10 +64,10 @@ func getHeaderFromDomain(domain Domain, url string) map[string]string {
 
 // isReachable checks whether the URL resource is reachable.
 // An URL resource is reachable if it returns HTTP 200.
-func (p *Parser) isReachable(u url.URL) (bool, error) {
+func (p *Parser) isReachable(u url.URL, network bool) (bool, error) {
 	// Don't check if the network checks are disabled or if we are running in WASM
 	// because we'd most likely fail due to CORS errors.
-	if p.DisableNetwork || runtime.GOARCH == "wasm" {
+	if !network || runtime.GOARCH == "wasm" {
 		return true, nil
 	}
 
@@ -75,7 +75,7 @@ func (p *Parser) isReachable(u url.URL) (bool, error) {
 		return false, fmt.Errorf("missing URL scheme")
 	}
 
-	r, err := httpclient.GetURL(u.String(), getHeaderFromDomain(p.Domain, u.String()))
+	r, err := httpclient.GetURL(u.String(), getHeaderFromDomain(p.domain, u.String()))
 	if err != nil {
 		return false, fmt.Errorf("HTTP GET failed for %s: %v", u.String(), err)
 	}
@@ -91,7 +91,7 @@ func (p *Parser) isReachable(u url.URL) (bool, error) {
 //
 // It supports relative paths and turns them into remote URLs or file:// URLs
 // depending on the value of baseURL
-func (p *Parser) toURL(file string) url.URL {
+func toCodeHostingURL(file string, baseURL *url.URL) url.URL {
 	// Check if file is an absolute URL
 	if uri, err := url.ParseRequestURI(file); err == nil {
 		if raw := vcsurl.GetRawFile(uri); raw != nil {
@@ -101,11 +101,11 @@ func (p *Parser) toURL(file string) url.URL {
 		return *uri
 	}
 
-	// p.baseURL can be nil if we didn't autodetect it because
+	// baseURL can be nil if we didn't autodetect it because
 	// of DisableNetwork == true.
-	if (p.baseURL != nil) {
+	if (baseURL != nil) {
 		// If file is a relative path, let's just append it to our baseURL
-		u := *p.baseURL
+		u := *baseURL
 		u.Path = path.Join(u.Path, file)
 
 		return u
@@ -117,7 +117,7 @@ func (p *Parser) toURL(file string) url.URL {
 }
 
 // fileExists returns true if the file resource exists.
-func (p *Parser) fileExists(u url.URL) bool {
+func (p *Parser) fileExists(u url.URL, network bool) bool {
 	// If we have an absolute local path, perform validation on it, otherwise do it
 	// on the remote URL if any. If none are available, validation is skipped.
 	if u.Scheme == "file" {
@@ -126,28 +126,33 @@ func (p *Parser) fileExists(u url.URL) bool {
 		return err == nil
 	}
 
-	reachable, _ := p.isReachable(u)
 
-	return reachable
+	if network {
+		reachable, _ := p.isReachable(u, network)
+
+		return reachable
+	}
+
+	return true
 }
 
 // isImageFile check whether the string is a valid image. It also checks if the file exists.
 // It returns true if it is an image or false if it's not and an error, if any
-func (p *Parser) isImageFile(u url.URL) (bool, error) {
+func (p *Parser) isImageFile(u url.URL, network bool) (bool, error) {
 	validExt := []string{".jpg", ".png"}
 	ext := strings.ToLower(filepath.Ext(u.Path))
 
 	if !slices.Contains(validExt, ext) {
 		return false, fmt.Errorf("invalid file extension for: %s", netutil.DisplayURL(&u))
 	}
-	exists := p.fileExists(u)
+	exists := p.fileExists(u, network)
 
 	return exists, fmt.Errorf("no such file : %s", netutil.DisplayURL(&u))
 }
 
 // validLogo returns true if the file path in value is a valid logo.
 // It also checks if the file exists.
-func (p *Parser) validLogo(u url.URL) (bool, error) {
+func (p *Parser) validLogo(u url.URL, parser Parser, network bool) (bool, error) {
 	validExt := []string{".svg", ".svgz", ".png"}
 	ext := strings.ToLower(filepath.Ext(u.Path))
 
@@ -156,7 +161,7 @@ func (p *Parser) validLogo(u url.URL) (bool, error) {
 		return false, fmt.Errorf("invalid file extension for: %s", netutil.DisplayURL(&u))
 	}
 
-	if exists := p.fileExists(u); !exists {
+	if exists := p.fileExists(u, network); !exists {
 		return false, fmt.Errorf("no such file: %s", netutil.DisplayURL(&u))
 	}
 
@@ -165,10 +170,10 @@ func (p *Parser) validLogo(u url.URL) (bool, error) {
 	if u.Scheme != "file" {
 		var err error
 
-		if p.DisableNetwork {
+		if !network {
 			return true, nil
 		}
-		localPath, err = netutil.DownloadTmpFile(&u, getHeaderFromDomain(p.Domain, u.String()))
+		localPath, err = netutil.DownloadTmpFile(&u, getHeaderFromDomain(p.domain, u.String()))
 		if err != nil {
 			return false, err
 		}
@@ -198,7 +203,7 @@ func (p *Parser) validLogo(u url.URL) (bool, error) {
 }
 
 // isMIME checks whether the string in input is a well formed MIME or not.
-func (p *Parser) isMIME(value string) bool {
+func isMIME(value string) bool {
 	// Regex for MIME.
 	// Reference: https://github.com/jshttp/media-typer/
 	re := regexp.MustCompile("^ *([A-Za-z0-9][A-Za-z0-9!#$&^_-]{0,126})/([A-Za-z0-9][A-Za-z0-9!#$&^_.+-]{0,126}) *$")
