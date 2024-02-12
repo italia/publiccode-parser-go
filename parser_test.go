@@ -23,11 +23,27 @@ type testType struct {
 func parse(file string) error {
 	var p *Parser
 	var err error
-	if p, err = NewParserWithPath(file, "."); err != nil {
+
+	if p, err = NewDefaultParser(); err != nil {
 		return err
 	}
 
-	return p.Parse()
+	_, err = p.Parse(file)
+
+	return err
+}
+
+func parseNoNetwork(file string) error {
+	var p *Parser
+	var err error
+
+	if p, err = NewParser(ParserConfig{DisableNetwork: true}); err != nil {
+		return err
+	}
+
+	_, err = p.Parse(file)
+
+	return err
 }
 
 // Check all the YAML files matching the glob pattern and fail for each file
@@ -36,8 +52,20 @@ func checkValidFiles(pattern string, t *testing.T) {
 	testFiles, _ := filepath.Glob(pattern)
 	for _, file := range testFiles {
 		t.Run(file, func(t *testing.T) {
-			err := parse(file)
-			if err != nil {
+			if err := parse(file); err != nil {
+				t.Errorf("[%s] validation failed for valid file: %T - %s\n", file, err, err)
+			}
+		})
+	}
+}
+
+// Check all the YAML files matching the glob pattern and fail for each file
+// with parsing or validation errors, with the network disabled.
+func checkValidFilesNoNetwork(pattern string, t *testing.T) {
+	testFiles, _ := filepath.Glob(pattern)
+	for _, file := range testFiles {
+		t.Run(file, func(t *testing.T) {
+			if err := parseNoNetwork(file); err != nil {
 				t.Errorf("[%s] validation failed for valid file: %T - %s\n", file, err, err)
 			}
 		})
@@ -62,17 +90,48 @@ func TestValidPreviousStandardVersion(t *testing.T) {
 		err := parse(file)
 		checkParseErrors(t, err, testType{
 			file, ValidationResults{
-				ValidationWarning{"publiccodeYmlVersion", "v0.2 is not the latest version, use '0.3'. Parsing this file as v0.3.", 1, 1},
+				ValidationWarning{"publiccodeYmlVersion", "v0.2 is not the latest version, use '0.3.0'. Parsing this file as v0.3.0.", 1, 1},
 			},
 		})
 	})
 }
-func TestInvalidTestcasesV0_3(t *testing.T) {
-	cwd, err := os.Getwd()
-	if err != nil {
-		t.Errorf("Can't get current working directory")
+
+func TestValidTestcasesV0_3_NoNetwordk(t *testing.T) {
+	checkValidFilesNoNetwork("testdata/v0.3/valid/no-network/*.yml", t)
+}
+
+func TestInvalidTestcasesV0_3_NoNetwork(t *testing.T) {
+	expected := map[string]error{
+		// logo
+		"logo_missing_file.yml": ValidationResults{
+			ValidationError{"logo", "no such file: no_such_file.png", 18, 1},
+		},
+		"logo_invalid_png.yml": ValidationResults{
+			ValidationError{"logo", "image: unknown format", 18, 1},
+		},
+
+		// monochromeLogo
+		"monochromeLogo_invalid_png.yml": ValidationResults{
+			ValidationWarning{"monochromeLogo", "This key is DEPRECATED and will be removed in the future", 18, 1},
+			ValidationError{"monochromeLogo", "image: unknown format", 18, 1},
+		},
+
 	}
 
+	testFiles, _ := filepath.Glob("testdata/v0.3/invalid/no-network/*yml")
+	for _, file := range testFiles {
+		baseName := path.Base(file)
+		if expected[baseName] == nil {
+			t.Errorf("No expected data for file %s", baseName)
+		}
+		t.Run(file, func(t *testing.T) {
+			err := parseNoNetwork(file)
+			checkParseErrors(t, err, testType{file, expected[baseName]})
+		})
+	}
+}
+
+func TestInvalidTestcasesV0_3(t *testing.T) {
 	expected := map[string]error{
 		// publiccodeYmlVersion
 		"publiccodeYmlVersion_missing.yml": ValidationResults{ValidationError{"publiccodeYmlVersion", "required", 0, 0}},
@@ -81,7 +140,7 @@ func TestInvalidTestcasesV0_3(t *testing.T) {
 		}},
 		"publiccodeYmlVersion_wrong_type.yml": ValidationResults{
 			ValidationError{"publiccodeYmlVersion", "wrong type for this field", 2, 1},
-			ValidationError{"publiccodeYmlVersion", "required", 2, 1}},
+		},
 
 		// name
 		"name_missing.yml": ValidationResults{ValidationError{"name", "required", 1, 1}},
@@ -150,13 +209,10 @@ func TestInvalidTestcasesV0_3(t *testing.T) {
 			ValidationError{"logo", "wrong type for this field", 18, 1},
 		},
 		"logo_unsupported_extension.yml": ValidationResults{
-			ValidationError{"logo", fmt.Sprintf("invalid file extension for: %s/logo.mpg", cwd), 18, 1},
+			ValidationError{"logo", "invalid file extension for: https://raw.githubusercontent.com/italia/developers.italia.it/main/logo.mpg", 18, 1},
 		},
 		"logo_missing_file.yml": ValidationResults{
-			ValidationError{"logo", fmt.Sprintf("no such file: %s/no_such_file.png", cwd), 18, 1},
-		},
-		"logo_invalid_png.yml": ValidationResults{
-			ValidationError{"logo", "image: unknown format", 18, 1},
+			ValidationError{"logo", "no such file: https://raw.githubusercontent.com/italia/developers.italia.it/main/no_such_file.png", 18, 1},
 		},
 
 		// monochromeLogo
@@ -167,18 +223,14 @@ func TestInvalidTestcasesV0_3(t *testing.T) {
 			ValidationWarning{"monochromeLogo", "This key is DEPRECATED and will be removed in the future", 18, 1},
 			ValidationError{
 				"monochromeLogo",
-				fmt.Sprintf("invalid file extension for: %s/monochromeLogo.mpg", cwd),
+				"invalid file extension for: https://raw.githubusercontent.com/italia/developers.italia.it/main/monochromeLogo.mpg",
 				18,
 				1,
 			},
 		},
 		"monochromeLogo_missing_file.yml": ValidationResults{
 			ValidationWarning{"monochromeLogo", "This key is DEPRECATED and will be removed in the future", 18, 1},
-			ValidationError{"monochromeLogo", fmt.Sprintf("no such file: %s/no_such_file.png", cwd), 18, 1},
-		},
-		"monochromeLogo_invalid_png.yml": ValidationResults{
-			ValidationWarning{"monochromeLogo", "This key is DEPRECATED and will be removed in the future", 18, 1},
-			ValidationError{"monochromeLogo", "image: unknown format", 18, 1},
+			ValidationError{"monochromeLogo", "no such file: https://raw.githubusercontent.com/italia/developers.italia.it/main/no_such_file.png", 18, 1},
 		},
 
 		// inputTypes
@@ -337,7 +389,7 @@ func TestInvalidTestcasesV0_3(t *testing.T) {
 		"description_eng_screenshots_missing_file.yml": ValidationResults{
 			ValidationError{
 				"description.eng.screenshots[0]",
-				fmt.Sprintf("'no_such_file.png' is not an image: no such file : %s/no_such_file.png", cwd),
+				"'no_such_file.png' is not an image: no such file : https://raw.githubusercontent.com/italia/developers.italia.it/main/no_such_file.png",
 				20,
 				5,
 			},
@@ -367,7 +419,7 @@ func TestInvalidTestcasesV0_3(t *testing.T) {
 		"legal_authorsFile_missing_file.yml": ValidationResults{
 			ValidationError{
 				"legal.authorsFile",
-				fmt.Sprintf("'%s/no_such_authors_file.txt' does not exist", cwd),
+				"'https://raw.githubusercontent.com/italia/developers.italia.it/main/no_such_authors_file.txt' does not exist",
 				42,
 				3,
 			},
@@ -508,21 +560,23 @@ func TestDecodeValueErrorsRemote(t *testing.T) {
 	testRemoteFiles := []testType{
 		{"https://raw.githubusercontent.com/italia/publiccode-editor/master/publiccode.yml", ValidationResults{
 			ValidationWarning{
-				"publiccodeYmlVersion", "v0.2 is not the latest version, use '0.3'. Parsing this file as v0.3.", 1, 1,
+				"publiccodeYmlVersion", "v0.2 is not the latest version, use '0.3.0'. Parsing this file as v0.3.0.", 1, 1,
 			},
 			ValidationWarning{"description.it.genericName", "This key is DEPRECATED and will be removed in the future", 12, 5},
 		}},
 	}
 
+
+	parser, err := NewDefaultParser()
+	if err != nil {
+		t.Errorf("Can't create parser: %v", err)
+	}
+
 	for _, test := range testRemoteFiles {
 		t.Run(fmt.Sprintf("%v", test.err), func(t *testing.T) {
-			var p *Parser
 			var err error
 
-			if p, err = NewParser(test.file); err != nil {
-				t.Errorf("Can't create parser for %s", test.file)
-			}
-			err = p.Parse()
+			_, err = parser.Parse(test.file)
 
 			checkParseErrors(t, err, test)
 		})
@@ -536,6 +590,11 @@ func TestUrlMissingWithoutPath(t *testing.T) {
 		},
 	}
 
+	parser, err := NewDefaultParser()
+	if err != nil {
+		t.Errorf("Can't create parser: %v", err)
+	}
+
 	testFiles, _ := filepath.Glob("testdata/v0.3/invalid/url_missing.yml")
 	for _, file := range testFiles {
 		baseName := path.Base(file)
@@ -543,11 +602,7 @@ func TestUrlMissingWithoutPath(t *testing.T) {
 			t.Errorf("No expected data for file %s", baseName)
 		}
 		t.Run(file, func(t *testing.T) {
-			parser, err := NewParser(file)
-			if err != nil {
-				t.Errorf("Can't create parser for %s", file)
-			}
-			err = parser.Parse()
+			_, err := parser.Parse(file)
 
 			checkParseErrors(t, err, testType{file, expected[baseName]})
 		})
@@ -555,11 +610,10 @@ func TestUrlMissingWithoutPath(t *testing.T) {
 }
 
 func TestIsReachable(t *testing.T) {
-	var p Parser
-	p.DisableNetwork = true
+	parser, _:= NewParser(ParserConfig{ DisableNetwork: true })
 
 	u, _ := url.Parse("https://google.com/404")
-	if reachable, _ := p.isReachable(*u); !reachable {
+	if reachable, _ := parser.isReachable(*u, false); !reachable {
 		t.Errorf("isReachable() returned false with DisableNetwork enabled")
 	}
 }
@@ -567,35 +621,32 @@ func TestIsReachable(t *testing.T) {
 // Test that the exported YAML passes validation again, and that re-exporting it
 // matches the first export (lossless roundtrip).
 func TestExport(t *testing.T) {
-	var p *Parser
-	var err error
-	if p, err = NewParser("testdata/v0.3/valid/valid.yml"); err != nil {
+	parser, err := NewParser(ParserConfig{ DisableNetwork: true })
+	if err != nil {
 		t.Errorf("Can't create Parser: %v", err)
 	}
-	p.DisableNetwork = true
 
-	err = p.Parse()
+	publiccode, err := parser.Parse("testdata/v0.3/valid/valid.yml")
 	if err != nil {
 		t.Errorf("Failed to parse valid file: %v", err)
 	}
 
-	yaml1, err := p.ToYAML()
+	yaml1, err := publiccode.ToYAML()
 	if err != nil {
 		t.Errorf("Failed to export YAML: %v", err)
 	}
 
-	var p2 *Parser
-	if p2, err = NewParser("/dev/null"); err != nil {
-		t.Errorf("Can't create Parser: %v", err)
-	}
-	p2.DisableNetwork = true
+	// var p2 *Parser
+	// if p2, err = NewParser("/dev/null"); err != nil {
+	// 	t.Errorf("Can't create Parser: %v", err)
+	// }
 
-	err = p2.ParseBytes(yaml1)
+	publiccode2, err := parser.ParseStream(bytes.NewBuffer(yaml1))
 	if err != nil {
 		t.Errorf("Failed to parse exported file: %v", err)
 	}
 
-	yaml2, err := p2.ToYAML()
+	yaml2, err := publiccode2.ToYAML()
 	if err != nil {
 		t.Errorf("Failed to export YAML again: %v", err)
 	}

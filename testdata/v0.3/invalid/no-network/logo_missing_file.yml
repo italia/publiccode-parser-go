@@ -14,8 +14,11 @@ developmentStatus: development
 
 softwareType: "standalone/other"
 
+# Should NOT validate: logo must exist as a file
+logo: "no_such_file.png"
+
 description:
-  en_GB:
+  eng:
     localisedName: Medusa
     shortDescription: >
           A rather short description which
