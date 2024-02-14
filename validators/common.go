@@ -16,7 +16,7 @@ func isDate(fl validator.FieldLevel) bool {
 
 func isIso3166Alpha2Lowercase(fl validator.FieldLevel) bool {
 	str := fl.Field().String()
-	validate := validator.New()
+	validate := validator.New(validator.WithRequiredStructEnabled())
 
 	err := validate.Var(str, "lowercase")
 	if err != nil {

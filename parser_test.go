@@ -326,10 +326,10 @@ func TestInvalidTestcasesV0_3(t *testing.T) {
 
 		// legal
 		// legal.*
-		"legal_missing.yml": ValidationResults{ValidationError{"legal.license", "required", 0, 0}},
+		"legal_missing.yml": ValidationResults{ValidationError{"legal", "required", 1, 1}},
 		"legal_wrong_type.yml": ValidationResults{
 			ValidationError{"legal", "wrong type for this field", 46, 1},
-			ValidationError{"legal.license", "required", 46, 8},
+			ValidationError{"legal", "required", 46, 1},
 		},
 		"legal_license_missing.yml": ValidationResults{ValidationError{"legal.license", "required", 41, 3}},
 		"legal_license_invalid.yml": ValidationResults{ValidationError{
