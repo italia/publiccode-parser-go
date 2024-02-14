@@ -8,7 +8,7 @@ import (
 )
 
 func New() *validator.Validate {
-	validate := validator.New()
+	validate := validator.New(validator.WithRequiredStructEnabled())
 	_ = validate.RegisterValidation("date", isDate)
 	_ = validate.RegisterValidation("iso3166_1_alpha2_lowercase", isIso3166Alpha2Lowercase)
 	_ = validate.RegisterValidation("umax", uMax)
