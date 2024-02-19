@@ -17,7 +17,7 @@ softwareType: "standalone/other"
 
 description:
   eng:
-    localisedName: Name
+    localisedName: Medusa
     shortDescription: >
           A rather short description which
           is probably useless
@@ -35,19 +35,21 @@ description:
           on multiple rows. You should note what the software
           is and why one should need it. This is 632 characters.
     features:
-      - Feature 1
-    videos:
-      # Should NOT validate: not a valid URL
-      - ABC
+       - Just one feature
 
 legal:
   license: AGPL-3.0-or-later
 
 maintenance:
-  type: "community"
+  type: "contract"
 
-  contacts:
-    - name: Francesco Rossi
+  # Should NOT validate: contractors must be an array
+  contractors:
+    - until: 2001-01-01
+      name: Francesco Rossi
+
+      # Should NOT validate: not a URL
+      website: X
 
 localisation:
   localisationReady: true

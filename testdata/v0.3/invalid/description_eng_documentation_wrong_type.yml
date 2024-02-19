@@ -1,7 +1,9 @@
 publiccodeYmlVersion: "0.3"
 
 name: Medusa
+
 url: "https://github.com/italia/developers.italia.it.git"
+
 softwareVersion: "dev"
 releaseDate: "2017-04-15"
 
@@ -17,7 +19,11 @@ softwareType: "standalone/other"
 
 description:
   eng:
-    localisedName: Name
+    localisedName: Medusa
+
+    # Should NOT validate: documentation must be a string
+    documentation: []
+
     shortDescription: >
           A rather short description which
           is probably useless
@@ -35,10 +41,7 @@ description:
           on multiple rows. You should note what the software
           is and why one should need it. This is 632 characters.
     features:
-      - Feature 1
-    videos:
-      # Should NOT validate: not a valid URL
-      - ABC
+       - Just one feature
 
 legal:
   license: AGPL-3.0-or-later

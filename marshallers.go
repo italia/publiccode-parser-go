@@ -26,10 +26,9 @@ func (u *URL) MarshalYAML() (interface{}, error) {
   return u.String(), nil
 }
 
-func (u *URL) String() string {
-	return (*url.URL)(u).String()
+func (u URL) String() string {
+    return (*url.URL)(&u).String()
 }
-
 type UrlOrUrlArray []*URL
 
 func (a *UrlOrUrlArray) UnmarshalYAML(unmarshal func(interface{}) error) error {

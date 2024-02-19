@@ -241,6 +241,8 @@ func (p *Parser) ParseBytes(in []byte) error {
 			"date": "must be a date with format 'YYYY-MM-DD'",
 			"umax": "must be less or equal than",
 			"umin": "must be more or equal than",
+			"url_http_url": "must be an HTTP URL",
+			"url_url": "must be a valid URL",
 			"is_category_v0_2": "must be a valid category",
 			"is_scope_v0_2": "must be a valid scope",
 			"is_italian_ipa_code": "must be a valid Italian Public Administration Code (iPA)",
