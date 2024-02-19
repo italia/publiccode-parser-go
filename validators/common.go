@@ -1,11 +1,12 @@
-package validators;
+package validators
 
 import (
+	"fmt"
 	"strconv"
 	"time"
 
-	"github.com/rivo/uniseg"
 	"github.com/go-playground/validator/v10"
+	"github.com/rivo/uniseg"
 )
 
 func isDate(fl validator.FieldLevel) bool {
@@ -39,4 +40,32 @@ func uMin(fl validator.FieldLevel) bool {
 	min , _ := strconv.Atoi(fl.Param())
 
 	return length >= min
+}
+
+// go-playground/validator doesn't support `http_url` validations on non
+// strings yet.
+func isHTTPURL(fl validator.FieldLevel) bool {
+	validate := validator.New(validator.WithRequiredStructEnabled())
+
+	if stringer, ok := fl.Field().Interface().(fmt.Stringer); ok {
+		err := validate.Var(stringer.String(), "http_url")
+
+		return err == nil
+	}
+
+	panic(fmt.Sprintf("Bad field type for %T. Must be implement fmt.Stringer", fl.Field().Interface()))
+}
+
+// go-playground/validator doesn't support `url` validations on non
+// strings yet.
+func isURL(fl validator.FieldLevel) bool {
+	validate := validator.New(validator.WithRequiredStructEnabled())
+
+	if stringer, ok := fl.Field().Interface().(fmt.Stringer); ok {
+		err := validate.Var(stringer.String(), "url")
+
+		return err == nil
+	}
+
+	panic(fmt.Sprintf("Bad field type for %T. Must be implement fmt.Stringer", fl.Field().Interface()))
 }

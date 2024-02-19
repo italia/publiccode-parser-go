@@ -37,8 +37,8 @@ description:
     features:
       - Feature 1
     videos:
-      # Should NOT validate: not a valid URL
-      - ABC
+      # Should NOT validate: not a valid oEmbeddable video
+      - https://google.com
 
 legal:
   license: AGPL-3.0-or-later

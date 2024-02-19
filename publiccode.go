@@ -12,8 +12,8 @@ type PublicCode struct {
 
 	Name             string   `yaml:"name" validate:"required"`
 	ApplicationSuite string   `yaml:"applicationSuite,omitempty"`
-	URL              *URL 	  `yaml:"url" validate:"required"`
-	LandingURL       *URL     `yaml:"landingURL,omitempty"`
+	URL              *URL     `yaml:"url" validate:"required,url_url"`
+	LandingURL       *URL     `yaml:"landingURL,omitempty" validate:"omitnil,url_http_url"`
 
 	IsBasedOn         UrlOrUrlArray `yaml:"isBasedOn,omitempty"`
 	SoftwareVersion   string        `yaml:"softwareVersion,omitempty"`
@@ -30,7 +30,7 @@ type PublicCode struct {
 
 	UsedBy *[]string `yaml:"usedBy,omitempty"`
 
-	Roadmap *URL `yaml:"roadmap,omitempty"`
+	Roadmap *URL `yaml:"roadmap,omitempty" validate:"omitnil,url_http_url"`
 
 	DevelopmentStatus string `yaml:"developmentStatus" validate:"required,oneof=concept development beta stable obsolete"`
 
@@ -77,11 +77,11 @@ type Desc struct {
 	GenericName            string    `yaml:"genericName" validate:"umax=35"`
 	ShortDescription       string    `yaml:"shortDescription" validate:"required,umax=150"`
 	LongDescription        string    `yaml:"longDescription,omitempty" validate:"required,umin=150,umax=10000"`
-	Documentation          *URL      `yaml:"documentation,omitempty"`
-	APIDocumentation       *URL      `yaml:"apiDocumentation,omitempty"`
+	Documentation          *URL      `yaml:"documentation,omitempty" validate:"omitnil,url_http_url"`
+	APIDocumentation       *URL      `yaml:"apiDocumentation,omitempty" validate:"omitnil,url_http_url"`
 	Features               *[]string `yaml:"features,omitempty" validate:"gt=0,dive"`
 	Screenshots            []string  `yaml:"screenshots,omitempty"`
-	Videos                 []*URL    `yaml:"videos,omitempty"`
+	Videos                 []*URL    `yaml:"videos,omitempty" validate:"dive,omitnil,url_http_url"`
 	Awards                 []string  `yaml:"awards,omitempty"`
 }
 
@@ -89,7 +89,7 @@ type Desc struct {
 type Contractor struct {
 	Name          string  `yaml:"name" validate:"required"`
 	Email         *string `yaml:"email,omitempty" validate:"omitempty,email"`
-	Website       *URL    `yaml:"website,omitempty"`
+	Website       *URL    `yaml:"website,omitempty" validate:"omitnil,url_http_url"`
 	Until         string  `yaml:"until" validate:"required,date"`
 }
 

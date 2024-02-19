@@ -98,10 +98,12 @@ func TestInvalidTestcasesV0_3(t *testing.T) {
 		"url_missing.yml": ValidationResults{ValidationError{"url", "required", 1, 1}},
 		"url_wrong_type.yml": ValidationResults{
 			ValidationError{"url", "wrong type for this field", 6, 1},
+			ValidationError{"url", "must be a valid URL", 6, 1},
 			ValidationError{"url", "'' not reachable: missing URL scheme", 6, 1},
 			ValidationError{"url", "is not a valid code repository", 6, 1},
 		},
 		"url_invalid.yml": ValidationResults{
+			ValidationError{"url", "must be a valid URL", 6, 1},
 			ValidationError{"url", "'foobar' not reachable: missing URL scheme", 6, 1},
 			ValidationError{"url", "is not a valid code repository", 6, 1},
 		},
@@ -109,9 +111,11 @@ func TestInvalidTestcasesV0_3(t *testing.T) {
 		// landingURL
 		"landingURL_wrong_type.yml": ValidationResults{
 			ValidationError{"landingURL", "wrong type for this field", 8, 1},
+			ValidationError{"landingURL", "must be an HTTP URL", 8, 1},
 			ValidationError{"landingURL", "'' not reachable: missing URL scheme", 8, 1},
 		},
 		"landingURL_invalid.yml": ValidationResults{
+			ValidationError{"landingURL", "must be an HTTP URL", 8, 1},
 			ValidationError{"landingURL", "'???' not reachable: missing URL scheme", 8, 1},
 		},
 
@@ -221,10 +225,12 @@ func TestInvalidTestcasesV0_3(t *testing.T) {
 
 		// roadmap
 		"roadmap_invalid.yml": ValidationResults{
+			ValidationError{"roadmap", "must be an HTTP URL", 4, 1},
 			ValidationError{"roadmap", "'foobar' not reachable: missing URL scheme", 4, 1},
 		},
 		"roadmap_wrong_type.yml": ValidationResults{
 			ValidationError{"roadmap", "wrong type for this field", 4, 1},
+			ValidationError{"roadmap", "must be an HTTP URL", 4, 1},
 			ValidationError{"roadmap", "'' not reachable: missing URL scheme", 4, 1},
 		},
 
@@ -309,6 +315,24 @@ func TestInvalidTestcasesV0_3(t *testing.T) {
 		"description_eng_longDescription_too_short_grapheme_clusters.yml": ValidationResults{
 			ValidationError{"description.eng.longDescription", "must be more or equal than 150", 28, 5},
 		},
+		"description_eng_documentation_invalid.yml": ValidationResults{
+			ValidationError{"description.eng.documentation", "must be an HTTP URL", 25, 5},
+			ValidationError{"description.eng.documentation", "'not_a_url' not reachable: missing URL scheme", 25, 5},
+		},
+		"description_eng_documentation_wrong_type.yml": ValidationResults{
+			ValidationError{"description.eng.documentation", "wrong type for this field", 25, 1},
+			ValidationError{"description.eng.documentation", "must be an HTTP URL", 25, 5},
+			ValidationError{"description.eng.documentation", "'' not reachable: missing URL scheme", 25, 5},
+		},
+		"description_eng_apiDocumentation_invalid.yml": ValidationResults{
+			ValidationError{"description.eng.apiDocumentation", "must be an HTTP URL", 41, 5},
+			ValidationError{"description.eng.apiDocumentation", "'abc' not reachable: missing URL scheme", 41, 5},
+		},
+		"description_eng_apiDocumentation_wrong_type.yml": ValidationResults{
+			ValidationError{"description.eng.apiDocumentation", "wrong type for this field", 43, 1},
+			ValidationError{"description.eng.apiDocumentation", "must be an HTTP URL", 43, 5},
+			ValidationError{"description.eng.apiDocumentation", "'' not reachable: missing URL scheme", 43, 5},
+		},
 		"description_eng_screenshots_missing_file.yml": ValidationResults{
 			ValidationError{
 				"description.eng.screenshots[0]",
@@ -321,6 +345,10 @@ func TestInvalidTestcasesV0_3(t *testing.T) {
 			ValidationError{"description.eng.awards", "wrong type for this field", 40, 1},
 		},
 		"description_eng_videos_invalid.yml": ValidationResults{
+			ValidationError{"description.eng.videos[0]", "must be an HTTP URL", 20, 5},
+			ValidationError{"description.eng.videos[0]", "'ABC' is not a valid video URL supporting oEmbed: invalid oEmbed link: ABC", 20, 5},
+		},
+		"description_eng_videos_invalid_oembed.yml": ValidationResults{
 			ValidationError{"description.eng.videos[0]", "'https://google.com' is not a valid video URL supporting oEmbed: invalid oEmbed link: https://google.com", 20, 5},
 		},
 
@@ -382,6 +410,9 @@ func TestInvalidTestcasesV0_3(t *testing.T) {
 		},
 		"maintenance_contractors_email_invalid.yml": ValidationResults{
 			ValidationError{"maintenance.contractors[0].email", "must be a valid email", 0, 0},
+		},
+		"maintenance_contractors_website_invalid.yml": ValidationResults{
+			ValidationError{"maintenance.contractors[0].website", "must be an HTTP URL", 0, 0}, // TODO: line number
 		},
 
 		// localisation
