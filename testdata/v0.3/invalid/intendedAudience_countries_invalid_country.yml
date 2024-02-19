@@ -18,7 +18,9 @@ intendedAudience:
     countries:
       - it
       # Should NOT validate: this is not a valid country
-      - Mouseton
+      - mouseton
+      # Should NOT validate: not lowercase ISO 3166-1 alpha2
+      - DE
 
 description:
   eng:

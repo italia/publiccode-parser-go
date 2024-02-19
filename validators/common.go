@@ -3,6 +3,7 @@ package validators
 import (
 	"fmt"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/go-playground/validator/v10"
@@ -23,9 +24,9 @@ func isIso3166Alpha2Lowercase(fl validator.FieldLevel) bool {
 	if err != nil {
 		return false
 	}
-	err = validate.Var(str, "iso3166_1_alpha2")
+	err = validate.Var(strings.ToUpper(str), "iso3166_1_alpha2")
 
-	return err != nil
+	return err == nil
 }
 
 func uMax(fl validator.FieldLevel) bool {
