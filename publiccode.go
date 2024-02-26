@@ -1,6 +1,6 @@
 package publiccode
 
-// SupportedVersions lists the publiccode.yml versions this parser supports.
+// SupportedVersions contains the publiccode.yml versions this parser supports.
 var SupportedVersions = []string{"0.2", "0.2.0", "0.2.1", "0.2.2", "0.3", "0.3.0"}
 
 type PublicCode interface {

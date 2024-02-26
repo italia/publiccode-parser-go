@@ -16,22 +16,35 @@ This parser performs syntactic and semantic validation according to the
 
 - Go library and CLI tool (`publiccode-parser`)
 - Supports the latest version of the `publiccode.yml` Standard
-- `publiccode-parser` can output validation errors as JSON or in [errorformat](https://vim-jp.org/vimdoc-en/quickfix.html#error-file-format) friendly way
-- Verifies the existence of URLs by checking the response for URL fields (can be disabled)
+- `publiccode-parser` can output validation errors as JSON or in a
+  [errorformat](https://vim-jp.org/vimdoc-en/quickfix.html#error-file-format)
+  friendly way
+- Verifies the existence of URLs by checking the response for URL fields
+  (can be disabled)
 
 ## Example
 
 ```go
-parser := publiccode.NewParser("file:///path/to/local/dir/publiccode.yml")
+parser, err := NewDefaultParser()
+if err != nil {
+   // handle errors
+}
+
+publicCode, err := parser.Parse("https://foobar.example.org/publiccode.yml")
 // OR
-// parser := publiccode.NewParser("https://github.com/example/example/publiccode.yml")
+// publicCode, err := parser.Parse("file:///path/to/local/dir/publiccode.yml")
+if err != nil {
+    // handle errors
+}
 
-// all these settings are optional:
-parser.DisableNetwork = true
-parser.Branch = "mybranch"
-
-err := parser.Parse()
-publiccode := parser.PublicCode
+if publicCode != nil {
+    switch pc := publicCode.(type) {
+    case *publiccode.V0:
+        fmt.Println(pc)
+    default:
+        // handle error
+    }
+}
 ```
 
 ## Validation from command line

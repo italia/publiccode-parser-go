@@ -22,8 +22,9 @@ import (
 	urlutil "github.com/italia/publiccode-parser-go/v4/internal"
 )
 
+// ParserConfig defines the configuration options for the Parser
 type ParserConfig struct {
-	// DisableNetwork disables all network tests (URL existence and Oembed). This
+	// DisableNetwork disables all network tests (fe. URL existence and Oembed). This
 	// results in much faster parsing.
     DisableNetwork bool
 
@@ -35,7 +36,9 @@ type ParserConfig struct {
 	// in the publiccode.yml
     Branch string
 
-	// TODO: doc
+	// The path or URL used as base of relative files in publiccode.yml (eg. logo). If
+	// given, it will be used for existence checks and such, instead of the `url` key
+	// in the publiccode.yml file
 	BaseURL string
 }
 
@@ -44,10 +47,7 @@ type Parser struct {
 	disableNetwork bool
 	domain         Domain
 	branch         string
-
-	// The URL used as base of relative files in publiccode.yml (eg. authorsFile)
-	// It can be a local file with the 'file' scheme.
-	baseURL *url.URL
+	baseURL        *url.URL
 }
 
 // Domain is a single code hosting service.
@@ -58,8 +58,21 @@ type Domain struct {
 	BasicAuth   []string `yaml:"basic-auth"`
 }
 
-// NewParser initializes a new Parser object and returns it.
-// TODO
+// NewParser creates and returns a new Parser instance based on the provided ParserConfig.
+//
+// It returns a pointer to the newly created Parser, if successful, and an error.
+// The error is non-nil if there was an issue initializing the Parser.
+//
+// Example usage:
+//
+//  config := ParserConfig{
+//      DisableNetwork: true
+//  }
+//  parser, err := NewParser(config)
+//  if err != nil {
+//      log.Fatalf("Failed to create parser: %v", err)
+//  }
+//  // Use parser...
 func NewParser(config ParserConfig) (*Parser, error) {
 	parser := Parser{
 		disableNetwork: config.DisableNetwork,
@@ -77,11 +90,57 @@ func NewParser(config ParserConfig) (*Parser, error) {
 	return &parser, nil
 }
 
+// NewDefaultParser creates and returns a new Parser instance, using the default config.
+//
+// It returns a pointer to the newly created Parser, if successful, and an error.
+// The error is non-nil if there was an issue initializing the Parser.
+//
+// The default config is ParserConfig's fields zero values.
+//
+// Example usage:
+//
+//  parser, err := NewDefaultParser()
+//  if err != nil {
+//      log.Fatalf("Failed to create parser: %v", err)
+//  }
+//  // Use parser...
 func NewDefaultParser() (*Parser, error) {
 	return NewParser(ParserConfig{})
 }
 
-// ParseStream reads the data and tries to parse it. Returns an error if fails.
+// ParseStream reads from the provided io.Reader and attempts to parse the input
+// stream into a PublicCode object.
+//
+// Returns a non-nil error if there is an issue with the parsing process and a
+// a struct implementing the Publiccode interface, depending on the version
+// of the publiccode.yml file parsed.
+//
+// The only possible type returned is V0, representing v0.* files.
+//
+// PublicCode can be nil when there are major parsing issues.
+// It can also be non-nil even in presence of errors: in that case the returned struct
+// is filled as much as possible, based on what is successful parsed.
+//
+// Example usage:
+//
+//  file, err := os.Open("publiccode.yml")
+//  if err != nil {
+//      log.Fatalf("Failed to open file: %v", err)
+//  }
+//  defer file.Close()
+//
+//  publicCode, err := parser.ParseStream(file)
+//  if err != nil {
+//      log.Printf("Parsing errors: %v", err)
+//  }
+//  if publicCode != nil {
+//      switch pc := publicCode.(type) {
+//      case *publiccode.V0:
+//          fmt.Println(pc)
+//      default:
+//          log.Println("PublicCode parsed, but unexpected type found.")
+//      }
+//  }
 func (p *Parser) ParseStream(in io.Reader) (PublicCode, error) {
 	b, err := io.ReadAll(in)
 	if err != nil {
@@ -146,13 +205,13 @@ func (p *Parser) ParseStream(in io.Reader) (PublicCode, error) {
 	var decodeResults ValidationResults
 
 	if version.Value[0] == '0' {
-		v0 := PublicCodeV0{}
+		v0 := V0{}
 		validateFields = validateFieldsV0
 
 		decodeResults = decode(b, &v0, node)
 		publiccode = v0
 	} else {
-		v1 := PublicCodeV1{}
+		v1 := V1{}
 		validateFields = validateFieldsV1
 
 		decodeResults = decode(b, &v1, node)
@@ -200,7 +259,7 @@ func (p *Parser) ParseStream(in io.Reader) (PublicCode, error) {
 			// TODO: find a cleaner way
 			key := strings.Replace(
 				err.Namespace(),
-				fmt.Sprintf("PublicCodeV%d.", publiccode.Version()),
+				fmt.Sprintf("V%d.", publiccode.Version()),
 				"",
 				1,
 			)
@@ -262,6 +321,34 @@ func (p *Parser) ParseStream(in io.Reader) (PublicCode, error) {
 	return publiccode, ve
 }
 
+// Parse reads from the provided uri and attempts to parse it into
+// a PublicCode object.
+//
+// Returns a non-nil error if there is an issue with the parsing process and a
+// a struct implementing the Publiccode interface, depending on the version
+// of the publiccode.yml file parsed.
+//
+// The only possible type returned is V0, representing v0.* files.
+//
+// PublicCode can be nil when there are major parsing issues.
+// It can also be non-nil even in presence of errors: in that case the returned struct
+// is filled as much as possible, based on what is successful parsed.
+//
+// Example usage:
+//
+//  // publicCode, err := parser.Parse("file:///app/publiccode.yml")
+//  publicCode, err := parser.Parse("https://foobar.example.org/publiccode.yml")
+//  if err != nil {
+//      log.Printf("Parsing errors: %v", err)
+//  }
+//  if publicCode != nil {
+//      switch pc := publicCode.(type) {
+//      case *publiccode.V0:
+//          fmt.Println(pc)
+//      default:
+//          log.Println("PublicCode parsed, but unexpected type found.")
+//      }
+//  }
 func (p *Parser) Parse(uri string) (PublicCode, error) {
 	var stream io.Reader
 
@@ -410,7 +497,7 @@ func decode[T any](data []byte, publiccode *T, node yaml.Node) ValidationResults
 	return ve
 }
 
-// TODO doc
+// Turn the input into a valid URL
 func toURL(file string) (*url.URL, error) {
 	if _, u := urlutil.IsValidURL(file); u != nil {
 		return u, nil

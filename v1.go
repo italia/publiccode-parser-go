@@ -6,8 +6,7 @@ import (
 	urlutil "github.com/italia/publiccode-parser-go/v4/internal"
 )
 
-// PublicCode is a publiccode.yml file definition.
-type PublicCodeV1 struct {
+type V1 struct {
 	PubliccodeYamlVersion string `yaml:"publiccodeYmlVersion" validate:"required,oneof=1.0 1.0.0"`
 
 	Name             string   `yaml:"name" validate:"required"`
@@ -138,15 +137,15 @@ type ITSectionV1 struct {
 	} `yaml:"piattaforme"`
 }
 
-func (p PublicCodeV1) Version() uint {
+func (p V1) Version() uint {
 	return 1;
 
 }
-func (p PublicCodeV1) ToYAML() ([]byte, error) {
+func (p V1) ToYAML() ([]byte, error) {
 	return yaml.Marshal(p)
 }
 
-func (p PublicCodeV1) Url() *URL {
+func (p V1) Url() *URL {
 	if p.URL == nil {
 		return nil
 	}
