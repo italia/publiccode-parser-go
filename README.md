@@ -123,7 +123,7 @@ This software is maintained by the
 
 ## License
 
-© 2018-present Team per la Trasformazione Digitale - Presidenza del Consiglio dei Minstri
+© 2018-present Team per la Trasformazione Digitale - Presidenza del Consiglio dei Ministri
 
 Licensed under the EUPL 1.2.
 The version control system provides attribution for specific lines of code.
