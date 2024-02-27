@@ -2,11 +2,9 @@ package publiccode
 
 import (
 	"bytes"
-	"encoding/base64"
 	"fmt"
 	"image"
 	"image/png"
-	"math/rand"
 	"net/url"
 	"os"
 	"path"
@@ -27,14 +25,6 @@ import (
 // Despite the spec requires at least 1000px, we temporarily release this constraint to 120px.
 const minLogoWidth = 120
 
-func getBasicAuth(domain Domain) string {
-	if len(domain.BasicAuth) > 0 {
-		auth := domain.BasicAuth[rand.Intn(len(domain.BasicAuth))]
-		return "Basic " + base64.StdEncoding.EncodeToString([]byte(auth))
-	}
-	return ""
-}
-
 func stringInSlice(a string, list []string) bool {
 	for _, b := range list {
 		if b == a {
@@ -42,24 +32,6 @@ func stringInSlice(a string, list []string) bool {
 		}
 	}
 	return false
-}
-
-func isHostInDomain(domain Domain, u string) bool {
-	if len(domain.UseTokenFor) == 0 {
-		return false
-	}
-	urlP, _ := url.Parse(u)
-	return stringInSlice(urlP.Host, domain.UseTokenFor)
-}
-
-func getHeaderFromDomain(domain Domain, url string) map[string]string {
-	if !isHostInDomain(domain, url) {
-		return nil
-	}
-	// Set BasicAuth header
-	headers := make(map[string]string)
-	headers["Authorization"] = getBasicAuth(domain)
-	return headers
 }
 
 // isReachable checks whether the URL resource is reachable.
@@ -75,7 +47,7 @@ func (p *Parser) isReachable(u url.URL, network bool) (bool, error) {
 		return false, fmt.Errorf("missing URL scheme")
 	}
 
-	r, err := httpclient.GetURL(u.String(), getHeaderFromDomain(p.domain, u.String()))
+	r, err := httpclient.GetURL(u.String(), map[string]string{})
 	if err != nil {
 		return false, fmt.Errorf("HTTP GET failed for %s: %v", u.String(), err)
 	}
@@ -173,7 +145,7 @@ func (p *Parser) validLogo(u url.URL, parser Parser, network bool) (bool, error)
 		if !network {
 			return true, nil
 		}
-		localPath, err = netutil.DownloadTmpFile(&u, getHeaderFromDomain(p.domain, u.String()))
+		localPath, err = netutil.DownloadTmpFile(&u, map[string]string{})
 		if err != nil {
 			return false, err
 		}

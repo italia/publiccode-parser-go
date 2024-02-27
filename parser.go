@@ -28,10 +28,6 @@ type ParserConfig struct {
 	// results in much faster parsing.
     DisableNetwork bool
 
-	// Domain will have domain specific settings, including basic auth if provided
-	// this will avoid strong quota limit imposed by code hosting platform
-    Domain Domain
-
 	// The name of the branch used to check for existence of the files referenced
 	// in the publiccode.yml
     Branch string
@@ -45,17 +41,8 @@ type ParserConfig struct {
 // Parser is a helper class for parsing publiccode.yml files.
 type Parser struct {
 	disableNetwork bool
-	domain         Domain
 	branch         string
 	baseURL        *url.URL
-}
-
-// Domain is a single code hosting service.
-type Domain struct {
-	// Domains.yml data
-	Host        string   `yaml:"host"`
-	UseTokenFor []string `yaml:"use-token-for"`
-	BasicAuth   []string `yaml:"basic-auth"`
 }
 
 // NewParser creates and returns a new Parser instance based on the provided ParserConfig.
@@ -76,7 +63,6 @@ type Domain struct {
 func NewParser(config ParserConfig) (*Parser, error) {
 	parser := Parser{
 		disableNetwork: config.DisableNetwork,
-		domain:         config.Domain,
 		branch:         config.Branch,
 	}
 
