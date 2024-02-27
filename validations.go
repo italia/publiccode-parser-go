@@ -25,15 +25,6 @@ import (
 // Despite the spec requires at least 1000px, we temporarily release this constraint to 120px.
 const minLogoWidth = 120
 
-func stringInSlice(a string, list []string) bool {
-	for _, b := range list {
-		if b == a {
-			return true
-		}
-	}
-	return false
-}
-
 // isReachable checks whether the URL resource is reachable.
 // An URL resource is reachable if it returns HTTP 200.
 func (p *Parser) isReachable(u url.URL, network bool) (bool, error) {
