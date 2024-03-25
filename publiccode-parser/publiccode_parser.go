@@ -10,8 +10,8 @@ import (
 
 	"github.com/alranel/go-vcsurl/v2"
 
-	publiccode "github.com/italia/publiccode-parser-go/v3"
-	urlutil "github.com/italia/publiccode-parser-go/v3/internal"
+	publiccode "github.com/italia/publiccode-parser-go/v4"
+	urlutil "github.com/italia/publiccode-parser-go/v4/internal"
 )
 
 var (
@@ -64,21 +64,16 @@ func main() {
 		}
 	}
 
-	var p *publiccode.Parser
-	var err error
-	if *localBasePathPtr != "" {
-		p, err = publiccode.NewParserWithPath(publiccodeFile, *localBasePathPtr)
-	} else {
-		p, err = publiccode.NewParser(publiccodeFile)
-	}
+	config := publiccode.ParserConfig{BaseURL: *localBasePathPtr}
+	config.DisableNetwork = *disableNetworkPtr
+
+	p, err := publiccode.NewParser(config)
 	if (err != nil) {
 		fmt.Fprintf(os.Stderr, "Error creating Parser: %s\n", err.Error())
 		os.Exit(1)
 	}
 
-	p.DisableNetwork = *disableNetworkPtr
-
-	err = p.Parse()
+	_, err = p.Parse(publiccodeFile)
 
 	if *jsonOutputPtr {
 		if err == nil {
