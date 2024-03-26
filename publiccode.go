@@ -10,16 +10,16 @@ var SupportedVersions = []string{"0.2", "0.2.0", "0.2.1", "0.2.2", "0.3", "0.3.0
 type PublicCode struct {
 	PubliccodeYamlVersion string `yaml:"publiccodeYmlVersion" validate:"required,oneof=0.2 0.2.0 0.2.1 0.2.2 0.3 0.3.0"`
 
-	Name             string   `yaml:"name" validate:"required"`
-	ApplicationSuite string   `yaml:"applicationSuite,omitempty"`
-	URL              *URL     `yaml:"url" validate:"required,url_url"`
-	LandingURL       *URL     `yaml:"landingURL,omitempty" validate:"omitnil,url_http_url"`
+	Name             string `yaml:"name" validate:"required"`
+	ApplicationSuite string `yaml:"applicationSuite,omitempty"`
+	URL              *URL   `yaml:"url" validate:"required,url_url"`
+	LandingURL       *URL   `yaml:"landingURL,omitempty" validate:"omitnil,url_http_url"`
 
-	IsBasedOn         UrlOrUrlArray `yaml:"isBasedOn,omitempty"`
-	SoftwareVersion   string        `yaml:"softwareVersion,omitempty"`
-	ReleaseDate       string        `yaml:"releaseDate" validate:"required,date"`
-	Logo              string        `yaml:"logo,omitempty"`
-	MonochromeLogo    string        `yaml:"monochromeLogo,omitempty"`
+	IsBasedOn       UrlOrUrlArray `yaml:"isBasedOn,omitempty"`
+	SoftwareVersion string        `yaml:"softwareVersion,omitempty"`
+	ReleaseDate     string        `yaml:"releaseDate" validate:"required,date"`
+	Logo            string        `yaml:"logo,omitempty"`
+	MonochromeLogo  string        `yaml:"monochromeLogo,omitempty"`
 
 	InputTypes  []string `yaml:"inputTypes,omitempty"`
 	OutputTypes []string `yaml:"outputTypes,omitempty"`
@@ -52,7 +52,7 @@ type PublicCode struct {
 	} `yaml:"legal" validate:"required"`
 
 	Maintenance struct {
-		Type        string        `yaml:"type" validate:"required,oneof=internal contract community none"`
+		Type        string       `yaml:"type" validate:"required,oneof=internal contract community none"`
 		Contractors []Contractor `yaml:"contractors,omitempty" validate:"required_if=Type contract,dive"`
 		Contacts    []Contact    `yaml:"contacts,omitempty" validate:"required_if=Type community,required_if=Type internal,dive"`
 	} `yaml:"maintenance"`
@@ -73,24 +73,24 @@ type PublicCode struct {
 
 // Desc is a general description of the software.
 type Desc struct {
-	LocalisedName          *string   `yaml:"localisedName,omitempty"`
-	GenericName            string    `yaml:"genericName" validate:"umax=35"`
-	ShortDescription       string    `yaml:"shortDescription" validate:"required,umax=150"`
-	LongDescription        string    `yaml:"longDescription,omitempty" validate:"required,umin=150,umax=10000"`
-	Documentation          *URL      `yaml:"documentation,omitempty" validate:"omitnil,url_http_url"`
-	APIDocumentation       *URL      `yaml:"apiDocumentation,omitempty" validate:"omitnil,url_http_url"`
-	Features               *[]string `yaml:"features,omitempty" validate:"gt=0,dive"`
-	Screenshots            []string  `yaml:"screenshots,omitempty"`
-	Videos                 []*URL    `yaml:"videos,omitempty" validate:"dive,omitnil,url_http_url"`
-	Awards                 []string  `yaml:"awards,omitempty"`
+	LocalisedName    *string   `yaml:"localisedName,omitempty"`
+	GenericName      string    `yaml:"genericName" validate:"umax=35"`
+	ShortDescription string    `yaml:"shortDescription" validate:"required,umax=150"`
+	LongDescription  string    `yaml:"longDescription,omitempty" validate:"required,umin=150,umax=10000"`
+	Documentation    *URL      `yaml:"documentation,omitempty" validate:"omitnil,url_http_url"`
+	APIDocumentation *URL      `yaml:"apiDocumentation,omitempty" validate:"omitnil,url_http_url"`
+	Features         *[]string `yaml:"features,omitempty" validate:"gt=0,dive"`
+	Screenshots      []string  `yaml:"screenshots,omitempty"`
+	Videos           []*URL    `yaml:"videos,omitempty" validate:"dive,omitnil,url_http_url"`
+	Awards           []string  `yaml:"awards,omitempty"`
 }
 
 // Contractor is an entity or entities, if any, that are currently contracted for maintaining the software.
 type Contractor struct {
-	Name          string  `yaml:"name" validate:"required"`
-	Email         *string `yaml:"email,omitempty" validate:"omitempty,email"`
-	Website       *URL    `yaml:"website,omitempty" validate:"omitnil,url_http_url"`
-	Until         string  `yaml:"until" validate:"required,date"`
+	Name    string  `yaml:"name" validate:"required"`
+	Email   *string `yaml:"email,omitempty" validate:"omitempty,email"`
+	Website *URL    `yaml:"website,omitempty" validate:"omitnil,url_http_url"`
+	Until   string  `yaml:"until" validate:"required,date"`
 }
 
 // Contact is a contact info maintaining the software.
