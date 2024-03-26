@@ -1,4 +1,4 @@
-package validators;
+package validators
 
 import (
 	"reflect"
@@ -28,5 +28,6 @@ func New() *validator.Validate {
 		}
 		return name
 	})
+
 	return validate
 }
