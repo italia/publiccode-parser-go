@@ -110,12 +110,17 @@ func TestInvalidTestcasesV0_3_NoNetwork(t *testing.T) {
 			ValidationError{"logo", "image: unknown format", 18, 1},
 		},
 
+		// landingURL
+		"landingURL_invalid.yml": ValidationResults{
+			// Just a syntax check here, no check for reachability as network is disabled
+			ValidationError{"landingURL", "must be an HTTP URL", 8, 1},
+		},
+
 		// monochromeLogo
 		"monochromeLogo_invalid_png.yml": ValidationResults{
 			ValidationWarning{"monochromeLogo", "This key is DEPRECATED and will be removed in the future", 18, 1},
 			ValidationError{"monochromeLogo", "image: unknown format", 18, 1},
 		},
-
 	}
 
 	testFiles, _ := filepath.Glob("testdata/v0.3/invalid/no-network/*yml")
