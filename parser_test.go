@@ -347,6 +347,9 @@ func TestInvalidTestcasesV0_3(t *testing.T) {
 
 		// description
 		// description.*
+		"description_invalid_language.yml": ValidationResults{
+			ValidationError{"description", "must use a valid BCP 47 language", 18, 1},
+		},
 		"description_eng_features_missing.yml": ValidationResults{
 			ValidationError{"description.eng.features", "must be more than 0", 22, 5},
 		},
@@ -417,10 +420,10 @@ func TestInvalidTestcasesV0_3(t *testing.T) {
 
 		// legal
 		// legal.*
-		"legal_missing.yml": ValidationResults{ValidationError{"legal", "required", 1, 1}},
+		"legal_missing.yml": ValidationResults{ValidationError{"legal.license", "required", 0, 0}},
 		"legal_wrong_type.yml": ValidationResults{
 			ValidationError{"legal", "wrong type for this field", 46, 1},
-			ValidationError{"legal", "required", 46, 1},
+			ValidationError{"legal.license", "required", 46, 8},
 		},
 		"legal_license_missing.yml": ValidationResults{ValidationError{"legal.license", "required", 41, 3}},
 		"legal_license_invalid.yml": ValidationResults{ValidationError{
@@ -523,7 +526,23 @@ func TestInvalidTestcasesV0_3(t *testing.T) {
 
 		// misc
 		"file_encoding.yml": ValidationResults{ValidationError{"", "Invalid UTF-8", 0, 0}},
-		"invalid_yaml.yml": ValidationResults{ValidationError{"", "yaml: did not find expected key", 18, 1}},
+		"invalid_yaml.yml":  ValidationResults{ValidationError{"", "yaml: did not find expected key", 18, 1}},
+		"mostly_empty.yml": ValidationResults{
+			ValidationError{"name", "required", 1, 1},
+			ValidationError{"url", "required", 1, 1},
+			ValidationError{"releaseDate", "required", 1, 1},
+			ValidationError{"platforms", "must be more than 0", 1, 1},
+			ValidationError{"categories", "required", 1, 1},
+			ValidationError{"developmentStatus", "required", 1, 1},
+			ValidationError{"softwareType", "required", 1, 1},
+			ValidationError{"description[en-US].shortDescription", "required", 0, 0},
+			ValidationError{"description[en-US].longDescription", "required", 0, 0},
+			ValidationError{"description[en-US].features", "must be more than 0", 0, 0},
+			ValidationError{"legal.license", "required", 5, 8},
+			ValidationError{"maintenance.type", "required", 6, 14},
+			ValidationError{"localisation.localisationReady", "required", 4, 15},
+			ValidationError{"localisation.availableLanguages", "required", 4, 15},
+		},
 	}
 
 	testFiles, _ := filepath.Glob("testdata/v0.3/invalid/*yml")

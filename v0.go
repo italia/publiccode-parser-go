@@ -42,14 +42,14 @@ type PublicCodeV0 struct {
 		UnsupportedCountries *[]string `yaml:"unsupportedCountries,omitempty" validate:"omitempty,dive,iso3166_1_alpha2_lowercase"`
 	} `yaml:"intendedAudience,omitempty"`
 
-	Description map[string]DescV0 `yaml:"description" validate:"gt=0,dive,keys,bcp47_language_tag,endkeys,required"`
+	Description map[string]DescV0 `yaml:"description" validate:"gt=0,bcp47_keys,dive"`
 
 	Legal struct {
 		License            string  `yaml:"license" validate:"required"`
 		MainCopyrightOwner *string `yaml:"mainCopyrightOwner,omitempty"`
 		RepoOwner          *string `yaml:"repoOwner,omitempty"`
 		AuthorsFile        *string `yaml:"authorsFile,omitempty"`
-	} `yaml:"legal" validate:"required"`
+	} `yaml:"legal"`
 
 	Maintenance struct {
 		Type        string         `yaml:"type" validate:"required,oneof=internal contract community none"`
@@ -60,7 +60,7 @@ type PublicCodeV0 struct {
 	Localisation struct {
 		LocalisationReady  *bool    `yaml:"localisationReady" validate:"required"`
 		AvailableLanguages []string `yaml:"availableLanguages" validate:"required,gt=0,dive,bcp47_language_tag"`
-	} `yaml:"localisation" validate:"required"`
+	} `yaml:"localisation"`
 
 	DependsOn *struct {
 		Open        *[]DependencyV0 `yaml:"open,omitempty" validate:"omitempty,dive"`

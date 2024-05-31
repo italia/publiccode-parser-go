@@ -21,6 +21,8 @@ func New() *validator.Validate {
 
 	_ = validate.RegisterValidation("is_italian_ipa_code", isItalianIpaCode)
 
+	_ = validate.RegisterValidation("bcp47_keys", bcp47_keys)
+
 	validate.RegisterTagNameFunc(func(fld reflect.StructField) string {
 		name := strings.SplitN(fld.Tag.Get("yaml"), ",", 2)[0]
 		if name == "-" {
