@@ -18,22 +18,22 @@ import (
 	"github.com/go-playground/validator/v10"
 	"gopkg.in/yaml.v3"
 
-	publiccodeValidator "github.com/italia/publiccode-parser-go/v4/validators"
 	urlutil "github.com/italia/publiccode-parser-go/v4/internal"
+	publiccodeValidator "github.com/italia/publiccode-parser-go/v4/validators"
 )
 
 type ParserConfig struct {
 	// DisableNetwork disables all network tests (URL existence and Oembed). This
 	// results in much faster parsing.
-    DisableNetwork bool
+	DisableNetwork bool
 
 	// Domain will have domain specific settings, including basic auth if provided
 	// this will avoid strong quota limit imposed by code hosting platform
-    Domain Domain
+	Domain Domain
 
 	// The name of the branch used to check for existence of the files referenced
 	// in the publiccode.yml
-    Branch string
+	Branch string
 
 	// The URL used as base of relative files in publiccode.yml (eg. logo)
 	// It can be a local file with the 'file' scheme.
@@ -113,10 +113,10 @@ func (p *Parser) ParseStream(in io.Reader) (PublicCode, error) {
 		line, column := getPositionInFile("publiccodeYmlVersion", node)
 
 		return nil, ValidationResults{ValidationError{
-			Key: "publiccodeYmlVersion",
+			Key:         "publiccodeYmlVersion",
 			Description: "wrong type for this field",
-			Line: line,
-			Column: column,
+			Line:        line,
+			Column:      column,
 		}}
 	}
 
@@ -144,7 +144,7 @@ func (p *Parser) ParseStream(in io.Reader) (PublicCode, error) {
 				latestVersion,
 				latestVersion,
 			),
-			Line: line,
+			Line:   line,
 			Column: column,
 		})
 	}
@@ -222,10 +222,10 @@ func (p *Parser) ParseStream(in io.Reader) (PublicCode, error) {
 			line, column := getPositionInFile(key, node)
 
 			ve = append(ve, ValidationError{
-				Key: key,
+				Key:         key,
 				Description: sb.String(),
-				Line: line,
-				Column: column,
+				Line:        line,
+				Column:      column,
 			})
 		}
 	}
@@ -240,10 +240,10 @@ func (p *Parser) ParseStream(in io.Reader) (PublicCode, error) {
 			line, column := getPositionInFile("url", node)
 
 			ve = append(ve, ValidationError{
-				Key: "url",
+				Key:         "url",
 				Description: fmt.Sprintf("failed to get raw URL for code repository at %s: %s", publiccode.Url(), err),
-				Line: line,
-				Column: column,
+				Line:        line,
+				Column:      column,
 			})
 
 			// Return early because proceeding with no baseURL would result in a lot
@@ -267,7 +267,7 @@ func (p *Parser) ParseStream(in io.Reader) (PublicCode, error) {
 		}
 	}
 
-	if (len(ve) == 0) {
+	if len(ve) == 0 {
 		return publiccode, nil
 	}
 
@@ -277,7 +277,7 @@ func (p *Parser) ParseStream(in io.Reader) (PublicCode, error) {
 func (p *Parser) Parse(uri string) (PublicCode, error) {
 	var stream io.Reader
 
-	url, err := toURL(uri);
+	url, err := toURL(uri)
 	if err != nil {
 		return nil, fmt.Errorf("Invalid URL '%s': %w", uri, err)
 	}
@@ -305,7 +305,7 @@ func getNodes(key string, node *yaml.Node) (*yaml.Node, *yaml.Node) {
 		childNode := *node.Content[i]
 
 		if childNode.Value == key {
-			return &childNode, node.Content[i + 1]
+			return &childNode, node.Content[i+1]
 		}
 	}
 
@@ -316,20 +316,20 @@ func getPositionInFile(key string, node yaml.Node) (int, int) {
 	var n *yaml.Node = &node
 
 	keys := strings.Split(key, ".")
-	for _, path := range keys[:len(keys) - 1] {
+	for _, path := range keys[:len(keys)-1] {
 		_, n = getNodes(path, n)
 
 		// This should not happen, but let's be defensive
-		if (n == nil) {
+		if n == nil {
 			return 0, 0
 		}
 	}
 
 	parentNode := n
 
-	n, _ = getNodes(keys[len(keys) - 1], n)
+	n, _ = getNodes(keys[len(keys)-1], n)
 
-	if (n != nil) {
+	if n != nil {
 		return n.Line, n.Column
 	} else {
 		return parentNode.Line, parentNode.Column
@@ -378,7 +378,7 @@ func toValidationError(errorText string, node *yaml.Node) ValidationError {
 	matches := r.FindStringSubmatch(errorText)
 
 	line := 0
-	if (len(matches) > 1) {
+	if len(matches) > 1 {
 		line, _ = strconv.Atoi(matches[2])
 		errorText = strings.ReplaceAll(errorText, matches[1], "")
 	}
@@ -395,10 +395,10 @@ func toValidationError(errorText string, node *yaml.Node) ValidationError {
 	}
 
 	return ValidationError{
-		Key: key,
+		Key:         key,
 		Description: errorText,
-		Line: line,
-		Column: 1,
+		Line:        line,
+		Column:      1,
 	}
 }
 
@@ -410,12 +410,12 @@ func decode[T any](data []byte, publiccode *T, node yaml.Node) ValidationResults
 	d.KnownFields(true)
 	if err := d.Decode(&publiccode); err != nil {
 		switch err := err.(type) {
-			case *yaml.TypeError:
-				for _, errorText := range err.Errors {
-					ve = append(ve, toValidationError(errorText, &node))
-				}
-			default:
-				ve = append(ve, newValidationError("", err.Error()))
+		case *yaml.TypeError:
+			for _, errorText := range err.Errors {
+				ve = append(ve, toValidationError(errorText, &node))
+			}
+		default:
+			ve = append(ve, newValidationError("", err.Error()))
 		}
 	}
 
@@ -428,7 +428,7 @@ func toURL(file string) (*url.URL, error) {
 	}
 
 	if path, err := filepath.Abs(file); err == nil {
-		return &url.URL{Scheme: "file", Path: path }, nil
+		return &url.URL{Scheme: "file", Path: path}, nil
 	} else {
 		return nil, err
 	}

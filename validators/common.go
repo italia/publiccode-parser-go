@@ -38,7 +38,7 @@ func uMax(fl validator.FieldLevel) bool {
 
 func uMin(fl validator.FieldLevel) bool {
 	length := uniseg.GraphemeClusterCount(fl.Field().String())
-	min , _ := strconv.Atoi(fl.Param())
+	min, _ := strconv.Atoi(fl.Param())
 
 	return length >= min
 }

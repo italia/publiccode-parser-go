@@ -86,7 +86,7 @@ func checkParseErrors(t *testing.T, err error, test testType) {
 
 func TestValidPreviousStandardVersion(t *testing.T) {
 	file := "testdata/v0.2/valid/valid.minimal.yml"
-	t.Run(file,  func(t *testing.T) {
+	t.Run(file, func(t *testing.T) {
 		err := parse(file)
 		checkParseErrors(t, err, testType{
 			file, ValidationResults{
@@ -96,7 +96,7 @@ func TestValidPreviousStandardVersion(t *testing.T) {
 	})
 }
 
-func TestValidTestcasesV0_3_NoNetwordk(t *testing.T) {
+func TestValidTestcasesV0_3_NoNetwork(t *testing.T) {
 	checkValidFilesNoNetwork("testdata/v0.3/valid/no-network/*.yml", t)
 }
 
@@ -571,7 +571,6 @@ func TestDecodeValueErrorsRemote(t *testing.T) {
 		}},
 	}
 
-
 	parser, err := NewDefaultParser()
 	if err != nil {
 		t.Errorf("Can't create parser: %v", err)
@@ -615,7 +614,7 @@ func TestUrlMissingWithoutPath(t *testing.T) {
 }
 
 func TestIsReachable(t *testing.T) {
-	parser, _:= NewParser(ParserConfig{ DisableNetwork: true })
+	parser, _ := NewParser(ParserConfig{DisableNetwork: true})
 
 	u, _ := url.Parse("https://google.com/404")
 	if reachable, _ := parser.isReachable(*u, false); !reachable {
@@ -626,7 +625,7 @@ func TestIsReachable(t *testing.T) {
 // Test that the exported YAML passes validation again, and that re-exporting it
 // matches the first export (lossless roundtrip).
 func TestExport(t *testing.T) {
-	parser, err := NewParser(ParserConfig{ DisableNetwork: true })
+	parser, err := NewParser(ParserConfig{DisableNetwork: true})
 	if err != nil {
 		t.Errorf("Can't create Parser: %v", err)
 	}
