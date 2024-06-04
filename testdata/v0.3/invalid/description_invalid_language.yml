@@ -1,8 +1,8 @@
-# Should NOT validate: version 1 doesn't exist yet
-publiccodeYmlVersion: "1"
+publiccodeYmlVersion: "0.3"
 
 name: Medusa
 url: "https://github.com/italia/developers.italia.it.git"
+softwareVersion: "dev"
 releaseDate: "2017-04-15"
 
 platforms:
@@ -16,8 +16,9 @@ developmentStatus: development
 softwareType: "standalone/other"
 
 description:
-  en_GB:
-    localisedName: Medusa
+  # Should NOT validate: must be a valid BCP47 tag
+  xxx:
+    localisedName: Name
     shortDescription: >
           A rather short description which
           is probably useless
@@ -35,7 +36,7 @@ description:
           on multiple rows. You should note what the software
           is and why one should need it. This is 632 characters.
     features:
-       - Just one feature
+      - Feature 1
 
 legal:
   license: AGPL-3.0-or-later

@@ -2,6 +2,7 @@ package publiccode
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -12,20 +13,16 @@ import (
 	"strconv"
 	"strings"
 	"unicode/utf8"
-	"fmt"
 
-	"gopkg.in/yaml.v3"
-	"github.com/go-playground/validator/v10"
 	"github.com/alranel/go-vcsurl/v2"
+	"github.com/go-playground/validator/v10"
+	"gopkg.in/yaml.v3"
 
-	publiccodeValidator "github.com/italia/publiccode-parser-go/v3/validators"
-	urlutil "github.com/italia/publiccode-parser-go/v3/internal"
+	urlutil "github.com/italia/publiccode-parser-go/v4/internal"
+	publiccodeValidator "github.com/italia/publiccode-parser-go/v4/validators"
 )
 
-// Parser is a helper class for parsing publiccode.yml files.
-type Parser struct {
-	PublicCode PublicCode
-
+type ParserConfig struct {
 	// DisableNetwork disables all network tests (URL existence and Oembed). This
 	// results in much faster parsing.
 	DisableNetwork bool
@@ -38,13 +35,17 @@ type Parser struct {
 	// in the publiccode.yml
 	Branch string
 
-	// The URL used as based of relative files in publiccode.yml (eg. authorsFile)
+	// The URL used as base of relative files in publiccode.yml (eg. logo)
 	// It can be a local file with the 'file' scheme.
-	baseURL *url.URL
+	BaseURL string
+}
 
-	// The URL pointing to the publiccode.yml file.
-	// It can be a local file with the 'file' scheme.
-	file    *url.URL
+// Parser is a helper class for parsing publiccode.yml files.
+type Parser struct {
+	disableNetwork bool
+	domain         Domain
+	branch         string
+	baseURL        *url.URL
 }
 
 // Domain is a single code hosting service.
@@ -55,15 +56,249 @@ type Domain struct {
 	BasicAuth   []string `yaml:"basic-auth"`
 }
 
-// ParseInDomain wrapper func to be in domain env
-func (p *Parser) ParseInDomain(in []byte, host string, utf []string, ba []string) error {
-	p.Domain = Domain{
-		Host:        host,
-		UseTokenFor: utf,
-		BasicAuth:   ba,
+// NewParser initializes and returns a new Parser object following the settings in
+// ParserConfig.
+func NewParser(config ParserConfig) (*Parser, error) {
+	parser := Parser{
+		disableNetwork: config.DisableNetwork,
+		domain:         config.Domain,
+		branch:         config.Branch,
 	}
 
-	return p.ParseBytes(in)
+	if config.BaseURL != "" {
+		var err error
+		if parser.baseURL, err = toURL(config.BaseURL); err != nil {
+			return nil, err
+		}
+	}
+
+	return &parser, nil
+}
+
+func NewDefaultParser() (*Parser, error) {
+	return NewParser(ParserConfig{})
+}
+
+// ParseStream reads the data and tries to parse it. Returns an error if fails.
+func (p *Parser) ParseStream(in io.Reader) (PublicCode, error) {
+	b, err := io.ReadAll(in)
+	if err != nil {
+		return nil, ValidationResults{newValidationError("", fmt.Sprintf("Can't read the stream: %v", err))}
+	}
+
+	if !utf8.Valid(b) {
+		return nil, ValidationResults{newValidationError("", "Invalid UTF-8")}
+	}
+
+	// First, decode the YAML into yaml.Node so we can access line and column
+	// numbers.
+	var node yaml.Node
+
+	d := yaml.NewDecoder(bytes.NewReader(b))
+	d.KnownFields(true)
+	err = d.Decode(&node)
+
+	if err == nil && len(node.Content) > 0 {
+		node = *node.Content[0]
+	} else {
+		// YAML is malformed
+		return nil, ValidationResults{toValidationError(err.Error(), nil)}
+	}
+
+	_, version := getNodes("publiccodeYmlVersion", &node)
+	if version == nil {
+		return nil, ValidationResults{newValidationError("publiccodeYmlVersion", "required")}
+	}
+	if version.ShortTag() != "!!str" {
+		line, column := getPositionInFile("publiccodeYmlVersion", node)
+
+		return nil, ValidationResults{ValidationError{
+			Key:         "publiccodeYmlVersion",
+			Description: "wrong type for this field",
+			Line:        line,
+			Column:      column,
+		}}
+	}
+
+	if !slices.Contains(SupportedVersions, version.Value) {
+		return nil, ValidationResults{
+			newValidationError("publiccodeYmlVersion", fmt.Sprintf(
+				"unsupported version: '%s'. Supported versions: %s",
+				version.Value,
+				strings.Join(SupportedVersions, ", "),
+			)),
+		}
+	}
+
+	var ve ValidationResults
+
+	if slices.Contains(SupportedVersions, version.Value) && !strings.HasPrefix(version.Value, "0.3") {
+		latestVersion := SupportedVersions[len(SupportedVersions)-1]
+		line, column := getPositionInFile("publiccodeYmlVersion", node)
+
+		ve = append(ve, ValidationWarning{
+			Key: "publiccodeYmlVersion",
+			Description: fmt.Sprintf(
+				"v%s is not the latest version, use '%s'. Parsing this file as v%s.",
+				version.Value,
+				latestVersion,
+				latestVersion,
+			),
+			Line:   line,
+			Column: column,
+		})
+	}
+
+	var publiccode PublicCode
+	var validateFields validateFn
+	var decodeResults ValidationResults
+
+	if version.Value[0] == '0' {
+		v0 := PublicCodeV0{}
+		validateFields = validateFieldsV0
+
+		decodeResults = decode(b, &v0, node)
+		publiccode = v0
+	}
+
+	// When publiccode.yml v1.x is release the code will look
+	// like this:
+	// } else {
+	// 	v1 := PublicCodeV1{}
+	// 	validateFields = validateFieldsV1
+	//
+	// 	decodeResults = decode(b, &v1, node)
+	// 	publiccode = v1
+	// }
+
+	if decodeResults != nil {
+		ve = append(ve, decodeResults...)
+	}
+
+	validate := publiccodeValidator.New()
+
+	err = validate.Struct(publiccode)
+	if err != nil {
+		tagMap := map[string]string{
+			"gt":                         "must be more than",
+			"oneof":                      "must be one of the following:",
+			"email":                      "must be a valid email",
+			"date":                       "must be a date with format 'YYYY-MM-DD'",
+			"umax":                       "must be less or equal than",
+			"umin":                       "must be more or equal than",
+			"url_http_url":               "must be an HTTP URL",
+			"url_url":                    "must be a valid URL",
+			"is_category_v0":             "must be a valid category",
+			"is_scope_v0":                "must be a valid scope",
+			"is_italian_ipa_code":        "must be a valid Italian Public Administration Code (iPA)",
+			"iso3166_1_alpha2_lowercase": "must be a valid lowercase ISO 3166-1 alpha-2 two-letter country code",
+			"bcp47_language_tag":         "must be a valid BCP 47 language",
+			"bcp47_keys":                 "must use a valid BCP 47 language",
+		}
+		for _, err := range err.(validator.ValidationErrors) {
+			var sb strings.Builder
+
+			tag, ok := tagMap[err.ActualTag()]
+			if !ok {
+				tag = err.ActualTag()
+			}
+
+			sb.WriteString(tag)
+
+			// condition parameters, e.g. oneof=red blue -> red blue
+			if err.Param() != "" {
+				sb.WriteString(" " + err.Param())
+			}
+
+			// TODO: find a cleaner way
+			key := strings.Replace(
+				err.Namespace(),
+				fmt.Sprintf("PublicCodeV%d.", publiccode.Version()),
+				"",
+				1,
+			)
+			m := regexp.MustCompile(`\[([[:alpha:]]+)\]`)
+			key = m.ReplaceAllString(key, ".$1")
+
+			line, column := getPositionInFile(key, node)
+
+			ve = append(ve, ValidationError{
+				Key:         key,
+				Description: sb.String(),
+				Line:        line,
+				Column:      column,
+			})
+		}
+	}
+
+	// baseURL was not set to a local path, let's autodetect it from the
+	// publiccode.yml url key
+	//
+	// We need the baseURL to perform network checks.
+	if p.baseURL == nil && !p.disableNetwork && publiccode.Url() != nil {
+		rawRoot, err := vcsurl.GetRawRoot((*url.URL)(publiccode.Url()), p.branch)
+		if err != nil {
+			line, column := getPositionInFile("url", node)
+
+			ve = append(ve, ValidationError{
+				Key:         "url",
+				Description: fmt.Sprintf("failed to get raw URL for code repository at %s: %s", publiccode.Url(), err),
+				Line:        line,
+				Column:      column,
+			})
+
+			// Return early because proceeding with no baseURL would result in a lot
+			// of duplicate errors stemming from its absence.
+			return publiccode, ve
+		}
+
+		p.baseURL = rawRoot
+	}
+
+	if err = validateFields(publiccode, *p, !p.disableNetwork); err != nil {
+		for _, err := range err.(ValidationResults) {
+			switch err := err.(type) {
+			case ValidationError:
+				err.Line, err.Column = getPositionInFile(err.Key, node)
+				ve = append(ve, err)
+			case ValidationWarning:
+				err.Line, err.Column = getPositionInFile(err.Key, node)
+				ve = append(ve, err)
+			}
+		}
+	}
+
+	if len(ve) == 0 {
+		return publiccode, nil
+	}
+
+	return publiccode, ve
+}
+
+func (p *Parser) Parse(uri string) (PublicCode, error) {
+	var stream io.Reader
+
+	url, err := toURL(uri)
+	if err != nil {
+		return nil, fmt.Errorf("Invalid URL '%s': %w", uri, err)
+	}
+
+	if url.Scheme == "file" {
+		stream, err = os.Open(url.Path)
+		if err != nil {
+			return nil, fmt.Errorf("Can't open file '%s': %w", url.Path, err)
+		}
+	} else {
+		resp, err := http.Get(uri)
+		if err != nil {
+			return nil, fmt.Errorf("Can't GET '%s': %w", uri, err)
+		}
+		defer resp.Body.Close()
+
+		stream = resp.Body
+	}
+
+	return p.ParseStream(stream)
 }
 
 func getNodes(key string, node *yaml.Node) (*yaml.Node, *yaml.Node) {
@@ -71,7 +306,7 @@ func getNodes(key string, node *yaml.Node) (*yaml.Node, *yaml.Node) {
 		childNode := *node.Content[i]
 
 		if childNode.Value == key {
-			return &childNode, node.Content[i + 1]
+			return &childNode, node.Content[i+1]
 		}
 	}
 
@@ -82,20 +317,20 @@ func getPositionInFile(key string, node yaml.Node) (int, int) {
 	var n *yaml.Node = &node
 
 	keys := strings.Split(key, ".")
-	for _, path := range keys[:len(keys) - 1] {
+	for _, path := range keys[:len(keys)-1] {
 		_, n = getNodes(path, n)
 
 		// This should not happen, but let's be defensive
-		if (n == nil) {
+		if n == nil {
 			return 0, 0
 		}
 	}
 
 	parentNode := n
 
-	n, _ = getNodes(keys[len(keys) - 1], n)
+	n, _ = getNodes(keys[len(keys)-1], n)
 
-	if (n != nil) {
+	if n != nil {
 		return n.Line, n.Column
 	} else {
 		return parentNode.Line, parentNode.Column
@@ -144,7 +379,7 @@ func toValidationError(errorText string, node *yaml.Node) ValidationError {
 	matches := r.FindStringSubmatch(errorText)
 
 	line := 0
-	if (len(matches) > 1) {
+	if len(matches) > 1 {
 		line, _ = strconv.Atoi(matches[2])
 		errorText = strings.ReplaceAll(errorText, matches[1], "")
 	}
@@ -161,232 +396,40 @@ func toValidationError(errorText string, node *yaml.Node) ValidationError {
 	}
 
 	return ValidationError{
-		Key: key,
+		Key:         key,
 		Description: errorText,
-		Line: line,
-		Column: 1,
+		Line:        line,
+		Column:      1,
 	}
 }
 
-// ParseBytes loads the yaml bytes and tries to parse it. Return an error if fails.
-func (p *Parser) ParseBytes(in []byte) error {
+// Decode the YAML into a PublicCode structure, so we get type errors
+func decode[T any](data []byte, publiccode *T, node yaml.Node) ValidationResults {
 	var ve ValidationResults
 
-	if !utf8.Valid(in) {
-		ve = append(ve,newValidationError("", "Invalid UTF-8"))
-		return ve
-	}
-
-	// First, decode the YAML into yaml.Node so we can access line and column
-	// numbers.
-	var node yaml.Node
-
-	d := yaml.NewDecoder(bytes.NewReader(in))
+	d := yaml.NewDecoder(bytes.NewReader(data))
 	d.KnownFields(true)
-	err := d.Decode(&node)
-
-	if err == nil && len(node.Content) > 0 {
-		node = *node.Content[0]
-	} else {
-		// YAML is malformed
-		ve = append(ve, toValidationError(err.Error(), nil))
-
-		return ve;
-	}
-
-	_, version := getNodes("publiccodeYmlVersion", &node)
-	if version == nil {
-		ve = append(ve, newValidationError("publiccodeYmlVersion", "required"))
-
-		return ve
-	}
-	if slices.Contains(SupportedVersions, version.Value) && strings.HasPrefix(version.Value, "0.2") {
-		line, column := getPositionInFile("publiccodeYmlVersion", node)
-
-		ve = append(ve, ValidationWarning{
-			Key: "publiccodeYmlVersion",
-			Description: fmt.Sprintf(
-				"v%s is not the latest version, use '%s'. Parsing this file as v%s.",
-				version.Value,
-				Version,
-				Version,
-			),
-			Line: line,
-			Column: column,
-		})
-	}
-
-	// Decode the YAML into a PublicCode structure, so we get type errors
-	d = yaml.NewDecoder(bytes.NewReader(in))
-	d.KnownFields(true)
-	if err = d.Decode(&p.PublicCode); err != nil {
+	if err := d.Decode(&publiccode); err != nil {
 		switch err := err.(type) {
-			case *yaml.TypeError:
-				for _, errorText := range err.Errors {
-					ve = append(ve, toValidationError(errorText, &node))
-				}
-			default:
-				ve = append(ve, newValidationError("", err.Error()))
-		}
-	}
-
-	validate := publiccodeValidator.New()
-
-	err = validate.Struct(p.PublicCode)
-	if err != nil {
-		tagMap := map[string]string{
-			"gt": "must be more than",
-			"oneof": "must be one of the following:",
-			"email": "must be a valid email",
-			"date": "must be a date with format 'YYYY-MM-DD'",
-			"umax": "must be less or equal than",
-			"umin": "must be more or equal than",
-			"url_http_url": "must be an HTTP URL",
-			"url_url": "must be a valid URL",
-			"is_category_v0_2": "must be a valid category",
-			"is_scope_v0_2": "must be a valid scope",
-			"is_italian_ipa_code": "must be a valid Italian Public Administration Code (iPA)",
-			"iso3166_1_alpha2_lowercase": "must be a valid lowercase ISO 3166-1 alpha-2 two-letter country code",
-			"bcp47_language_tag": "must be a valid BCP 47 language",
-		}
-		for _, err := range err.(validator.ValidationErrors) {
-			var sb strings.Builder
-
-			tag, ok := tagMap[err.ActualTag()]
-			if !ok {
-				tag = err.ActualTag()
+		case *yaml.TypeError:
+			for _, errorText := range err.Errors {
+				ve = append(ve, toValidationError(errorText, &node))
 			}
-
-			sb.WriteString(tag)
-
-			// condition parameters, e.g. oneof=red blue -> red blue
-			if err.Param() != "" {
-				sb.WriteString(" " + err.Param())
-			}
-
-			// TODO: find a cleaner way
-			key := strings.Replace(err.Namespace(), "PublicCode.", "", 1)
-			m := regexp.MustCompile(`\[([[:alpha:]]+)\]`)
-			key = m.ReplaceAllString(key, ".$1")
-
-			line, column := getPositionInFile(key, node)
-
-			ve = append(ve, ValidationError{
-				Key: key,
-				Description: sb.String(),
-				Line: line,
-				Column: column,
-			})
+		default:
+			ve = append(ve, newValidationError("", err.Error()))
 		}
-	}
-
-	// baseURL was not set to a local path, let's autodetect it from the
-	// publiccode.yml url key
-	//
-	// We need the baseURL to perform network checks.
-	if p.baseURL == nil && !p.DisableNetwork && p.PublicCode.URL != nil {
-		rawRoot, err := vcsurl.GetRawRoot((*url.URL)(p.PublicCode.URL), p.Branch)
-		if err != nil {
-			line, column := getPositionInFile("url", node)
-
-			ve = append(ve, ValidationError{
-				Key: "url",
-				Description: fmt.Sprintf("failed to get raw URL for code repository at %s: %s", p.PublicCode.URL, err),
-				Line: line,
-				Column: column,
-			})
-
-			// Return early because proceeding with no baseURL would result in a lot
-			// of duplicate errors stemming from its absence.
-			return ve
-		}
-
-		p.baseURL = rawRoot
-	}
-
-	err = p.validateFields()
-	if err != nil {
-		for _, err := range err.(ValidationResults) {
-			switch err := err.(type) {
-			case ValidationError:
-				err.Line, err.Column = getPositionInFile(err.Key, node)
-				ve = append(ve, err)
-			case ValidationWarning:
-				err.Line, err.Column = getPositionInFile(err.Key, node)
-				ve = append(ve, err)
-			}
-		}
-	}
-
-	if (len(ve) == 0) {
-		return nil
 	}
 
 	return ve
 }
 
-func (p *Parser) Parse() error {
-	var data []byte
-	var err error
-
-	if p.file.Scheme == "file" {
-		data, err = os.ReadFile(p.file.Path)
-		if err != nil {
-			return err
-		}
-	} else {
-		resp, err := http.Get(p.file.String())
-		if err != nil {
-			return err
-		}
-		defer resp.Body.Close()
-
-		data, err = io.ReadAll(resp.Body)
-		if err != nil {
-			return err
-		}
-	}
-
-	return p.ParseBytes(data)
-}
-
-// NewParser initializes a new Parser object and returns it.
-// TODO
-func NewParser(file string) (*Parser, error) {
-	return NewParserWithPath(file, "")
-}
-
-// TODO doc
-// empty string disables it and enables remote
-func NewParserWithPath(file string, path string) (*Parser, error) {
-	var p Parser
-
-	var err error
-	if p.file, err = toURL(file); err != nil {
-		return nil, err
-	}
-	if path != "" {
-		if p.baseURL, err = toURL(path); err != nil {
-			return nil, err
-		}
-	}
-
-	return &p, nil
-}
-
-// ToYAML converts parser.PublicCode into YAML again.
-func (p *Parser) ToYAML() ([]byte, error) {
-	return yaml.Marshal(p.PublicCode)
-}
-
-// TODO doc
 func toURL(file string) (*url.URL, error) {
 	if _, u := urlutil.IsValidURL(file); u != nil {
 		return u, nil
 	}
 
 	if path, err := filepath.Abs(file); err == nil {
-		return &url.URL{Scheme: "file", Path: path }, nil
+		return &url.URL{Scheme: "file", Path: path}, nil
 	} else {
 		return nil, err
 	}

@@ -1,4 +1,4 @@
-package validators;
+package validators
 
 import (
 	"slices"
@@ -6,7 +6,7 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
-func isCategory_v0_2(fl validator.FieldLevel) bool {
+func isCategoryV0(fl validator.FieldLevel) bool {
 	var supportedCategories = []string{
 		"accounting",
 		"agile-project-management",
@@ -114,7 +114,7 @@ func isCategory_v0_2(fl validator.FieldLevel) bool {
 	return slices.Contains(supportedCategories, fl.Field().String())
 }
 
-func isScope_v0_2(fl validator.FieldLevel) bool {
+func isScopeV0(fl validator.FieldLevel) bool {
 	var supportedScopes = []string{
 		"agriculture",
 		"culture",

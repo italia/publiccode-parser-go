@@ -1,5 +1,4 @@
-# Should NOT validate: version 1 doesn't exist yet
-publiccodeYmlVersion: "1"
+publiccodeYmlVersion: "0.3"
 
 name: Medusa
 url: "https://github.com/italia/developers.italia.it.git"
@@ -15,8 +14,11 @@ developmentStatus: development
 
 softwareType: "standalone/other"
 
+# Should NOT validate: logo must exist as a file
+logo: "no_such_file.png"
+
 description:
-  en_GB:
+  eng:
     localisedName: Medusa
     shortDescription: >
           A rather short description which

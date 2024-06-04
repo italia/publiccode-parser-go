@@ -2,6 +2,7 @@ package validators
 
 import (
 	"fmt"
+	"reflect"
 	"strconv"
 	"strings"
 	"time"
@@ -38,7 +39,7 @@ func uMax(fl validator.FieldLevel) bool {
 
 func uMin(fl validator.FieldLevel) bool {
 	length := uniseg.GraphemeClusterCount(fl.Field().String())
-	min , _ := strconv.Atoi(fl.Param())
+	min, _ := strconv.Atoi(fl.Param())
 
 	return length >= min
 }
@@ -69,4 +70,21 @@ func isURL(fl validator.FieldLevel) bool {
 	}
 
 	panic(fmt.Sprintf("Bad field type for %T. Must be implement fmt.Stringer", fl.Field().Interface()))
+}
+
+// Custom validator to work around https://github.com/go-playground/validator/issues/1260
+func bcp47_keys(fl validator.FieldLevel) bool {
+	validate := validator.New(validator.WithRequiredStructEnabled())
+
+	if fl.Field().Kind() != reflect.Map {
+		panic(fmt.Sprintf("Bad field type for %T. Must be a map", fl.Field().Interface()))
+	}
+
+	for _, k := range fl.Field().MapKeys() {
+		if err := validate.Var(k.String(), "bcp47_language_tag"); err != nil {
+			return false
+		}
+	}
+
+	return true
 }

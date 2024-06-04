@@ -3,7 +3,7 @@
 [![Join the #publiccode channel](https://img.shields.io/badge/Slack%20channel-%23publiccode-blue.svg?logo=slack)](https://developersitalia.slack.com/messages/CAM3F785T)
 [![Get invited](https://slack.developers.italia.it/badge.svg)](https://slack.developers.italia.it/)
 
-A Go parser and validator for [publiccode.yml](https://github.com/italia/publiccode.yml)
+A Go parser and validator for [publiccode.yml](https://github.com/publiccodeyml/publiccode.yml)
 files.
 
 `publiccode.yml` is an international standard for describing public software, which
@@ -19,19 +19,14 @@ This parser performs syntactic and semantic validation according to the
 - `publiccode-parser` can output validation errors as JSON or in [errorformat](https://vim-jp.org/vimdoc-en/quickfix.html#error-file-format) friendly way
 - Verifies the existence of URLs by checking the response for URL fields (can be disabled)
 
-## Example
+## Example usage as a library
 
 ```go
-parser := publiccode.NewParser("file:///path/to/local/dir/publiccode.yml")
+parser := publiccode.NewDefaultParser()
+
+publiccode, err := parser.Parse("file:///path/to/local/dir/publiccode.yml")
 // OR
-// parser := publiccode.NewParser("https://github.com/example/example/publiccode.yml")
-
-// all these settings are optional:
-parser.DisableNetwork = true
-parser.Branch = "mybranch"
-
-err := parser.Parse()
-publiccode := parser.PublicCode
+// parse.Parse("https://github.com/example/example/publiccode.yml")
 ```
 
 ## Validation from command line
@@ -42,7 +37,7 @@ from the command line.
 To get the latest development version use:
 
 ```shell
-go install github.com/italia/publiccode-parser-go/v3/publiccode-parser@latest
+go install github.com/italia/publiccode-parser-go/v4/publiccode-parser@latest
 publiccode-parser mypubliccode.yml
 ```
 
@@ -114,7 +109,7 @@ refactoring might be needed.
 
 ## See also
 
-* [Developers Italia backend & crawler](https://github.com/italia/developers-italia-backend) - a Go crawler that uses this library
+* [publiccode-crawler](https://github.com/italia/publiccode-crawler) - a Go crawler that uses this library
 
 ## Maintainers
 

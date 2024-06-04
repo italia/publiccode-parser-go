@@ -16,10 +16,12 @@ func New() *validator.Validate {
 	_ = validate.RegisterValidation("url_http_url", isHTTPURL)
 	_ = validate.RegisterValidation("url_url", isURL)
 
-	_ = validate.RegisterValidation("is_category_v0_2", isCategory_v0_2)
-	_ = validate.RegisterValidation("is_scope_v0_2", isScope_v0_2)
+	_ = validate.RegisterValidation("is_category_v0", isCategoryV0)
+	_ = validate.RegisterValidation("is_scope_v0", isScopeV0)
 
 	_ = validate.RegisterValidation("is_italian_ipa_code", isItalianIpaCode)
+
+	_ = validate.RegisterValidation("bcp47_keys", bcp47_keys)
 
 	validate.RegisterTagNameFunc(func(fld reflect.StructField) string {
 		name := strings.SplitN(fld.Tag.Get("yaml"), ",", 2)[0]
