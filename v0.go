@@ -26,7 +26,7 @@ type PublicCodeV0 struct {
 
 	Platforms []string `yaml:"platforms" validate:"gt=0"`
 
-	Categories []string `yaml:"categories" validate:"required,gt=0,dive,is_category_v0_2"`
+	Categories []string `yaml:"categories" validate:"required,gt=0,dive,is_category_v0"`
 
 	UsedBy *[]string `yaml:"usedBy,omitempty"`
 
@@ -37,7 +37,7 @@ type PublicCodeV0 struct {
 	SoftwareType string `yaml:"softwareType" validate:"required,oneof=standalone/mobile standalone/iot standalone/desktop standalone/web standalone/backend standalone/other addon library configurationFiles"`
 
 	IntendedAudience *struct {
-		Scope                *[]string `yaml:"scope,omitempty" validate:"omitempty,dive,is_scope_v0_2"`
+		Scope                *[]string `yaml:"scope,omitempty" validate:"omitempty,dive,is_scope_v0"`
 		Countries            *[]string `yaml:"countries,omitempty" validate:"omitempty,dive,iso3166_1_alpha2_lowercase"`
 		UnsupportedCountries *[]string `yaml:"unsupportedCountries,omitempty" validate:"omitempty,dive,iso3166_1_alpha2_lowercase"`
 	} `yaml:"intendedAudience,omitempty"`
