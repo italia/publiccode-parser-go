@@ -22,7 +22,9 @@ This parser performs syntactic and semantic validation according to the
 ## Example usage as a library
 
 ```go
-parser := publiccode.NewDefaultParser()
+parser, err := publiccode.NewDefaultParser()
+
+// error handling
 
 publiccode, err := parser.Parse("file:///path/to/local/dir/publiccode.yml")
 // OR
