@@ -131,7 +131,7 @@ func TestInvalidTestcasesV0(t *testing.T) {
 		"publiccodeYmlVersion_invalid.yml": ValidationResults{
 			ValidationError{
 				"publiccodeYmlVersion",
-				"unsupported version: '1'. Supported versions: 0.2, 0.2.0, 0.2.1, 0.2.2, 0.3, 0.3.0",
+				"unsupported version: '1'. Supported versions: 0.2, 0.2.0, 0.2.1, 0.2.2, 0.3, 0.3.0, 0.4, 0.4.0",
 				0,
 				0,
 			},
@@ -558,7 +558,10 @@ func TestValidWithWarningsTestcasesV0(t *testing.T) {
 			ValidationWarning{"description.eng.genericName", "This key is DEPRECATED and will be removed in the future", 23, 5},
 		},
 		"valid.minimal.v0.2.yml": ValidationResults{
-			ValidationWarning{"publiccodeYmlVersion", "v0.2 is not the latest version, use '0.3.0'. Parsing this file as v0.3.0.", 1, 1},
+			ValidationWarning{"publiccodeYmlVersion", "v0.2 is not the latest version, use '0.4.0'. Parsing this file as v0.4.0.", 1, 1},
+		},
+		"valid.minimal.v0.3.yml": ValidationResults{
+			ValidationWarning{"publiccodeYmlVersion", "v0.3 is not the latest version, use '0.4.0'. Parsing this file as v0.4.0.", 1, 1},
 		},
 	}
 
@@ -580,7 +583,7 @@ func TestDecodeValueErrorsRemote(t *testing.T) {
 	testRemoteFiles := []testType{
 		{"https://raw.githubusercontent.com/italia/publiccode-editor/master/publiccode.yml", ValidationResults{
 			ValidationWarning{
-				"publiccodeYmlVersion", "v0.2 is not the latest version, use '0.3.0'. Parsing this file as v0.3.0.", 1, 1,
+				"publiccodeYmlVersion", "v0.2 is not the latest version, use '0.4.0'. Parsing this file as v0.4.0.", 1, 1,
 			},
 			ValidationWarning{"description.it.genericName", "This key is DEPRECATED and will be removed in the future", 12, 5},
 		}},

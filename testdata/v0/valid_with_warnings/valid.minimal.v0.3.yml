@@ -1,10 +1,7 @@
-publiccodeYmlVersion: "0.4"
+publiccodeYmlVersion: "0.3"
 
 name: Medusa
-
 url: "https://github.com/italia/developers.italia.it.git"
-
-softwareVersion: "dev"
 releaseDate: "2017-04-15"
 
 platforms:
@@ -36,10 +33,6 @@ description:
           Very long description of this software, also split
           on multiple rows. You should note what the software
           is and why one should need it. This is 632 characters.
-
-    # Should NOT validate: must be a valid URL
-    apiDocumentation: 'abc'
-
     features:
        - Just one feature
 
