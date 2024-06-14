@@ -88,6 +88,26 @@ func TestValidTestcasesV0_NoNetwork(t *testing.T) {
 	checkValidFilesNoNetwork("testdata/v0/valid/no-network/*.yml", t)
 }
 
+func TestValidWithWarningTestcasesV0_NoNetwork(t *testing.T) {
+	expected := map[string]error{
+		"authorsFile.yml": ValidationResults{
+			ValidationWarning{"legal.authorsFile", "This key is DEPRECATED and will be removed in the future", 72, 3},
+		},
+	}
+
+	testFiles, _ := filepath.Glob("testdata/v0/valid_with_warnings/no-network/*yml")
+	for _, file := range testFiles {
+		baseName := path.Base(file)
+		if expected[baseName] == nil {
+			t.Errorf("No expected data for file %s", baseName)
+		}
+		t.Run(file, func(t *testing.T) {
+			err := parseNoNetwork(file)
+			checkParseErrors(t, err, testType{file, expected[baseName]})
+		})
+	}
+}
+
 func TestInvalidTestcasesV0_NoNetwork(t *testing.T) {
 	expected := map[string]error{
 		// logo
@@ -418,6 +438,12 @@ func TestInvalidTestcasesV0(t *testing.T) {
 			"legal.license", "invalid license 'Invalid License'", 42, 3,
 		}},
 		"legal_authorsFile_missing_file.yml": ValidationResults{
+			ValidationWarning{
+				"legal.authorsFile",
+				"This key is DEPRECATED and will be removed in the future",
+				42,
+				3,
+			},
 			ValidationError{
 				"legal.authorsFile",
 				"'https://raw.githubusercontent.com/italia/developers.italia.it/main/no_such_authors_file.txt' does not exist",
@@ -585,6 +611,7 @@ func TestDecodeValueErrorsRemote(t *testing.T) {
 			ValidationWarning{
 				"publiccodeYmlVersion", "v0.2 is not the latest version, use '0.4.0'. Parsing this file as v0.4.0.", 1, 1,
 			},
+			ValidationWarning{"legal.authorsFile", "This key is DEPRECATED and will be removed in the future", 48, 3},
 			ValidationWarning{"description.it.genericName", "This key is DEPRECATED and will be removed in the future", 12, 5},
 		}},
 	}

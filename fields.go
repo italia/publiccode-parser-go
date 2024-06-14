@@ -61,10 +61,14 @@ func validateFieldsV0(publiccode PublicCode, parser Parser, network bool) error 
 		}
 	}
 
-	if publiccodev0.Legal.AuthorsFile != nil && !parser.fileExists(toCodeHostingURL(*publiccodev0.Legal.AuthorsFile, parser.baseURL), network) {
-		u := toCodeHostingURL(*publiccodev0.Legal.AuthorsFile, parser.baseURL)
+	if publiccodev0.Legal.AuthorsFile != nil {
+		vr = append(vr, ValidationWarning{"legal.authorsFile", "This key is DEPRECATED and will be removed in the future", 0, 0})
 
-		vr = append(vr, newValidationError("legal.authorsFile", "'%s' does not exist", urlutil.DisplayURL(&u)))
+		if !parser.fileExists(toCodeHostingURL(*publiccodev0.Legal.AuthorsFile, parser.baseURL), network) {
+			u := toCodeHostingURL(*publiccodev0.Legal.AuthorsFile, parser.baseURL)
+
+			vr = append(vr, newValidationError("legal.authorsFile", "'%s' does not exist", urlutil.DisplayURL(&u)))
+		}
 	}
 
 	if publiccodev0.Legal.License != "" {

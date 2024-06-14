@@ -177,7 +177,6 @@ legal:
   license: AGPL-3.0-or-later
   mainCopyrightOwner: City of Chicago
   repoOwner: City of Chicago
-  authorsFile: testdata/AUTHORS
 
 maintenance:
   type: "contract"
