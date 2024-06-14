@@ -84,23 +84,11 @@ func checkParseErrors(t *testing.T, err error, test testType) {
 	}
 }
 
-func TestValidPreviousStandardVersion(t *testing.T) {
-	file := "testdata/v0.2/valid/valid.minimal.yml"
-	t.Run(file, func(t *testing.T) {
-		err := parse(file)
-		checkParseErrors(t, err, testType{
-			file, ValidationResults{
-				ValidationWarning{"publiccodeYmlVersion", "v0.2 is not the latest version, use '0.3.0'. Parsing this file as v0.3.0.", 1, 1},
-			},
-		})
-	})
+func TestValidTestcasesV0_NoNetwork(t *testing.T) {
+	checkValidFilesNoNetwork("testdata/v0/valid/no-network/*.yml", t)
 }
 
-func TestValidTestcasesV0_3_NoNetwork(t *testing.T) {
-	checkValidFilesNoNetwork("testdata/v0.3/valid/no-network/*.yml", t)
-}
-
-func TestInvalidTestcasesV0_3_NoNetwork(t *testing.T) {
+func TestInvalidTestcasesV0_NoNetwork(t *testing.T) {
 	expected := map[string]error{
 		// logo
 		"logo_missing_file.yml": ValidationResults{
@@ -123,7 +111,7 @@ func TestInvalidTestcasesV0_3_NoNetwork(t *testing.T) {
 		},
 	}
 
-	testFiles, _ := filepath.Glob("testdata/v0.3/invalid/no-network/*yml")
+	testFiles, _ := filepath.Glob("testdata/v0/invalid/no-network/*yml")
 	for _, file := range testFiles {
 		baseName := path.Base(file)
 		if expected[baseName] == nil {
@@ -136,7 +124,7 @@ func TestInvalidTestcasesV0_3_NoNetwork(t *testing.T) {
 	}
 }
 
-func TestInvalidTestcasesV0_3(t *testing.T) {
+func TestInvalidTestcasesV0(t *testing.T) {
 	expected := map[string]error{
 		// publiccodeYmlVersion
 		"publiccodeYmlVersion_missing.yml": ValidationResults{ValidationError{"publiccodeYmlVersion", "required", 0, 0}},
@@ -545,7 +533,7 @@ func TestInvalidTestcasesV0_3(t *testing.T) {
 		},
 	}
 
-	testFiles, _ := filepath.Glob("testdata/v0.3/invalid/*yml")
+	testFiles, _ := filepath.Glob("testdata/v0/invalid/*yml")
 	for _, file := range testFiles {
 		baseName := path.Base(file)
 		if expected[baseName] == nil {
@@ -558,20 +546,23 @@ func TestInvalidTestcasesV0_3(t *testing.T) {
 	}
 }
 
-// Test v0.3 valid YAML testcases (testdata/v0.3/valid/).
-func TestValidTestcasesV0_3(t *testing.T) {
-	checkValidFiles("testdata/v0.3/valid/*.yml", t)
+// Test v0 valid YAML testcases (testdata/v0/valid/).
+func TestValidTestcasesV0(t *testing.T) {
+	checkValidFiles("testdata/v0/valid/*.yml", t)
 }
 
-// Test v0.3 valid YAML testcases (testdata/v0.3/valid_with_warnings/).
-func TestValidWithWarningsTestcasesV0_3(t *testing.T) {
+// Test v0 valid YAML testcases (testdata/v0/valid_with_warnings/).
+func TestValidWithWarningsTestcasesV0(t *testing.T) {
 	expected := map[string]error{
 		"unicode_grapheme_clusters.yml": ValidationResults{
 			ValidationWarning{"description.eng.genericName", "This key is DEPRECATED and will be removed in the future", 23, 5},
 		},
+		"valid.minimal.v0.2.yml": ValidationResults{
+			ValidationWarning{"publiccodeYmlVersion", "v0.2 is not the latest version, use '0.3.0'. Parsing this file as v0.3.0.", 1, 1},
+		},
 	}
 
-	testFiles, _ := filepath.Glob("testdata/v0.3/valid_with_warnings/*yml")
+	testFiles, _ := filepath.Glob("testdata/v0/valid_with_warnings/*yml")
 	for _, file := range testFiles {
 		baseName := path.Base(file)
 		if expected[baseName] == nil {
@@ -623,7 +614,7 @@ func TestUrlMissingWithoutPath(t *testing.T) {
 		t.Errorf("Can't create parser: %v", err)
 	}
 
-	testFiles, _ := filepath.Glob("testdata/v0.3/invalid/url_missing.yml")
+	testFiles, _ := filepath.Glob("testdata/v0/invalid/url_missing.yml")
 	for _, file := range testFiles {
 		baseName := path.Base(file)
 		if expected[baseName] == nil {
@@ -654,7 +645,7 @@ func TestExport(t *testing.T) {
 		t.Errorf("Can't create Parser: %v", err)
 	}
 
-	publiccode, err := parser.Parse("testdata/v0.3/valid/valid.yml")
+	publiccode, err := parser.Parse("testdata/v0/valid/valid.yml")
 	if err != nil {
 		t.Errorf("Failed to parse valid file: %v", err)
 	}
