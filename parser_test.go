@@ -213,10 +213,13 @@ func TestInvalidTestcasesV0(t *testing.T) {
 		},
 
 		// releaseDate
-		"releaseDate_missing.yml": ValidationResults{ValidationError{"releaseDate", "required", 1, 1}},
+		"releaseDate_empty.yml": ValidationResults{ValidationError{"releaseDate", "must be a date with format 'YYYY-MM-DD'", 8, 1}},
 		"releaseDate_wrong_type.yml": ValidationResults{
 			ValidationError{"releaseDate", "wrong type for this field", 8, 1},
-			ValidationError{"releaseDate", "required", 8, 1},
+			// FIXME: This isn't ideal, but it's a bug of the yaml library that deserializes
+			// the field as a pointer to "" (two double quotes), instead of leaving it as nil.
+			// It's still technically correct validation-wise.
+			ValidationError{"releaseDate", "must be a date with format 'YYYY-MM-DD'", 8, 1},
 		},
 		"releaseDate_invalid.yml": ValidationResults{
 			ValidationError{"releaseDate", "must be a date with format 'YYYY-MM-DD'", 8, 1},
@@ -544,7 +547,6 @@ func TestInvalidTestcasesV0(t *testing.T) {
 		"mostly_empty.yml": ValidationResults{
 			ValidationError{"name", "required", 1, 1},
 			ValidationError{"url", "required", 1, 1},
-			ValidationError{"releaseDate", "required", 1, 1},
 			ValidationError{"platforms", "must be more than 0", 1, 1},
 			ValidationError{"categories", "required", 1, 1},
 			ValidationError{"developmentStatus", "required", 1, 1},

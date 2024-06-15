@@ -17,7 +17,7 @@ type PublicCodeV0 struct {
 
 	IsBasedOn       UrlOrUrlArray `yaml:"isBasedOn,omitempty"`
 	SoftwareVersion string        `yaml:"softwareVersion,omitempty"`
-	ReleaseDate     string        `yaml:"releaseDate" validate:"required,date"`
+	ReleaseDate     *string       `yaml:"releaseDate" validate:"omitnil,date"`
 	Logo            string        `yaml:"logo,omitempty"`
 	MonochromeLogo  string        `yaml:"monochromeLogo,omitempty"`
 

@@ -2,7 +2,6 @@ publiccodeYmlVersion: "0.4"
 
 name: Medusa
 url: "https://github.com/italia/developers.italia.it.git"
-releaseDate: "2017-04-15"
 
 platforms:
   - web
