@@ -8,7 +8,7 @@ import (
 
 // PublicCodeV0 defines how a publiccode.yml v0.x is structured
 type PublicCodeV0 struct {
-	PubliccodeYamlVersion string `yaml:"publiccodeYmlVersion" validate:"required,oneof=0.2 0.2.0 0.2.1 0.2.2 0.3 0.3.0"`
+	PubliccodeYamlVersion string `yaml:"publiccodeYmlVersion" validate:"required,oneof=0.2 0.2.0 0.2.1 0.2.2 0.3 0.3.0 0.4 0.4.0"`
 
 	Name             string `yaml:"name" validate:"required"`
 	ApplicationSuite string `yaml:"applicationSuite,omitempty"`
@@ -17,7 +17,7 @@ type PublicCodeV0 struct {
 
 	IsBasedOn       UrlOrUrlArray `yaml:"isBasedOn,omitempty"`
 	SoftwareVersion string        `yaml:"softwareVersion,omitempty"`
-	ReleaseDate     string        `yaml:"releaseDate" validate:"required,date"`
+	ReleaseDate     *string       `yaml:"releaseDate" validate:"omitnil,date"`
 	Logo            string        `yaml:"logo,omitempty"`
 	MonochromeLogo  string        `yaml:"monochromeLogo,omitempty"`
 

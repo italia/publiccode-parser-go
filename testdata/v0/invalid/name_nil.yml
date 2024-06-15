@@ -1,4 +1,4 @@
-publiccodeYmlVersion: "0.3"
+publiccodeYmlVersion: "0.4"
 
 # Should NOT validate: name is nil
 name:

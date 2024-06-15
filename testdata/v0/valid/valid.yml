@@ -1,7 +1,7 @@
 # This is a valid publiccode.yml that uses as many fields and combinations
 # as possible.
 
-publiccodeYmlVersion: "0.3"
+publiccodeYmlVersion: "0.4"
 
 name: Medusa
 applicationSuite: MegaProductivitySuite
@@ -42,6 +42,8 @@ categories:
   - data-analytics
   - data-collection
   - data-visualization
+  - design
+  - design-system
   - digital-asset-management
   - digital-citizenship
   - document-management
@@ -70,6 +72,7 @@ categories:
   - ide
   - identity-management
   - instant-messaging
+  - integrated-library-system
   - inventory-management
   - it-asset-management
   - it-development
@@ -95,6 +98,7 @@ categories:
   - project-management
   - property-management
   - real-estate-management
+  - regulations-and-directives
   - remote-support
   - resource-management
   - sales-management

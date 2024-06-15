@@ -1,11 +1,11 @@
-publiccodeYmlVersion: "0.3"
+publiccodeYmlVersion: "0.4"
 
 name: Medusa
 url: "https://github.com/italia/developers.italia.it.git"
 softwareVersion: "dev"
 
-# Should NOT validate: releaseDate is missing
-# releaseDate: "2017-04-15"
+# Should NOT validate: releaseDate is empty (not a date)
+releaseDate: ""
 
 platforms:
   - web

@@ -88,6 +88,26 @@ func TestValidTestcasesV0_NoNetwork(t *testing.T) {
 	checkValidFilesNoNetwork("testdata/v0/valid/no-network/*.yml", t)
 }
 
+func TestValidWithWarningTestcasesV0_NoNetwork(t *testing.T) {
+	expected := map[string]error{
+		"authorsFile.yml": ValidationResults{
+			ValidationWarning{"legal.authorsFile", "This key is DEPRECATED and will be removed in the future", 72, 3},
+		},
+	}
+
+	testFiles, _ := filepath.Glob("testdata/v0/valid_with_warnings/no-network/*yml")
+	for _, file := range testFiles {
+		baseName := path.Base(file)
+		if expected[baseName] == nil {
+			t.Errorf("No expected data for file %s", baseName)
+		}
+		t.Run(file, func(t *testing.T) {
+			err := parseNoNetwork(file)
+			checkParseErrors(t, err, testType{file, expected[baseName]})
+		})
+	}
+}
+
 func TestInvalidTestcasesV0_NoNetwork(t *testing.T) {
 	expected := map[string]error{
 		// logo
@@ -131,7 +151,7 @@ func TestInvalidTestcasesV0(t *testing.T) {
 		"publiccodeYmlVersion_invalid.yml": ValidationResults{
 			ValidationError{
 				"publiccodeYmlVersion",
-				"unsupported version: '1'. Supported versions: 0.2, 0.2.0, 0.2.1, 0.2.2, 0.3, 0.3.0",
+				"unsupported version: '1'. Supported versions: 0.2, 0.2.0, 0.2.1, 0.2.2, 0.3, 0.3.0, 0.4, 0.4.0",
 				0,
 				0,
 			},
@@ -193,10 +213,13 @@ func TestInvalidTestcasesV0(t *testing.T) {
 		},
 
 		// releaseDate
-		"releaseDate_missing.yml": ValidationResults{ValidationError{"releaseDate", "required", 1, 1}},
+		"releaseDate_empty.yml": ValidationResults{ValidationError{"releaseDate", "must be a date with format 'YYYY-MM-DD'", 8, 1}},
 		"releaseDate_wrong_type.yml": ValidationResults{
 			ValidationError{"releaseDate", "wrong type for this field", 8, 1},
-			ValidationError{"releaseDate", "required", 8, 1},
+			// FIXME: This isn't ideal, but it's a bug of the yaml library that deserializes
+			// the field as a pointer to "" (two double quotes), instead of leaving it as nil.
+			// It's still technically correct validation-wise.
+			ValidationError{"releaseDate", "must be a date with format 'YYYY-MM-DD'", 8, 1},
 		},
 		"releaseDate_invalid.yml": ValidationResults{
 			ValidationError{"releaseDate", "must be a date with format 'YYYY-MM-DD'", 8, 1},
@@ -418,6 +441,12 @@ func TestInvalidTestcasesV0(t *testing.T) {
 			"legal.license", "invalid license 'Invalid License'", 42, 3,
 		}},
 		"legal_authorsFile_missing_file.yml": ValidationResults{
+			ValidationWarning{
+				"legal.authorsFile",
+				"This key is DEPRECATED and will be removed in the future",
+				42,
+				3,
+			},
 			ValidationError{
 				"legal.authorsFile",
 				"'https://raw.githubusercontent.com/italia/developers.italia.it/main/no_such_authors_file.txt' does not exist",
@@ -518,7 +547,6 @@ func TestInvalidTestcasesV0(t *testing.T) {
 		"mostly_empty.yml": ValidationResults{
 			ValidationError{"name", "required", 1, 1},
 			ValidationError{"url", "required", 1, 1},
-			ValidationError{"releaseDate", "required", 1, 1},
 			ValidationError{"platforms", "must be more than 0", 1, 1},
 			ValidationError{"categories", "required", 1, 1},
 			ValidationError{"developmentStatus", "required", 1, 1},
@@ -558,7 +586,10 @@ func TestValidWithWarningsTestcasesV0(t *testing.T) {
 			ValidationWarning{"description.eng.genericName", "This key is DEPRECATED and will be removed in the future", 23, 5},
 		},
 		"valid.minimal.v0.2.yml": ValidationResults{
-			ValidationWarning{"publiccodeYmlVersion", "v0.2 is not the latest version, use '0.3.0'. Parsing this file as v0.3.0.", 1, 1},
+			ValidationWarning{"publiccodeYmlVersion", "v0.2 is not the latest version, use '0.4.0'. Parsing this file as v0.4.0.", 1, 1},
+		},
+		"valid.minimal.v0.3.yml": ValidationResults{
+			ValidationWarning{"publiccodeYmlVersion", "v0.3 is not the latest version, use '0.4.0'. Parsing this file as v0.4.0.", 1, 1},
 		},
 	}
 
@@ -580,8 +611,9 @@ func TestDecodeValueErrorsRemote(t *testing.T) {
 	testRemoteFiles := []testType{
 		{"https://raw.githubusercontent.com/italia/publiccode-editor/master/publiccode.yml", ValidationResults{
 			ValidationWarning{
-				"publiccodeYmlVersion", "v0.2 is not the latest version, use '0.3.0'. Parsing this file as v0.3.0.", 1, 1,
+				"publiccodeYmlVersion", "v0.2 is not the latest version, use '0.4.0'. Parsing this file as v0.4.0.", 1, 1,
 			},
+			ValidationWarning{"legal.authorsFile", "This key is DEPRECATED and will be removed in the future", 48, 3},
 			ValidationWarning{"description.it.genericName", "This key is DEPRECATED and will be removed in the future", 12, 5},
 		}},
 	}
