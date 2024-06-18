@@ -537,6 +537,9 @@ func TestInvalidTestcasesV0(t *testing.T) {
 		},
 
 		// it.*
+		"it_countryExtensionVersion_invalid.yml": ValidationResults{
+			ValidationError{"it.countryExtensionVersion", "must be one of the following: 0.2 1.0", 12, 3},
+		},
 		"it_riuso_codiceIPA_invalid.yml": ValidationResults{
 			ValidationError{"it.riuso.codiceIPA", "must be a valid Italian Public Administration Code (iPA)", 55, 5},
 		},

@@ -81,13 +81,6 @@ func validateFieldsV0(publiccode PublicCode, parser Parser, network bool) error 
 		}
 	}
 
-	if publiccodev0.It.CountryExtensionVersion != "" && publiccodev0.It.CountryExtensionVersion != "0.2" {
-		vr = append(vr, newValidationError(
-			"it.countryExtensionVersion",
-			"version %s not supported for country-specific section 'it'", publiccodev0.It.CountryExtensionVersion,
-		))
-	}
-
 	if len(publiccodev0.InputTypes) > 0 {
 		vr = append(vr, ValidationWarning{"inputTypes", "This key is DEPRECATED and will be removed in the future", 0, 0})
 	}

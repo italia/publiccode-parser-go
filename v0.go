@@ -117,7 +117,7 @@ type DependencyV0 struct {
 // countries, such as declaring compliance with local laws or regulations.
 
 type ITSectionV0 struct {
-	CountryExtensionVersion string `yaml:"countryExtensionVersion"`
+	CountryExtensionVersion *string `yaml:"countryExtensionVersion" validate:"omitnil,oneof=0.2 1.0"`
 
 	Conforme struct {
 		LineeGuidaDesign        bool `yaml:"lineeGuidaDesign,omitempty"`
