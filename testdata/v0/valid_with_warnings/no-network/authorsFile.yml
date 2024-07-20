@@ -35,7 +35,7 @@ intendedAudience:
     - us
 
 description:
-  eng:
+  en:
     localisedName: Medusa
     shortDescription: "A really interesting software."
     longDescription: >
@@ -83,7 +83,7 @@ localisation:
   localisationReady: true
   # Languages already available
   availableLanguages:
-    - eng
+    - en
     - ita
     - fra
     - deu

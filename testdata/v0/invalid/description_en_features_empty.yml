@@ -16,10 +16,11 @@ developmentStatus: development
 softwareType: "standalone/other"
 
 description:
-  eng:
+  en:
     localisedName: Medusa
-    # Should NOT validate: shortDescription is missing
-    # shortDescription: ""
+    shortDescription: >
+          A rather short description which
+          is probably useless
     longDescription: >
           Very long description of this software, also split
           on multiple rows. You should note what the software
@@ -33,8 +34,9 @@ description:
           Very long description of this software, also split
           on multiple rows. You should note what the software
           is and why one should need it. This is 632 characters.
-    features:
-       - Just one feature
+
+    # Should NOT validate: features is empty
+    features: []
 
 legal:
   license: AGPL-3.0-or-later
@@ -48,4 +50,4 @@ maintenance:
 localisation:
   localisationReady: true
   availableLanguages:
-    - eng
+    - en
