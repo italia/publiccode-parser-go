@@ -49,4 +49,4 @@ maintenance:
 localisation:
   localisationReady: true
   availableLanguages:
-    - eng
+    - en

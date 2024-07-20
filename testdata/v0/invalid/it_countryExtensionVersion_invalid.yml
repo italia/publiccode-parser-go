@@ -2,11 +2,14 @@ publiccodeYmlVersion: "0.4"
 
 name: Medusa
 url: "https://github.com/italia/developers.italia.it.git"
-softwareVersion: "dev"
 releaseDate: "2017-04-15"
 
 platforms:
   - web
+
+# Should NOT validate: invalid countryExtensionVersion
+it:
+  countryExtensionVersion: "1.1"
 
 categories:
   - cloud-management
@@ -16,7 +19,7 @@ developmentStatus: development
 softwareType: "standalone/other"
 
 description:
-  eng:
+  en:
     localisedName: Medusa
     shortDescription: >
           A rather short description which
@@ -35,11 +38,7 @@ description:
           on multiple rows. You should note what the software
           is and why one should need it. This is 632 characters.
     features:
-      - Feature 1
-
-     # Should NOT validate: screenshot file does not exist
-    screenshots:
-      - no_such_file.png
+       - Just one feature
 
 legal:
   license: AGPL-3.0-or-later
@@ -53,4 +52,4 @@ maintenance:
 localisation:
   localisationReady: true
   availableLanguages:
-    - eng
+    - en

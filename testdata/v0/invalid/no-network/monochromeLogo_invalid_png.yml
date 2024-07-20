@@ -18,7 +18,7 @@ softwareType: "standalone/other"
 monochromeLogo: "testdata/img/not-an-image.png"
 
 description:
-  eng:
+  en:
     localisedName: Medusa
     shortDescription: >
           A rather short description which
@@ -51,4 +51,4 @@ maintenance:
 localisation:
   localisationReady: true
   availableLanguages:
-    - eng
+    - en

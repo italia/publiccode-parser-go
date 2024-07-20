@@ -361,72 +361,72 @@ func TestInvalidTestcasesV0(t *testing.T) {
 		"description_invalid_language.yml": ValidationResults{
 			ValidationError{"description", "must use a valid BCP 47 language", 18, 1},
 		},
-		"description_eng_features_missing.yml": ValidationResults{
-			ValidationError{"description.eng.features", "must be more than 0", 22, 5},
+		"description_en_features_missing.yml": ValidationResults{
+			ValidationError{"description.en.features", "must be more than 0", 22, 5},
 		},
-		"description_eng_features_empty.yml": ValidationResults{
-			ValidationError{"description.eng.features", "must be more than 0", 39, 5},
+		"description_en_features_empty.yml": ValidationResults{
+			ValidationError{"description.en.features", "must be more than 0", 39, 5},
 		},
-		"description_eng_localisedName_wrong_type.yml": ValidationResults{
-			ValidationError{"description.eng.localisedName", "wrong type for this field", 21, 1},
+		"description_en_localisedName_wrong_type.yml": ValidationResults{
+			ValidationError{"description.en.localisedName", "wrong type for this field", 21, 1},
 		},
-		"description_eng_genericName_too_long.yml": ValidationResults{
-			ValidationError{"description.eng.genericName", "must be less or equal than 35", 22, 5},
-			ValidationWarning{"description.eng.genericName", "This key is DEPRECATED and will be removed in the future", 22, 5},
+		"description_en_genericName_too_long.yml": ValidationResults{
+			ValidationError{"description.en.genericName", "must be less or equal than 35", 22, 5},
+			ValidationWarning{"description.en.genericName", "This key is DEPRECATED and will be removed in the future", 22, 5},
 		},
-		"description_eng_shortDescription_missing.yml": ValidationResults{
-			ValidationError{"description.eng.shortDescription", "required", 20, 5},
+		"description_en_shortDescription_missing.yml": ValidationResults{
+			ValidationError{"description.en.shortDescription", "required", 20, 5},
 		},
-		"description_eng_shortDescription_too_short.yml": ValidationResults{
-			ValidationError{"description.eng.shortDescription", "required", 20, 5},
+		"description_en_shortDescription_too_short.yml": ValidationResults{
+			ValidationError{"description.en.shortDescription", "required", 20, 5},
 		},
-		"description_eng_longDescription_missing.yml": ValidationResults{
-			ValidationError{"description.eng.longDescription", "required", 20, 5},
+		"description_en_longDescription_missing.yml": ValidationResults{
+			ValidationError{"description.en.longDescription", "required", 20, 5},
 		},
-		"description_eng_longDescription_too_long.yml": ValidationResults{
-			ValidationError{"description.eng.longDescription", "must be less or equal than 10000", 27, 5},
+		"description_en_longDescription_too_long.yml": ValidationResults{
+			ValidationError{"description.en.longDescription", "must be less or equal than 10000", 27, 5},
 		},
-		"description_eng_longDescription_too_short.yml": ValidationResults{
-			ValidationError{"description.eng.longDescription", "must be more or equal than 150", 27, 5},
+		"description_en_longDescription_too_short.yml": ValidationResults{
+			ValidationError{"description.en.longDescription", "must be more or equal than 150", 27, 5},
 		},
-		"description_eng_longDescription_too_short_grapheme_clusters.yml": ValidationResults{
-			ValidationError{"description.eng.longDescription", "must be more or equal than 150", 28, 5},
+		"description_en_longDescription_too_short_grapheme_clusters.yml": ValidationResults{
+			ValidationError{"description.en.longDescription", "must be more or equal than 150", 28, 5},
 		},
-		"description_eng_documentation_invalid.yml": ValidationResults{
-			ValidationError{"description.eng.documentation", "must be an HTTP URL", 25, 5},
-			ValidationError{"description.eng.documentation", "'not_a_url' not reachable: missing URL scheme", 25, 5},
+		"description_en_documentation_invalid.yml": ValidationResults{
+			ValidationError{"description.en.documentation", "must be an HTTP URL", 25, 5},
+			ValidationError{"description.en.documentation", "'not_a_url' not reachable: missing URL scheme", 25, 5},
 		},
-		"description_eng_documentation_wrong_type.yml": ValidationResults{
-			ValidationError{"description.eng.documentation", "wrong type for this field", 25, 1},
-			ValidationError{"description.eng.documentation", "must be an HTTP URL", 25, 5},
-			ValidationError{"description.eng.documentation", "'' not reachable: missing URL scheme", 25, 5},
+		"description_en_documentation_wrong_type.yml": ValidationResults{
+			ValidationError{"description.en.documentation", "wrong type for this field", 25, 1},
+			ValidationError{"description.en.documentation", "must be an HTTP URL", 25, 5},
+			ValidationError{"description.en.documentation", "'' not reachable: missing URL scheme", 25, 5},
 		},
-		"description_eng_apiDocumentation_invalid.yml": ValidationResults{
-			ValidationError{"description.eng.apiDocumentation", "must be an HTTP URL", 41, 5},
-			ValidationError{"description.eng.apiDocumentation", "'abc' not reachable: missing URL scheme", 41, 5},
+		"description_en_apiDocumentation_invalid.yml": ValidationResults{
+			ValidationError{"description.en.apiDocumentation", "must be an HTTP URL", 41, 5},
+			ValidationError{"description.en.apiDocumentation", "'abc' not reachable: missing URL scheme", 41, 5},
 		},
-		"description_eng_apiDocumentation_wrong_type.yml": ValidationResults{
-			ValidationError{"description.eng.apiDocumentation", "wrong type for this field", 43, 1},
-			ValidationError{"description.eng.apiDocumentation", "must be an HTTP URL", 43, 5},
-			ValidationError{"description.eng.apiDocumentation", "'' not reachable: missing URL scheme", 43, 5},
+		"description_en_apiDocumentation_wrong_type.yml": ValidationResults{
+			ValidationError{"description.en.apiDocumentation", "wrong type for this field", 43, 1},
+			ValidationError{"description.en.apiDocumentation", "must be an HTTP URL", 43, 5},
+			ValidationError{"description.en.apiDocumentation", "'' not reachable: missing URL scheme", 43, 5},
 		},
-		"description_eng_screenshots_missing_file.yml": ValidationResults{
+		"description_en_screenshots_missing_file.yml": ValidationResults{
 			ValidationError{
-				"description.eng.screenshots[0]",
+				"description.en.screenshots[0]",
 				"'no_such_file.png' is not an image: no such file : https://raw.githubusercontent.com/italia/developers.italia.it/main/no_such_file.png",
 				20,
 				5,
 			},
 		},
-		"description_eng_awards_wrong_type.yml": ValidationResults{
-			ValidationError{"description.eng.awards", "wrong type for this field", 40, 1},
+		"description_en_awards_wrong_type.yml": ValidationResults{
+			ValidationError{"description.en.awards", "wrong type for this field", 40, 1},
 		},
-		"description_eng_videos_invalid.yml": ValidationResults{
-			ValidationError{"description.eng.videos[0]", "must be an HTTP URL", 20, 5},
-			ValidationError{"description.eng.videos[0]", "'ABC' is not a valid video URL supporting oEmbed: invalid oEmbed link: ABC", 20, 5},
+		"description_en_videos_invalid.yml": ValidationResults{
+			ValidationError{"description.en.videos[0]", "must be an HTTP URL", 20, 5},
+			ValidationError{"description.en.videos[0]", "'ABC' is not a valid video URL supporting oEmbed: invalid oEmbed link: ABC", 20, 5},
 		},
-		"description_eng_videos_invalid_oembed.yml": ValidationResults{
-			ValidationError{"description.eng.videos[0]", "'https://google.com' is not a valid video URL supporting oEmbed: invalid oEmbed link: https://google.com", 20, 5},
+		"description_en_videos_invalid_oembed.yml": ValidationResults{
+			ValidationError{"description.en.videos[0]", "'https://google.com' is not a valid video URL supporting oEmbed: invalid oEmbed link: https://google.com", 20, 5},
 		},
 
 		// legal
@@ -586,7 +586,7 @@ func TestValidTestcasesV0(t *testing.T) {
 func TestValidWithWarningsTestcasesV0(t *testing.T) {
 	expected := map[string]error{
 		"unicode_grapheme_clusters.yml": ValidationResults{
-			ValidationWarning{"description.eng.genericName", "This key is DEPRECATED and will be removed in the future", 23, 5},
+			ValidationWarning{"description.en.genericName", "This key is DEPRECATED and will be removed in the future", 23, 5},
 		},
 		"valid.minimal.v0.2.yml": ValidationResults{
 			ValidationWarning{"publiccodeYmlVersion", "v0.2 is not the latest version, use '0.4.0'. Parsing this file as v0.4.0.", 1, 1},

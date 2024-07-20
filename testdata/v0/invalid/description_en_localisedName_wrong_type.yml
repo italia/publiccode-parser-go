@@ -16,10 +16,9 @@ developmentStatus: development
 softwareType: "standalone/other"
 
 description:
-  eng:
-    localisedName: Medusa
-    # Should not validate: genericName is more than 35 chars
-    genericName: 012345678901234567890123456789012345
+  en:
+    # Should NOT validate: localisedName is not a string
+    localisedName: []
     shortDescription: >
           A rather short description which
           is probably useless
@@ -37,7 +36,7 @@ description:
           on multiple rows. You should note what the software
           is and why one should need it. This is 632 characters.
     features:
-       - Just one feature
+      - Feature 1
 
 legal:
   license: AGPL-3.0-or-later
@@ -51,4 +50,4 @@ maintenance:
 localisation:
   localisationReady: true
   availableLanguages:
-    - eng
+    - en

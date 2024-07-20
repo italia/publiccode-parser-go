@@ -1,7 +1,10 @@
 publiccodeYmlVersion: "0.4"
 
 name: Medusa
+
 url: "https://github.com/italia/developers.italia.it.git"
+
+softwareVersion: "dev"
 releaseDate: "2017-04-15"
 
 platforms:
@@ -14,12 +17,13 @@ developmentStatus: development
 
 softwareType: "standalone/other"
 
-# Should NOT validate: logo must exist as a file
-logo: "no_such_file.png"
-
 description:
   en:
     localisedName: Medusa
+
+    # Should NOT validate: must be a valid URL
+    documentation: 'not_a_url'
+
     shortDescription: >
           A rather short description which
           is probably useless

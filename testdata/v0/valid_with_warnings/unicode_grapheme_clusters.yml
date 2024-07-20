@@ -16,7 +16,7 @@ developmentStatus: development
 softwareType: "standalone/other"
 
 description:
-  eng:
+  en:
     localisedName: Medusa
 
     # This is 14 characters long and below this field's limit of 35 characters.
@@ -53,4 +53,4 @@ maintenance:
 localisation:
   localisationReady: true
   availableLanguages:
-    - eng
+    - en
