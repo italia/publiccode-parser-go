@@ -17,9 +17,8 @@ import (
 	"strings"
 
 	"github.com/alranel/go-vcsurl/v2"
-	httpclient "github.com/italia/httpclient-lib-go"
-
 	"github.com/dyatlov/go-oembed/oembed"
+	httpclient "github.com/italia/httpclient-lib-go"
 	"github.com/italia/publiccode-parser-go/v4/data"
 	netutil "github.com/italia/publiccode-parser-go/v4/internal"
 )
@@ -103,7 +102,7 @@ func toCodeHostingURL(file string, baseURL *url.URL) url.URL {
 
 	// baseURL can be nil if we didn't autodetect it because
 	// of DisableNetwork == true.
-	if (baseURL != nil) {
+	if baseURL != nil {
 		// If file is a relative path, let's just append it to our baseURL
 		u := *baseURL
 		u.Path = path.Join(u.Path, file)
@@ -125,7 +124,6 @@ func (p *Parser) fileExists(u url.URL, network bool) bool {
 
 		return err == nil
 	}
-
 
 	if network {
 		reachable, _ := p.isReachable(u, network)
@@ -178,7 +176,12 @@ func (p *Parser) validLogo(u url.URL, parser Parser, network bool) (bool, error)
 			return false, err
 		}
 
-		defer func() { os.Remove(path.Dir(localPath)) }()
+		defer func() {
+			file := path.Dir(localPath)
+			if err := os.Remove(file); err != nil {
+				fmt.Fprintf(os.Stderr, "failed to remove %s: %v\n", file, err)
+			}
+		}()
 	} else {
 		localPath = u.Path
 	}

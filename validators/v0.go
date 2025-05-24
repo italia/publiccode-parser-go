@@ -7,7 +7,7 @@ import (
 )
 
 func isCategoryV0(fl validator.FieldLevel) bool {
-	var supportedCategories = []string{
+	supportedCategories := []string{
 		"accounting",
 		"agile-project-management",
 		"applicant-tracking",
@@ -119,7 +119,7 @@ func isCategoryV0(fl validator.FieldLevel) bool {
 }
 
 func isScopeV0(fl validator.FieldLevel) bool {
-	var supportedScopes = []string{
+	supportedScopes := []string{
 		"agriculture",
 		"culture",
 		"defence",

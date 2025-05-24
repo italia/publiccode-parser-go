@@ -1,4 +1,4 @@
-package publiccode;
+package publiccode
 
 import (
 	"net/url"
@@ -23,12 +23,13 @@ func (u *URL) UnmarshalYAML(unmarshal func(interface{}) error) error {
 }
 
 func (u *URL) MarshalYAML() (interface{}, error) {
-  return u.String(), nil
+	return u.String(), nil
 }
 
 func (u URL) String() string {
-    return (*url.URL)(&u).String()
+	return (*url.URL)(&u).String()
 }
+
 type UrlOrUrlArray []*URL
 
 func (a *UrlOrUrlArray) UnmarshalYAML(unmarshal func(interface{}) error) error {

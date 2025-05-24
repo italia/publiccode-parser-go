@@ -11,7 +11,6 @@ import (
 // isCodiceIPA returns true if the field is a valid Italian Public Administration Code
 // (iPA) from https://indicepa.gov.it.
 func isItalianIpaCode(fl validator.FieldLevel) bool {
-
 	input := data.ItIpaCodes
 
 	// Scan the file, line by line.

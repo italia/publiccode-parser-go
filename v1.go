@@ -1,9 +1,8 @@
 package publiccode
 
 import (
-	"gopkg.in/yaml.v3"
-
 	urlutil "github.com/italia/publiccode-parser-go/v4/internal"
+	"gopkg.in/yaml.v3"
 )
 
 // There's no v1 yet, this is just an unexported placeholder type
@@ -16,7 +15,6 @@ type publicCodeV1 struct {
 //nolint:unused
 func (p publicCodeV1) Version() uint {
 	return 1
-
 }
 
 //nolint:unused
