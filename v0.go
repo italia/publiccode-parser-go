@@ -1,9 +1,8 @@
 package publiccode
 
 import (
-	"gopkg.in/yaml.v3"
-
 	urlutil "github.com/italia/publiccode-parser-go/v4/internal"
+	"gopkg.in/yaml.v3"
 )
 
 // PublicCodeV0 defines how a publiccode.yml v0.x is structured

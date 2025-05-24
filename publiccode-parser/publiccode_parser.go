@@ -9,7 +9,6 @@ import (
 	"runtime/debug"
 
 	"github.com/alranel/go-vcsurl/v2"
-
 	publiccode "github.com/italia/publiccode-parser-go/v4"
 	urlutil "github.com/italia/publiccode-parser-go/v4/internal"
 )
@@ -33,7 +32,7 @@ func init() {
 
 func main() {
 	flag.Usage = func() {
-		fmt.Fprintf(flag.CommandLine.Output(), "Usage: %s [ OPTIONS ] publiccode.yml\n", os.Args[0])
+		_, _ = fmt.Fprintf(flag.CommandLine.Output(), "Usage: %s [ OPTIONS ] publiccode.yml\n", os.Args[0])
 		flag.PrintDefaults()
 	}
 	localBasePathPtr := flag.String("path", "", "Use this local directory as base path when checking for files existence instead of using the `url` key in publiccode.yml")
@@ -54,7 +53,7 @@ func main() {
 		return
 	}
 
-	var publiccodeFile = flag.Args()[0]
+	publiccodeFile := flag.Args()[0]
 
 	if ok, url := urlutil.IsValidURL(publiccodeFile); ok {
 		// supplied argument looks like an URL
@@ -68,7 +67,7 @@ func main() {
 	config.DisableNetwork = *disableNetworkPtr
 
 	p, err := publiccode.NewParser(config)
-	if (err != nil) {
+	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error creating Parser: %s\n", err.Error())
 		os.Exit(1)
 	}
@@ -82,7 +81,7 @@ func main() {
 		}
 
 		out, jsonerr := json.MarshalIndent(err, "", "    ")
-		if (jsonerr != nil) {
+		if jsonerr != nil {
 			fmt.Fprintf(os.Stderr, "Error encoding JSON\n")
 			os.Exit(1)
 		}
@@ -106,7 +105,6 @@ func hasValidationErrors(results error) bool {
 	if results == nil {
 		return false
 	}
-
 
 	switch e := results.(type) {
 	case publiccode.ValidationResults:

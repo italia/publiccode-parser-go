@@ -19,7 +19,9 @@ func downloadFile(filepath string, url *url.URL, headers map[string]string) erro
 	if err != nil {
 		return err
 	}
-	defer out.Close()
+	defer func() {
+		_ = out.Close()
+	}()
 
 	// Get the data from the url.
 	resp, err := httpclient.GetURL(url.String(), headers)

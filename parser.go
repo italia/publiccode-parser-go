@@ -16,10 +16,9 @@ import (
 
 	"github.com/alranel/go-vcsurl/v2"
 	"github.com/go-playground/validator/v10"
-	"gopkg.in/yaml.v3"
-
 	urlutil "github.com/italia/publiccode-parser-go/v4/internal"
 	publiccodeValidator "github.com/italia/publiccode-parser-go/v4/validators"
+	"gopkg.in/yaml.v3"
 )
 
 type ParserConfig struct {
@@ -280,20 +279,22 @@ func (p *Parser) Parse(uri string) (PublicCode, error) {
 
 	url, err := toURL(uri)
 	if err != nil {
-		return nil, fmt.Errorf("Invalid URL '%s': %w", uri, err)
+		return nil, fmt.Errorf("invalid URL '%s': %w", uri, err)
 	}
 
 	if url.Scheme == "file" {
 		stream, err = os.Open(url.Path)
 		if err != nil {
-			return nil, fmt.Errorf("Can't open file '%s': %w", url.Path, err)
+			return nil, fmt.Errorf("can't open file '%s': %w", url.Path, err)
 		}
 	} else {
 		resp, err := http.Get(uri)
 		if err != nil {
-			return nil, fmt.Errorf("Can't GET '%s': %w", uri, err)
+			return nil, fmt.Errorf("can't GET '%s': %w", uri, err)
 		}
-		defer resp.Body.Close()
+		defer func() {
+			_ = resp.Body.Close()
+		}()
 
 		stream = resp.Body
 	}
@@ -314,7 +315,7 @@ func getNodes(key string, node *yaml.Node) (*yaml.Node, *yaml.Node) {
 }
 
 func getPositionInFile(key string, node yaml.Node) (int, int) {
-	var n *yaml.Node = &node
+	n := &node
 
 	keys := strings.Split(key, ".")
 	for _, path := range keys[:len(keys)-1] {
@@ -340,7 +341,7 @@ func getPositionInFile(key string, node yaml.Node) (int, int) {
 // getKeyAtLine returns the key name at line "line" for the YAML document
 // represented at parentNode.
 func getKeyAtLine(parentNode yaml.Node, line int, path string) string {
-	var key = path
+	key := path
 
 	for i, currNode := range parentNode.Content {
 		// If this node is a mapping and the index is odd it means

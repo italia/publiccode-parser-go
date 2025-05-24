@@ -5,9 +5,8 @@ import (
 	"net/url"
 
 	"github.com/alranel/go-vcsurl/v2"
-	spdxValidator "github.com/kyoh86/go-spdx/spdx"
-
 	urlutil "github.com/italia/publiccode-parser-go/v4/internal"
+	spdxValidator "github.com/kyoh86/go-spdx/spdx"
 )
 
 type validateFn func(publiccode PublicCode, parser Parser, network bool) error
