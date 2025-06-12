@@ -44,9 +44,6 @@ maintenance:
   # Should NOT validate: type is missing
   # type: "community"
 
-  contacts:
-    - name: Francesco Rossi
-
 localisation:
   localisationReady: true
   availableLanguages:

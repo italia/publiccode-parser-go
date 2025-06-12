@@ -458,16 +458,31 @@ func TestInvalidTestcasesV0(t *testing.T) {
 		// maintenance
 		// maintenance.*
 		"maintenance_type_missing.yml": ValidationResults{
-			ValidationError{"maintenance.type", "required", 47, 3},
+			ValidationError{"maintenance.type", "required", 43, 13},
 		},
 		"maintenance_type_invalid.yml": ValidationResults{
 			ValidationError{"maintenance.type", "must be one of the following: internal contract community none", 45, 3},
 		},
+		"maintenance_contractors_excluded_if_type_community.yml": ValidationResults{
+			ValidationError{"maintenance.contractors", "must not be present unless Type contract", 47, 3},
+		},
+		"maintenance_contractors_excluded_if_type_internal.yml": ValidationResults{
+			ValidationError{"maintenance.contractors", "must not be present unless Type contract", 47, 3},
+		},
+		"maintenance_contractors_excluded_if_type_none.yml": ValidationResults{
+			ValidationError{"maintenance.contractors", "must not be present unless Type contract", 47, 3},
+		},
 		"maintenance_contacts_missing_with_type_community.yml": ValidationResults{
-			ValidationError{"maintenance.contacts", "required_if Type community", 44, 3},
+			ValidationError{"maintenance.contacts", "must be present if Type community", 44, 3},
 		},
 		"maintenance_contacts_missing_with_type_internal.yml": ValidationResults{
-			ValidationError{"maintenance.contacts", "required_if Type internal", 44, 3},
+			ValidationError{"maintenance.contacts", "must be present if Type internal", 44, 3},
+		},
+		"maintenance_contacts_excluded_if_type_contract.yml": ValidationResults{
+			ValidationError{"maintenance.contacts", "must not be present unless Type is community or internal Type internal", 51, 3},
+		},
+		"maintenance_contacts_excluded_if_type_none.yml": ValidationResults{
+			ValidationError{"maintenance.contacts", "must not be present unless Type is community or internal Type internal", 46, 3},
 		},
 		"maintenance_contacts_name_missing.yml": ValidationResults{
 			ValidationError{"maintenance.contacts[0].name", "required", 0, 0},
@@ -476,11 +491,11 @@ func TestInvalidTestcasesV0(t *testing.T) {
 			ValidationError{"maintenance.contacts[0].email", "must be a valid email", 0, 0},
 		},
 		"maintenance_contractors_missing_with_type_contract.yml": ValidationResults{
-			ValidationError{"maintenance.contractors", "required_if Type contract", 44, 3},
+			ValidationError{"maintenance.contractors", "must be present if Type contract", 44, 3},
 		},
 		"maintenance_contractors_invalid_type.yml": ValidationResults{
 			ValidationError{"maintenance.contractors", "wrong type for this field", 47, 1},
-			ValidationError{"maintenance.contractors", "required_if Type contract", 47, 3},
+			ValidationError{"maintenance.contractors", "must be present if Type contract", 47, 3},
 		},
 		"maintenance_contractors_name_missing.yml": ValidationResults{
 			ValidationError{"maintenance.contractors[0].name", "required", 0, 0},
@@ -734,5 +749,24 @@ func TestToURL(t *testing.T) {
 		if *u != *out {
 			t.Errorf("%s: expected %v got %v", in, out, u)
 		}
+	}
+}
+
+func TestInvalidContractorsMustBeIgnored(t *testing.T) {
+	expected := error(
+		ValidationResults{
+			ValidationError{"maintenance.contractors", "must not be present unless Type contract", 47, 3},
+		},
+	)
+
+	parser, errParser := NewParser(ParserConfig{DisableNetwork: true})
+	if errParser != nil {
+		t.Errorf("Can't create Parser: %v", errParser)
+	}
+	var file = "testdata/v0/invalid/maintenance_contractors_excluded_if_type_community.yml"
+	_, err := parser.Parse(file)
+
+	if err != nil && expected != nil && err.Error() != expected.Error() {
+		t.Errorf("Expected contractors excluded_if error")
 	}
 }

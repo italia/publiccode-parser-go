@@ -193,6 +193,9 @@ func (p *Parser) ParseStream(in io.Reader) (PublicCode, error) {
 			"iso3166_1_alpha2_lowercase": "must be a valid lowercase ISO 3166-1 alpha-2 two-letter country code",
 			"bcp47_language_tag":         "must be a valid BCP 47 language",
 			"bcp47_keys":                 "must use a valid BCP 47 language",
+			"required_if":                "must be present if",
+			"excluded_unless":            "must not be present unless",
+			"excluded_unless=Type community|excluded_unless=Type internal": "must not be present unless Type is community or internal",
 		}
 		for _, err := range err.(validator.ValidationErrors) {
 			var sb strings.Builder

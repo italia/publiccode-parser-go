@@ -50,11 +50,7 @@ type PublicCodeV0 struct {
 		AuthorsFile        *string `yaml:"authorsFile,omitempty"`
 	} `yaml:"legal"`
 
-	Maintenance struct {
-		Type        string         `yaml:"type" validate:"required,oneof=internal contract community none"`
-		Contractors []ContractorV0 `yaml:"contractors,omitempty" validate:"required_if=Type contract,dive"`
-		Contacts    []ContactV0    `yaml:"contacts,omitempty" validate:"required_if=Type community,required_if=Type internal,dive"`
-	} `yaml:"maintenance"`
+	Maintenance MaintenanceV0 `yaml:"maintenance"`
 
 	Localisation struct {
 		LocalisationReady  *bool    `yaml:"localisationReady" validate:"required"`
@@ -82,6 +78,12 @@ type DescV0 struct {
 	Screenshots      []string  `yaml:"screenshots,omitempty"`
 	Videos           []*URL    `yaml:"videos,omitempty" validate:"dive,omitnil,url_http_url"`
 	Awards           []string  `yaml:"awards,omitempty"`
+}
+
+type MaintenanceV0 struct {
+	Type        string         `yaml:"type" validate:"required,oneof=internal contract community none"`
+	Contractors []ContractorV0 `yaml:"contractors,omitempty" validate:"excluded_unless=Type contract,required_if=Type contract,dive"`
+	Contacts    []ContactV0    `yaml:"contacts,omitempty" validate:"excluded_unless=Type community|excluded_unless=Type internal,required_if=Type community,required_if=Type internal,dive"`
 }
 
 // ContractorV0 is an entity or entities, if any, that are currently contracted for maintaining the software.
