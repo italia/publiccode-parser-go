@@ -464,10 +464,10 @@ func TestInvalidTestcasesV0(t *testing.T) {
 			ValidationError{"maintenance.type", "must be one of the following: internal contract community none", 45, 3},
 		},
 		"maintenance_contacts_missing_with_type_community.yml": ValidationResults{
-			ValidationError{"maintenance.contacts", "required_if Type community", 44, 3},
+			ValidationError{"maintenance.contacts", "must be present if Type community", 44, 3},
 		},
 		"maintenance_contacts_missing_with_type_internal.yml": ValidationResults{
-			ValidationError{"maintenance.contacts", "required_if Type internal", 44, 3},
+			ValidationError{"maintenance.contacts", "must be present if Type internal", 44, 3},
 		},
 		"maintenance_contacts_name_missing.yml": ValidationResults{
 			ValidationError{"maintenance.contacts[0].name", "required", 0, 0},
@@ -476,11 +476,11 @@ func TestInvalidTestcasesV0(t *testing.T) {
 			ValidationError{"maintenance.contacts[0].email", "must be a valid email", 0, 0},
 		},
 		"maintenance_contractors_missing_with_type_contract.yml": ValidationResults{
-			ValidationError{"maintenance.contractors", "required_if Type contract", 44, 3},
+			ValidationError{"maintenance.contractors", "must be present if Type contract", 44, 3},
 		},
 		"maintenance_contractors_invalid_type.yml": ValidationResults{
 			ValidationError{"maintenance.contractors", "wrong type for this field", 47, 1},
-			ValidationError{"maintenance.contractors", "required_if Type contract", 47, 3},
+			ValidationError{"maintenance.contractors", "must be present if Type contract", 47, 3},
 		},
 		"maintenance_contractors_name_missing.yml": ValidationResults{
 			ValidationError{"maintenance.contractors[0].name", "required", 0, 0},
@@ -496,6 +496,15 @@ func TestInvalidTestcasesV0(t *testing.T) {
 		},
 		"maintenance_contractors_website_invalid.yml": ValidationResults{
 			ValidationError{"maintenance.contractors[0].website", "must be an HTTP URL", 0, 0}, // TODO: line number
+		},
+		"maintenance_contractors_when_type_is_community.yml": ValidationResults{
+			ValidationError{"maintenance.contractors", "must not be present unless Type contract", 46, 3},
+		},
+		"maintenance_contractors_when_type_is_internal.yml": ValidationResults{
+			ValidationError{"maintenance.contractors", "must not be present unless Type contract", 46, 3},
+		},
+		"maintenance_contractors_when_type_is_none.yml": ValidationResults{
+			ValidationError{"maintenance.contractors", "must not be present unless Type contract", 46, 3},
 		},
 
 		// localisation
