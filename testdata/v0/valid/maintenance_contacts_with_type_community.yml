@@ -41,8 +41,14 @@ legal:
   license: AGPL-3.0-or-later
 
 maintenance:
-  # Should NOT validate: invalid type
-  type: "no_such_type"
+  type: "community"
+
+  contacts:
+      - name: Dario Bianchi
+        email: "dario.bianchi@fornitore.it"
+
+      - name: Giancarlo Verdi
+        email: "dario.bianchi@fornitore.it"
 
 localisation:
   localisationReady: true

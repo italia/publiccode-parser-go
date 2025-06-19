@@ -1,0 +1,24 @@
+{
+	"name": "PublicCodeGoParser",
+	"runArgs": [
+		"--name=PublicCodeGoParser"
+	],
+	"image": "mcr.microsoft.com/devcontainers/go:1-1.23-bookworm",
+	"features": {
+		"ghcr.io/devcontainers/features/docker-in-docker:2": {
+			"moby": true,
+			"azureDnsAutoDetection": true,
+			"installDockerBuildx": true,
+			"installDockerComposeSwitch": true,
+			"version": "latest",
+			"dockerDashComposeVersion": "v2"
+		}
+	},
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"redhat.vscode-yaml"
+			]
+		}
+	}
+}

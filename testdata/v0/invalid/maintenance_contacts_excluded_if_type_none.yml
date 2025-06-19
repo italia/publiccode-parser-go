@@ -41,8 +41,10 @@ legal:
   license: AGPL-3.0-or-later
 
 maintenance:
-  # Should NOT validate: invalid type
-  type: "no_such_type"
+  type: "none"
+
+  contacts:
+    - name: Francesco Rossi
 
 localisation:
   localisationReady: true

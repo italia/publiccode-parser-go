@@ -41,8 +41,12 @@ legal:
   license: AGPL-3.0-or-later
 
 maintenance:
-  # Should NOT validate: invalid type
-  type: "no_such_type"
+  type: "contract"
+
+  contractors:
+    - name: "Fornitore Privato SPA"
+      website: "https://developers.italia.it"
+      until: "2019-01-01"
 
 localisation:
   localisationReady: true
