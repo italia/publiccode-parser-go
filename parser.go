@@ -15,7 +15,10 @@ import (
 	"unicode/utf8"
 
 	"github.com/alranel/go-vcsurl/v2"
+	"github.com/go-playground/locales/en"
+	ut "github.com/go-playground/universal-translator"
 	"github.com/go-playground/validator/v10"
+	en_translations "github.com/go-playground/validator/v10/translations/en"
 	urlutil "github.com/italia/publiccode-parser-go/v4/internal"
 	publiccodeValidator "github.com/italia/publiccode-parser-go/v4/validators"
 	"gopkg.in/yaml.v3"
@@ -106,7 +109,7 @@ func (p *Parser) ParseStream(in io.Reader) (PublicCode, error) {
 
 	_, version := getNodes("publiccodeYmlVersion", &node)
 	if version == nil {
-		return nil, ValidationResults{newValidationError("publiccodeYmlVersion", "required")}
+		return nil, ValidationResults{newValidationError("publiccodeYmlVersion", "publiccodeYmlVersion is a required field")}
 	}
 	if version.ShortTag() != "!!str" {
 		line, column := getPositionInFile("publiccodeYmlVersion", node)
@@ -176,38 +179,19 @@ func (p *Parser) ParseStream(in io.Reader) (PublicCode, error) {
 
 	validate := publiccodeValidator.New()
 
+	en := en.New()
+	uni := ut.New(en, en)
+
+	trans, _ := uni.GetTranslator("en")
+	_ = en_translations.RegisterDefaultTranslations(validate, trans)
+	_ = publiccodeValidator.RegisterLocalErrorMessages(validate, trans)
+
 	err = validate.Struct(publiccode)
 	if err != nil {
-		tagMap := map[string]string{
-			"gt":                         "must be more than",
-			"oneof":                      "must be one of the following:",
-			"email":                      "must be a valid email",
-			"date":                       "must be a date with format 'YYYY-MM-DD'",
-			"umax":                       "must be less or equal than",
-			"umin":                       "must be more or equal than",
-			"url_http_url":               "must be an HTTP URL",
-			"url_url":                    "must be a valid URL",
-			"is_category_v0":             "must be a valid category",
-			"is_scope_v0":                "must be a valid scope",
-			"is_italian_ipa_code":        "must be a valid Italian Public Administration Code (iPA)",
-			"iso3166_1_alpha2_lowercase": "must be a valid lowercase ISO 3166-1 alpha-2 two-letter country code",
-			"bcp47_language_tag":         "must be a valid BCP 47 language",
-			"bcp47_keys":                 "must use a valid BCP 47 language",
-		}
 		for _, err := range err.(validator.ValidationErrors) {
 			var sb strings.Builder
 
-			tag, ok := tagMap[err.ActualTag()]
-			if !ok {
-				tag = err.ActualTag()
-			}
-
-			sb.WriteString(tag)
-
-			// condition parameters, e.g. oneof=red blue -> red blue
-			if err.Param() != "" {
-				sb.WriteString(" " + err.Param())
-			}
+			sb.WriteString(err.Translate(trans))
 
 			// TODO: find a cleaner way
 			key := strings.Replace(
