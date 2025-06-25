@@ -121,7 +121,7 @@ func TestInvalidTestcasesV0_NoNetwork(t *testing.T) {
 		// landingURL
 		"landingURL_invalid.yml": ValidationResults{
 			// Just a syntax check here, no check for reachability as network is disabled
-			ValidationError{"landingURL", "must be an HTTP URL", 8, 1},
+			ValidationError{"landingURL", "landingURL must be an HTTP URL", 8, 1},
 		},
 
 		// monochromeLogo
@@ -147,7 +147,7 @@ func TestInvalidTestcasesV0_NoNetwork(t *testing.T) {
 func TestInvalidTestcasesV0(t *testing.T) {
 	expected := map[string]error{
 		// publiccodeYmlVersion
-		"publiccodeYmlVersion_missing.yml": ValidationResults{ValidationError{"publiccodeYmlVersion", "required", 0, 0}},
+		"publiccodeYmlVersion_missing.yml": ValidationResults{ValidationError{"publiccodeYmlVersion", "publiccodeYmlVersion is a required field", 0, 0}},
 		"publiccodeYmlVersion_invalid.yml": ValidationResults{
 			ValidationError{
 				"publiccodeYmlVersion",
@@ -161,26 +161,26 @@ func TestInvalidTestcasesV0(t *testing.T) {
 		},
 
 		// name
-		"name_missing.yml": ValidationResults{ValidationError{"name", "required", 1, 1}},
-		"name_nil.yml":     ValidationResults{ValidationError{"name", "required", 4, 1}},
+		"name_missing.yml": ValidationResults{ValidationError{"name", "name is a required field", 1, 1}},
+		"name_nil.yml":     ValidationResults{ValidationError{"name", "name is a required field", 4, 1}},
 		"name_wrong_type.yml": ValidationResults{
 			ValidationError{"name", "wrong type for this field", 4, 1},
-			ValidationError{"name", "required", 4, 1},
+			ValidationError{"name", "name is a required field", 4, 1},
 		},
 
 		// applicationSuite
 		"applicationSuite_wrong_type.yml": ValidationResults{ValidationError{"applicationSuite", "wrong type for this field", 4, 1}},
 
 		// url
-		"url_missing.yml": ValidationResults{ValidationError{"url", "required", 1, 1}},
+		"url_missing.yml": ValidationResults{ValidationError{"url", "url is a required field", 1, 1}},
 		"url_wrong_type.yml": ValidationResults{
 			ValidationError{"url", "wrong type for this field", 6, 1},
-			ValidationError{"url", "must be a valid URL", 6, 1},
+			ValidationError{"url", "url must be a valid URL", 6, 1},
 			ValidationError{"url", "'' not reachable: missing URL scheme", 6, 1},
 			ValidationError{"url", "is not a valid code repository", 6, 1},
 		},
 		"url_invalid.yml": ValidationResults{
-			ValidationError{"url", "must be a valid URL", 6, 1},
+			ValidationError{"url", "url must be a valid URL", 6, 1},
 			ValidationError{"url", "'foobar' not reachable: missing URL scheme", 6, 1},
 			ValidationError{"url", "is not a valid code repository", 6, 1},
 		},
@@ -188,11 +188,11 @@ func TestInvalidTestcasesV0(t *testing.T) {
 		// landingURL
 		"landingURL_wrong_type.yml": ValidationResults{
 			ValidationError{"landingURL", "wrong type for this field", 8, 1},
-			ValidationError{"landingURL", "must be an HTTP URL", 8, 1},
+			ValidationError{"landingURL", "landingURL must be an HTTP URL", 8, 1},
 			ValidationError{"landingURL", "'' not reachable: missing URL scheme", 8, 1},
 		},
 		"landingURL_invalid.yml": ValidationResults{
-			ValidationError{"landingURL", "must be an HTTP URL", 8, 1},
+			ValidationError{"landingURL", "landingURL must be an HTTP URL", 8, 1},
 			ValidationError{"landingURL", "'???' not reachable: missing URL scheme", 8, 1},
 		},
 
@@ -213,16 +213,16 @@ func TestInvalidTestcasesV0(t *testing.T) {
 		},
 
 		// releaseDate
-		"releaseDate_empty.yml": ValidationResults{ValidationError{"releaseDate", "must be a date with format 'YYYY-MM-DD'", 8, 1}},
+		"releaseDate_empty.yml": ValidationResults{ValidationError{"releaseDate", "releaseDate must be a date with format 'YYYY-MM-DD'", 8, 1}},
 		"releaseDate_wrong_type.yml": ValidationResults{
 			ValidationError{"releaseDate", "wrong type for this field", 8, 1},
 			// FIXME: This isn't ideal, but it's a bug of the yaml library that deserializes
 			// the field as a pointer to "" (two double quotes), instead of leaving it as nil.
 			// It's still technically correct validation-wise.
-			ValidationError{"releaseDate", "must be a date with format 'YYYY-MM-DD'", 8, 1},
+			ValidationError{"releaseDate", "releaseDate must be a date with format 'YYYY-MM-DD'", 8, 1},
 		},
 		"releaseDate_invalid.yml": ValidationResults{
-			ValidationError{"releaseDate", "must be a date with format 'YYYY-MM-DD'", 8, 1},
+			ValidationError{"releaseDate", "releaseDate must be a date with format 'YYYY-MM-DD'", 8, 1},
 		},
 
 		// logo
@@ -273,23 +273,23 @@ func TestInvalidTestcasesV0(t *testing.T) {
 		},
 
 		// platforms
-		"platforms_missing.yml": ValidationResults{ValidationError{"platforms", "must be more than 0", 1, 1}},
+		"platforms_missing.yml": ValidationResults{ValidationError{"platforms", "platforms must contain more than 0 items", 1, 1}},
 		"platforms_wrong_type.yml": ValidationResults{
 			ValidationError{"platforms", "wrong type for this field", 9, 1},
-			ValidationError{"platforms", "must be more than 0", 9, 1},
+			ValidationError{"platforms", "platforms must contain more than 0 items", 9, 1},
 		},
 
 		// categories
 		"categories_missing.yml": ValidationResults{
-			ValidationError{"categories", "required", 1, 1},
+			ValidationError{"categories", "categories is a required field", 1, 1},
 		},
 		"categories_nil.yml": ValidationResults{
-			ValidationError{"categories", "required", 12, 1},
+			ValidationError{"categories", "categories is a required field", 12, 1},
 		},
 		"categories_empty.yml": ValidationResults{
-			ValidationError{"categories", "must be more than 0", 12, 1},
+			ValidationError{"categories", "categories must contain more than 0 items", 12, 1},
 		},
-		"categories_invalid.yml": ValidationResults{ValidationError{"categories[0]", "must be a valid category", 1, 1}},
+		"categories_invalid.yml": ValidationResults{ValidationError{"categories[0]", "categories[0] must be a valid category (see https://github.com/publiccodeyml/publiccode.yml/blob/main/docs/standard/categories-list.rst)", 1, 1}},
 
 		// usedBy
 		"usedBy_wrong_type.yml": ValidationResults{
@@ -298,37 +298,37 @@ func TestInvalidTestcasesV0(t *testing.T) {
 
 		// roadmap
 		"roadmap_invalid.yml": ValidationResults{
-			ValidationError{"roadmap", "must be an HTTP URL", 4, 1},
+			ValidationError{"roadmap", "roadmap must be an HTTP URL", 4, 1},
 			ValidationError{"roadmap", "'foobar' not reachable: missing URL scheme", 4, 1},
 		},
 		"roadmap_wrong_type.yml": ValidationResults{
 			ValidationError{"roadmap", "wrong type for this field", 4, 1},
-			ValidationError{"roadmap", "must be an HTTP URL", 4, 1},
+			ValidationError{"roadmap", "roadmap must be an HTTP URL", 4, 1},
 			ValidationError{"roadmap", "'' not reachable: missing URL scheme", 4, 1},
 		},
 
 		// developmentStatus
 		"developmentStatus_missing.yml": ValidationResults{
-			ValidationError{"developmentStatus", "required", 1, 1},
+			ValidationError{"developmentStatus", "developmentStatus is a required field", 1, 1},
 		},
 		"developmentStatus_invalid.yml": ValidationResults{
-			ValidationError{"developmentStatus", "must be one of the following: concept development beta stable obsolete", 16, 1},
+			ValidationError{"developmentStatus", "developmentStatus must be one of the following: \"concept\", \"development\", \"beta\", \"stable\" or \"obsolete\"", 16, 1},
 		},
 		"developmentStatus_wrong_type.yml": ValidationResults{
 			ValidationError{"developmentStatus", "wrong type for this field", 16, 1},
-			ValidationError{"developmentStatus", "required", 16, 1},
+			ValidationError{"developmentStatus", "developmentStatus is a required field", 16, 1},
 		},
 
 		// softwareType
 		"softwareType_missing.yml": ValidationResults{
-			ValidationError{"softwareType", "required", 1, 1},
+			ValidationError{"softwareType", "softwareType is a required field", 1, 1},
 		},
 		"softwareType_invalid.yml": ValidationResults{
-			ValidationError{"softwareType", "must be one of the following: standalone/mobile standalone/iot standalone/desktop standalone/web standalone/backend standalone/other addon library configurationFiles", 17, 1},
+			ValidationError{"softwareType", "softwareType must be one of the following: \"standalone/mobile\", \"standalone/iot\", \"standalone/desktop\", \"standalone/web\", \"standalone/backend\", \"standalone/other\", \"addon\", \"library\" or \"configurationFiles\"", 17, 1},
 		},
 		"softwareType_wrong_type.yml": ValidationResults{
 			ValidationError{"softwareType", "wrong type for this field", 17, 1},
-			ValidationError{"softwareType", "required", 17, 1},
+			ValidationError{"softwareType", "softwareType is a required field", 17, 1},
 		},
 
 		// intendedAudience
@@ -337,20 +337,20 @@ func TestInvalidTestcasesV0(t *testing.T) {
 			ValidationError{"intendedAudience", "wrong type for this field", 18, 1},
 		},
 		"intendedAudience_countries_invalid_country.yml": ValidationResults{
-			ValidationError{"intendedAudience.countries[1]", "must be a valid lowercase ISO 3166-1 alpha-2 two-letter country code", 18, 5},
-			ValidationError{"intendedAudience.countries[2]", "must be a valid lowercase ISO 3166-1 alpha-2 two-letter country code", 18, 5},
+			ValidationError{"intendedAudience.countries[1]", "countries[1] must be a valid lowercase ISO 3166-1 alpha-2 two-letter country code", 18, 5},
+			ValidationError{"intendedAudience.countries[2]", "countries[2] must be a valid lowercase ISO 3166-1 alpha-2 two-letter country code", 18, 5},
 		},
 		"intendedAudience_countries_wrong_type.yml": ValidationResults{
 			ValidationError{"intendedAudience.countries", "wrong type for this field", 19, 1},
 		},
 		"intendedAudience_unsupportedCountries_invalid_country.yml": ValidationResults{
-			ValidationError{"intendedAudience.unsupportedCountries[0]", "must be a valid lowercase ISO 3166-1 alpha-2 two-letter country code", 18, 5},
+			ValidationError{"intendedAudience.unsupportedCountries[0]", "unsupportedCountries[0] must be a valid lowercase ISO 3166-1 alpha-2 two-letter country code", 18, 5},
 		},
 		"intendedAudience_unsupportedCountries_wrong_type.yml": ValidationResults{
 			ValidationError{"intendedAudience.unsupportedCountries", "wrong type for this field", 19, 1},
 		},
 		"intendedAudience_scope_invalid_scope.yml": ValidationResults{
-			ValidationError{"intendedAudience.scope[0]", "must be a valid scope", 18, 5},
+			ValidationError{"intendedAudience.scope[0]", "scope[0] must be a valid scope (see https://github.com/publiccodeyml/publiccode.yml/blob/main/docs/standard/scope-list.rst)", 18, 5},
 		},
 		"intendedAudience_scope_wrong_type.yml": ValidationResults{
 			ValidationError{"intendedAudience.scope", "wrong type for this field", 19, 1},
@@ -359,55 +359,55 @@ func TestInvalidTestcasesV0(t *testing.T) {
 		// description
 		// description.*
 		"description_invalid_language.yml": ValidationResults{
-			ValidationError{"description", "must use a valid BCP 47 language", 18, 1},
+			ValidationError{"description", "description must be a valid BCP 47 language", 18, 1},
 		},
 		"description_en_features_missing.yml": ValidationResults{
-			ValidationError{"description.en.features", "must be more than 0", 22, 5},
+			ValidationError{"description.en.features", "features must contain more than 0 items", 22, 5},
 		},
 		"description_en_features_empty.yml": ValidationResults{
-			ValidationError{"description.en.features", "must be more than 0", 39, 5},
+			ValidationError{"description.en.features", "features must contain more than 0 items", 39, 5},
 		},
 		"description_en_localisedName_wrong_type.yml": ValidationResults{
 			ValidationError{"description.en.localisedName", "wrong type for this field", 21, 1},
 		},
 		"description_en_genericName_too_long.yml": ValidationResults{
-			ValidationError{"description.en.genericName", "must be less or equal than 35", 22, 5},
+			ValidationError{"description.en.genericName", "genericName must be a maximum of 35 characters in length", 22, 5},
 			ValidationWarning{"description.en.genericName", "This key is DEPRECATED and will be removed in the future", 22, 5},
 		},
 		"description_en_shortDescription_missing.yml": ValidationResults{
-			ValidationError{"description.en.shortDescription", "required", 20, 5},
+			ValidationError{"description.en.shortDescription", "shortDescription is a required field", 20, 5},
 		},
 		"description_en_shortDescription_too_short.yml": ValidationResults{
-			ValidationError{"description.en.shortDescription", "required", 20, 5},
+			ValidationError{"description.en.shortDescription", "shortDescription is a required field", 20, 5},
 		},
 		"description_en_longDescription_missing.yml": ValidationResults{
-			ValidationError{"description.en.longDescription", "required", 20, 5},
+			ValidationError{"description.en.longDescription", "longDescription is a required field", 20, 5},
 		},
 		"description_en_longDescription_too_long.yml": ValidationResults{
-			ValidationError{"description.en.longDescription", "must be less or equal than 10000", 27, 5},
+			ValidationError{"description.en.longDescription", "longDescription must be a maximum of 10000 characters in length", 27, 5},
 		},
 		"description_en_longDescription_too_short.yml": ValidationResults{
-			ValidationError{"description.en.longDescription", "must be more or equal than 150", 27, 5},
+			ValidationError{"description.en.longDescription", "longDescription must be at least 150 characters in length", 27, 5},
 		},
 		"description_en_longDescription_too_short_grapheme_clusters.yml": ValidationResults{
-			ValidationError{"description.en.longDescription", "must be more or equal than 150", 28, 5},
+			ValidationError{"description.en.longDescription", "longDescription must be at least 150 characters in length", 28, 5},
 		},
 		"description_en_documentation_invalid.yml": ValidationResults{
-			ValidationError{"description.en.documentation", "must be an HTTP URL", 25, 5},
+			ValidationError{"description.en.documentation", "documentation must be an HTTP URL", 25, 5},
 			ValidationError{"description.en.documentation", "'not_a_url' not reachable: missing URL scheme", 25, 5},
 		},
 		"description_en_documentation_wrong_type.yml": ValidationResults{
 			ValidationError{"description.en.documentation", "wrong type for this field", 25, 1},
-			ValidationError{"description.en.documentation", "must be an HTTP URL", 25, 5},
+			ValidationError{"description.en.documentation", "documentation must be an HTTP URL", 25, 5},
 			ValidationError{"description.en.documentation", "'' not reachable: missing URL scheme", 25, 5},
 		},
 		"description_en_apiDocumentation_invalid.yml": ValidationResults{
-			ValidationError{"description.en.apiDocumentation", "must be an HTTP URL", 41, 5},
+			ValidationError{"description.en.apiDocumentation", "apiDocumentation must be an HTTP URL", 41, 5},
 			ValidationError{"description.en.apiDocumentation", "'abc' not reachable: missing URL scheme", 41, 5},
 		},
 		"description_en_apiDocumentation_wrong_type.yml": ValidationResults{
 			ValidationError{"description.en.apiDocumentation", "wrong type for this field", 43, 1},
-			ValidationError{"description.en.apiDocumentation", "must be an HTTP URL", 43, 5},
+			ValidationError{"description.en.apiDocumentation", "apiDocumentation must be an HTTP URL", 43, 5},
 			ValidationError{"description.en.apiDocumentation", "'' not reachable: missing URL scheme", 43, 5},
 		},
 		"description_en_screenshots_missing_file.yml": ValidationResults{
@@ -422,7 +422,7 @@ func TestInvalidTestcasesV0(t *testing.T) {
 			ValidationError{"description.en.awards", "wrong type for this field", 40, 1},
 		},
 		"description_en_videos_invalid.yml": ValidationResults{
-			ValidationError{"description.en.videos[0]", "must be an HTTP URL", 20, 5},
+			ValidationError{"description.en.videos[0]", "videos[0] must be an HTTP URL", 20, 5},
 			ValidationError{"description.en.videos[0]", "'ABC' is not a valid video URL supporting oEmbed: invalid oEmbed link: ABC", 20, 5},
 		},
 		"description_en_videos_invalid_oembed.yml": ValidationResults{
@@ -431,12 +431,12 @@ func TestInvalidTestcasesV0(t *testing.T) {
 
 		// legal
 		// legal.*
-		"legal_missing.yml": ValidationResults{ValidationError{"legal.license", "required", 0, 0}},
+		"legal_missing.yml": ValidationResults{ValidationError{"legal.license", "license is a required field", 0, 0}},
 		"legal_wrong_type.yml": ValidationResults{
 			ValidationError{"legal", "wrong type for this field", 46, 1},
-			ValidationError{"legal.license", "required", 46, 8},
+			ValidationError{"legal.license", "license is a required field", 46, 8},
 		},
-		"legal_license_missing.yml": ValidationResults{ValidationError{"legal.license", "required", 41, 3}},
+		"legal_license_missing.yml": ValidationResults{ValidationError{"legal.license", "license is a required field", 41, 3}},
 		"legal_license_invalid.yml": ValidationResults{ValidationError{
 			"legal.license", "invalid license 'Invalid License'", 42, 3,
 		}},
@@ -458,55 +458,55 @@ func TestInvalidTestcasesV0(t *testing.T) {
 		// maintenance
 		// maintenance.*
 		"maintenance_type_missing.yml": ValidationResults{
-			ValidationError{"maintenance.type", "required", 47, 3},
+			ValidationError{"maintenance.type", "type is a required field", 47, 3},
 		},
 		"maintenance_type_invalid.yml": ValidationResults{
-			ValidationError{"maintenance.type", "must be one of the following: internal contract community none", 45, 3},
+			ValidationError{"maintenance.type", "type must be one of the following: \"internal\", \"contract\", \"community\" or \"none\"", 45, 3},
 		},
 		"maintenance_contacts_missing_with_type_community.yml": ValidationResults{
-			ValidationError{"maintenance.contacts", "required_if Type community", 44, 3},
+			ValidationError{"maintenance.contacts", "contacts is a required field when \"type\" is \"community\"", 44, 3},
 		},
 		"maintenance_contacts_missing_with_type_internal.yml": ValidationResults{
-			ValidationError{"maintenance.contacts", "required_if Type internal", 44, 3},
+			ValidationError{"maintenance.contacts", "contacts is a required field when \"type\" is \"internal\"", 44, 3},
 		},
 		"maintenance_contacts_name_missing.yml": ValidationResults{
-			ValidationError{"maintenance.contacts[0].name", "required", 0, 0},
+			ValidationError{"maintenance.contacts[0].name", "name is a required field", 0, 0},
 		},
 		"maintenance_contacts_email_invalid.yml": ValidationResults{
-			ValidationError{"maintenance.contacts[0].email", "must be a valid email", 0, 0},
+			ValidationError{"maintenance.contacts[0].email", "email must be a valid email address", 0, 0},
 		},
 		"maintenance_contractors_missing_with_type_contract.yml": ValidationResults{
-			ValidationError{"maintenance.contractors", "required_if Type contract", 44, 3},
+			ValidationError{"maintenance.contractors", "contractors is a required field when \"type\" is \"contract\"", 44, 3},
 		},
 		"maintenance_contractors_invalid_type.yml": ValidationResults{
 			ValidationError{"maintenance.contractors", "wrong type for this field", 47, 1},
-			ValidationError{"maintenance.contractors", "required_if Type contract", 47, 3},
+			ValidationError{"maintenance.contractors", "contractors is a required field when \"type\" is \"contract\"", 47, 3},
 		},
 		"maintenance_contractors_name_missing.yml": ValidationResults{
-			ValidationError{"maintenance.contractors[0].name", "required", 0, 0},
+			ValidationError{"maintenance.contractors[0].name", "name is a required field", 0, 0},
 		},
 		"maintenance_contractors_until_missing.yml": ValidationResults{
-			ValidationError{"maintenance.contractors[0].until", "required", 0, 0},
+			ValidationError{"maintenance.contractors[0].until", "until is a required field", 0, 0},
 		},
 		"maintenance_contractors_until_invalid.yml": ValidationResults{
-			ValidationError{"maintenance.contractors[0].until", "must be a date with format 'YYYY-MM-DD'", 0, 0},
+			ValidationError{"maintenance.contractors[0].until", "until must be a date with format 'YYYY-MM-DD'", 0, 0},
 		},
 		"maintenance_contractors_email_invalid.yml": ValidationResults{
-			ValidationError{"maintenance.contractors[0].email", "must be a valid email", 0, 0},
+			ValidationError{"maintenance.contractors[0].email", "email must be a valid email address", 0, 0},
 		},
 		"maintenance_contractors_website_invalid.yml": ValidationResults{
-			ValidationError{"maintenance.contractors[0].website", "must be an HTTP URL", 0, 0}, // TODO: line number
+			ValidationError{"maintenance.contractors[0].website", "website must be an HTTP URL", 0, 0}, // TODO: line number
 		},
 
 		// localisation
 		"localisation_availableLanguages_missing.yml": ValidationResults{
-			ValidationError{"localisation.availableLanguages", "required", 50, 3},
+			ValidationError{"localisation.availableLanguages", "availableLanguages is a required field", 50, 3},
 		},
 		"localisation_availableLanguages_empty.yml": ValidationResults{
-			ValidationError{"localisation.availableLanguages", "must be more than 0", 52, 3},
+			ValidationError{"localisation.availableLanguages", "availableLanguages must contain more than 0 items", 52, 3},
 		},
 		"localisation_availableLanguages_invalid.yml": ValidationResults{
-			ValidationError{"localisation.availableLanguages[0]", "must be a valid BCP 47 language", 50, 3},
+			ValidationError{"localisation.availableLanguages[0]", "availableLanguages[0] must be a valid BCP 47 language", 50, 3},
 		},
 		// TODO: Enable this test when https://github.com/italia/publiccode-parser-go/issues/47
 		// is fixed
@@ -515,13 +515,13 @@ func TestInvalidTestcasesV0(t *testing.T) {
 		// 	ValidationError{"localisation.availableLanguages[0]", "must be a valid BCP 47 language", 56, 3},
 		// },
 		"localisation_localisationReady_missing.yml": ValidationResults{
-			ValidationError{"localisation.localisationReady", "required", 52, 3},
+			ValidationError{"localisation.localisationReady", "localisationReady is a required field", 52, 3},
 		},
 
 		// dependsOn
 		"dependsOn_open_name_wrong_type.yml": ValidationResults{
 			ValidationError{"dependsOn.open.name", "wrong type for this field", 56, 1},
-			ValidationError{"dependsOn.open[0].name", "required", 0, 0},
+			ValidationError{"dependsOn.open[0].name", "name is a required field", 0, 0},
 		},
 		"dependsOn_open_versionMin_wrong_type.yml": ValidationResults{
 			ValidationError{"dependsOn.open.versionMin", "wrong type for this field", 57, 1},
@@ -538,29 +538,29 @@ func TestInvalidTestcasesV0(t *testing.T) {
 
 		// it.*
 		"it_countryExtensionVersion_invalid.yml": ValidationResults{
-			ValidationError{"it.countryExtensionVersion", "must be one of the following: 0.2 1.0", 12, 3},
+			ValidationError{"it.countryExtensionVersion", "countryExtensionVersion must be one of the following: \"0.2\" or \"1.0\"", 12, 3},
 		},
 		"it_riuso_codiceIPA_invalid.yml": ValidationResults{
-			ValidationError{"it.riuso.codiceIPA", "must be a valid Italian Public Administration Code (iPA)", 55, 5},
+			ValidationError{"it.riuso.codiceIPA", "codiceIPA must be a valid Italian Public Administration Code (iPA) (see https://www.indicepa.gov.it/public-services/opendata-read-service.php?dstype=FS&filename=amministrazioni.txt)", 55, 5},
 		},
 
 		// misc
 		"file_encoding.yml": ValidationResults{ValidationError{"", "Invalid UTF-8", 0, 0}},
 		"invalid_yaml.yml":  ValidationResults{ValidationError{"", "yaml: did not find expected key", 18, 1}},
 		"mostly_empty.yml": ValidationResults{
-			ValidationError{"name", "required", 1, 1},
-			ValidationError{"url", "required", 1, 1},
-			ValidationError{"platforms", "must be more than 0", 1, 1},
-			ValidationError{"categories", "required", 1, 1},
-			ValidationError{"developmentStatus", "required", 1, 1},
-			ValidationError{"softwareType", "required", 1, 1},
-			ValidationError{"description[en-US].shortDescription", "required", 0, 0},
-			ValidationError{"description[en-US].longDescription", "required", 0, 0},
-			ValidationError{"description[en-US].features", "must be more than 0", 0, 0},
-			ValidationError{"legal.license", "required", 5, 8},
-			ValidationError{"maintenance.type", "required", 6, 14},
-			ValidationError{"localisation.localisationReady", "required", 4, 15},
-			ValidationError{"localisation.availableLanguages", "required", 4, 15},
+			ValidationError{"name", "name is a required field", 1, 1},
+			ValidationError{"url", "url is a required field", 1, 1},
+			ValidationError{"platforms", "platforms must contain more than 0 items", 1, 1},
+			ValidationError{"categories", "categories is a required field", 1, 1},
+			ValidationError{"developmentStatus", "developmentStatus is a required field", 1, 1},
+			ValidationError{"softwareType", "softwareType is a required field", 1, 1},
+			ValidationError{"description[en-US].shortDescription", "shortDescription is a required field", 0, 0},
+			ValidationError{"description[en-US].longDescription", "longDescription is a required field", 0, 0},
+			ValidationError{"description[en-US].features", "features must contain more than 0 items", 0, 0},
+			ValidationError{"legal.license", "license is a required field", 5, 8},
+			ValidationError{"maintenance.type", "type is a required field", 6, 14},
+			ValidationError{"localisation.localisationReady", "localisationReady is a required field", 4, 15},
+			ValidationError{"localisation.availableLanguages", "availableLanguages is a required field", 4, 15},
 		},
 	}
 
@@ -640,7 +640,7 @@ func TestDecodeValueErrorsRemote(t *testing.T) {
 func TestUrlMissingWithoutPath(t *testing.T) {
 	expected := map[string]error{
 		"url_missing.yml": ValidationResults{
-			ValidationError{"url", "required", 1, 1},
+			ValidationError{"url", "url is a required field", 1, 1},
 		},
 	}
 
