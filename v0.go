@@ -51,9 +51,9 @@ type PublicCodeV0 struct {
 	} `yaml:"legal"`
 
 	Maintenance struct {
-		Type        string         `validate:"required,oneof=internal contract community none"           yaml:"type"`
-		Contractors []ContractorV0 `validate:"required_if=Type contract,dive"                            yaml:"contractors,omitempty"`
-		Contacts    []ContactV0    `validate:"required_if=Type community,required_if=Type internal,dive" yaml:"contacts,omitempty"`
+		Type        string         `validate:"required,oneof=internal contract community none"              yaml:"type"`
+		Contractors []ContractorV0 `validate:"required_if=Type contract,excluded_unless=Type contract,dive" yaml:"contractors,omitempty"`
+		Contacts    []ContactV0    `validate:"required_if=Type community,required_if=Type internal,dive"    yaml:"contacts,omitempty"`
 	} `yaml:"maintenance"`
 
 	Localisation struct {

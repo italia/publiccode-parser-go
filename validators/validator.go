@@ -103,6 +103,26 @@ func RegisterLocalErrorMessages(v *validator.Validate, trans ut.Translator) erro
 			translation: "{0} is not a valid MIME type",
 		},
 		{
+			// Override the default error with a more user friendly one
+			//
+			// original:
+			//   foo is an excluded field
+			// overridden:
+			//   foo is not permitted when "bar" is "foobar"
+			tag: "excluded_unless",
+			customRegisFunc: func(ut ut.Translator) error {
+				return ut.Add("excluded_unless", "{0} must not be present unless {1}", true)
+			},
+			customTransFunc: func(ut ut.Translator, fe validator.FieldError) string {
+				parts := strings.Fields(fe.Param())
+
+				t, _ := ut.T("excluded_unless", fe.Field(), fmt.Sprintf("\"%s\" is \"%s\"", strings.ToLower(parts[0]), parts[1]))
+
+				return t
+			},
+			override: true,
+		},
+		{
 			tag: "umax",
 			customRegisFunc: func(ut ut.Translator) error {
 				return ut.Add("umax", "{0} must be a maximum of {1} characters in length", false)

@@ -497,6 +497,15 @@ func TestInvalidTestcasesV0(t *testing.T) {
 		"maintenance_contractors_website_invalid.yml": ValidationResults{
 			ValidationError{"maintenance.contractors[0].website", "website must be an HTTP URL", 0, 0}, // TODO: line number
 		},
+		"maintenance_contractors_when_type_is_community.yml": ValidationResults{
+			ValidationError{"maintenance.contractors", "contractors must not be present unless \"type\" is \"contract\"", 46, 3},
+		},
+		"maintenance_contractors_when_type_is_internal.yml": ValidationResults{
+			ValidationError{"maintenance.contractors", "contractors must not be present unless \"type\" is \"contract\"", 46, 3},
+		},
+		"maintenance_contractors_when_type_is_none.yml": ValidationResults{
+			ValidationError{"maintenance.contractors", "contractors must not be present unless \"type\" is \"contract\"", 46, 3},
+		},
 
 		// localisation
 		"localisation_availableLanguages_missing.yml": ValidationResults{
