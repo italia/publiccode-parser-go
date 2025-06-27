@@ -163,7 +163,7 @@ func (p *Parser) ParseStream(in io.Reader) (PublicCode, error) {
 		publiccode = v0
 	}
 
-	// When publiccode.yml v1.x is release the code will look
+	// When publiccode.yml v1.x is released, the code will look
 	// like this:
 	// } else {
 	// 	v1 := PublicCodeV1{}
