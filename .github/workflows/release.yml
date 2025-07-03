@@ -31,9 +31,9 @@ jobs:
           echo "${DOCKERHUB_TOKEN}" | docker login --username "${DOCKERHUB_USERNAME}" --password-stdin
       -
         name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v2
+        uses: goreleaser/goreleaser-action@v6
         with:
-          version: v1.5.0
-          args: release --rm-dist
+          version: v2.10.2
+          args: release --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
