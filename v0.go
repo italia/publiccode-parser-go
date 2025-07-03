@@ -7,64 +7,64 @@ import (
 
 // PublicCodeV0 defines how a publiccode.yml v0.x is structured
 type PublicCodeV0 struct {
-	PubliccodeYamlVersion string `yaml:"publiccodeYmlVersion" validate:"required,oneof=0.2 0.2.0 0.2.1 0.2.2 0.3 0.3.0 0.4 0.4.0"`
+	PubliccodeYamlVersion string `validate:"required,oneof=0.2 0.2.0 0.2.1 0.2.2 0.3 0.3.0 0.4 0.4.0" yaml:"publiccodeYmlVersion"`
 
-	Name             string `yaml:"name" validate:"required"`
+	Name             string `validate:"required"               yaml:"name"`
 	ApplicationSuite string `yaml:"applicationSuite,omitempty"`
-	URL              *URL   `yaml:"url" validate:"required,url_url"`
-	LandingURL       *URL   `yaml:"landingURL,omitempty" validate:"omitnil,url_http_url"`
+	URL              *URL   `validate:"required,url_url"       yaml:"url"`
+	LandingURL       *URL   `validate:"omitnil,url_http_url"   yaml:"landingURL,omitempty"`
 
 	IsBasedOn       UrlOrUrlArray `yaml:"isBasedOn,omitempty"`
 	SoftwareVersion string        `yaml:"softwareVersion,omitempty"`
-	ReleaseDate     *string       `yaml:"releaseDate" validate:"omitnil,date"`
+	ReleaseDate     *string       `validate:"omitnil,date"          yaml:"releaseDate"`
 	Logo            string        `yaml:"logo,omitempty"`
 	MonochromeLogo  string        `yaml:"monochromeLogo,omitempty"`
 
 	InputTypes  []string `yaml:"inputTypes,omitempty"`
 	OutputTypes []string `yaml:"outputTypes,omitempty"`
 
-	Platforms []string `yaml:"platforms" validate:"gt=0"`
+	Platforms []string `validate:"gt=0" yaml:"platforms"`
 
-	Categories []string `yaml:"categories" validate:"required,gt=0,dive,is_category_v0"`
+	Categories []string `validate:"required,gt=0,dive,is_category_v0" yaml:"categories"`
 
 	UsedBy *[]string `yaml:"usedBy,omitempty"`
 
-	Roadmap *URL `yaml:"roadmap,omitempty" validate:"omitnil,url_http_url"`
+	Roadmap *URL `validate:"omitnil,url_http_url" yaml:"roadmap,omitempty"`
 
-	DevelopmentStatus string `yaml:"developmentStatus" validate:"required,oneof=concept development beta stable obsolete"`
+	DevelopmentStatus string `validate:"required,oneof=concept development beta stable obsolete" yaml:"developmentStatus"`
 
-	SoftwareType string `yaml:"softwareType" validate:"required,oneof=standalone/mobile standalone/iot standalone/desktop standalone/web standalone/backend standalone/other addon library configurationFiles"`
+	SoftwareType string `validate:"required,oneof=standalone/mobile standalone/iot standalone/desktop standalone/web standalone/backend standalone/other addon library configurationFiles" yaml:"softwareType"`
 
 	IntendedAudience *struct {
-		Scope                *[]string `yaml:"scope,omitempty" validate:"omitempty,dive,is_scope_v0"`
-		Countries            *[]string `yaml:"countries,omitempty" validate:"omitempty,dive,iso3166_1_alpha2_lowercase"`
-		UnsupportedCountries *[]string `yaml:"unsupportedCountries,omitempty" validate:"omitempty,dive,iso3166_1_alpha2_lowercase"`
+		Scope                *[]string `validate:"omitempty,dive,is_scope_v0"                yaml:"scope,omitempty"`
+		Countries            *[]string `validate:"omitempty,dive,iso3166_1_alpha2_lowercase" yaml:"countries,omitempty"`
+		UnsupportedCountries *[]string `validate:"omitempty,dive,iso3166_1_alpha2_lowercase" yaml:"unsupportedCountries,omitempty"`
 	} `yaml:"intendedAudience,omitempty"`
 
-	Description map[string]DescV0 `yaml:"description" validate:"gt=0,bcp47_keys,dive"`
+	Description map[string]DescV0 `validate:"gt=0,bcp47_keys,dive" yaml:"description"`
 
 	Legal struct {
-		License            string  `yaml:"license" validate:"required,is_spdx_expression"`
+		License            string  `validate:"required,is_spdx_expression" yaml:"license"`
 		MainCopyrightOwner *string `yaml:"mainCopyrightOwner,omitempty"`
 		RepoOwner          *string `yaml:"repoOwner,omitempty"`
 		AuthorsFile        *string `yaml:"authorsFile,omitempty"`
 	} `yaml:"legal"`
 
 	Maintenance struct {
-		Type        string         `yaml:"type" validate:"required,oneof=internal contract community none"`
-		Contractors []ContractorV0 `yaml:"contractors,omitempty" validate:"required_if=Type contract,dive"`
-		Contacts    []ContactV0    `yaml:"contacts,omitempty" validate:"required_if=Type community,required_if=Type internal,dive"`
+		Type        string         `validate:"required,oneof=internal contract community none"           yaml:"type"`
+		Contractors []ContractorV0 `validate:"required_if=Type contract,dive"                            yaml:"contractors,omitempty"`
+		Contacts    []ContactV0    `validate:"required_if=Type community,required_if=Type internal,dive" yaml:"contacts,omitempty"`
 	} `yaml:"maintenance"`
 
 	Localisation struct {
-		LocalisationReady  *bool    `yaml:"localisationReady" validate:"required"`
-		AvailableLanguages []string `yaml:"availableLanguages" validate:"required,gt=0,dive,bcp47_language_tag"`
+		LocalisationReady  *bool    `validate:"required"                              yaml:"localisationReady"`
+		AvailableLanguages []string `validate:"required,gt=0,dive,bcp47_language_tag" yaml:"availableLanguages"`
 	} `yaml:"localisation"`
 
 	DependsOn *struct {
-		Open        *[]DependencyV0 `yaml:"open,omitempty" validate:"omitempty,dive"`
-		Proprietary *[]DependencyV0 `yaml:"proprietary,omitempty" validate:"omitempty,dive"`
-		Hardware    *[]DependencyV0 `yaml:"hardware,omitempty" validate:"omitempty,dive"`
+		Open        *[]DependencyV0 `validate:"omitempty,dive" yaml:"open,omitempty"`
+		Proprietary *[]DependencyV0 `validate:"omitempty,dive" yaml:"proprietary,omitempty"`
+		Hardware    *[]DependencyV0 `validate:"omitempty,dive" yaml:"hardware,omitempty"`
 	} `yaml:"dependsOn,omitempty"`
 
 	It ITSectionV0 `yaml:"it"`
@@ -73,36 +73,36 @@ type PublicCodeV0 struct {
 // DescV0 is a general description of the software.
 type DescV0 struct {
 	LocalisedName    *string   `yaml:"localisedName,omitempty"`
-	GenericName      string    `yaml:"genericName" validate:"umax=35"`
-	ShortDescription string    `yaml:"shortDescription" validate:"required,umax=150"`
-	LongDescription  string    `yaml:"longDescription,omitempty" validate:"required,umin=150,umax=10000"`
-	Documentation    *URL      `yaml:"documentation,omitempty" validate:"omitnil,url_http_url"`
-	APIDocumentation *URL      `yaml:"apiDocumentation,omitempty" validate:"omitnil,url_http_url"`
-	Features         *[]string `yaml:"features,omitempty" validate:"gt=0,dive"`
+	GenericName      string    `validate:"umax=35"                      yaml:"genericName"`
+	ShortDescription string    `validate:"required,umax=150"            yaml:"shortDescription"`
+	LongDescription  string    `validate:"required,umin=150,umax=10000" yaml:"longDescription,omitempty"`
+	Documentation    *URL      `validate:"omitnil,url_http_url"         yaml:"documentation,omitempty"`
+	APIDocumentation *URL      `validate:"omitnil,url_http_url"         yaml:"apiDocumentation,omitempty"`
+	Features         *[]string `validate:"gt=0,dive"                    yaml:"features,omitempty"`
 	Screenshots      []string  `yaml:"screenshots,omitempty"`
-	Videos           []*URL    `yaml:"videos,omitempty" validate:"dive,omitnil,url_http_url"`
+	Videos           []*URL    `validate:"dive,omitnil,url_http_url"    yaml:"videos,omitempty"`
 	Awards           []string  `yaml:"awards,omitempty"`
 }
 
 // ContractorV0 is an entity or entities, if any, that are currently contracted for maintaining the software.
 type ContractorV0 struct {
-	Name    string  `yaml:"name" validate:"required"`
-	Email   *string `yaml:"email,omitempty" validate:"omitempty,email"`
-	Website *URL    `yaml:"website,omitempty" validate:"omitnil,url_http_url"`
-	Until   string  `yaml:"until" validate:"required,date"`
+	Name    string  `validate:"required"             yaml:"name"`
+	Email   *string `validate:"omitempty,email"      yaml:"email,omitempty"`
+	Website *URL    `validate:"omitnil,url_http_url" yaml:"website,omitempty"`
+	Until   string  `validate:"required,date"        yaml:"until"`
 }
 
 // ContactV0 is a contact info maintaining the software.
 type ContactV0 struct {
-	Name        string  `yaml:"name" validate:"required"`
-	Email       *string `yaml:"email,omitempty" validate:"omitempty,email"`
+	Name        string  `validate:"required"          yaml:"name"`
+	Email       *string `validate:"omitempty,email"   yaml:"email,omitempty"`
 	Affiliation *string `yaml:"affiliation,omitempty"`
-	Phone       *string `yaml:"phone,omitempty" validate:"omitempty"`
+	Phone       *string `validate:"omitempty"         yaml:"phone,omitempty"`
 }
 
 // DependencyV0 describes system-level dependencies required to install and use this software.
 type DependencyV0 struct {
-	Name       string  `yaml:"name" validate:"required,gt=0"`
+	Name       string  `validate:"required,gt=0"    yaml:"name"`
 	VersionMin *string `yaml:"versionMin,omitempty"`
 	VersionMax *string `yaml:"versionMax,omitempty"`
 	Optional   *bool   `yaml:"optional,omitempty"`
@@ -116,7 +116,7 @@ type DependencyV0 struct {
 // countries, such as declaring compliance with local laws or regulations.
 
 type ITSectionV0 struct {
-	CountryExtensionVersion *string `yaml:"countryExtensionVersion" validate:"omitnil,oneof=0.2 1.0"`
+	CountryExtensionVersion *string `validate:"omitnil,oneof=0.2 1.0" yaml:"countryExtensionVersion"`
 
 	Conforme struct {
 		LineeGuidaDesign        bool `yaml:"lineeGuidaDesign,omitempty"`
@@ -126,7 +126,7 @@ type ITSectionV0 struct {
 	} `yaml:"conforme"`
 
 	Riuso struct {
-		CodiceIPA string `yaml:"codiceIPA,omitempty" validate:"omitempty,is_italian_ipa_code"`
+		CodiceIPA string `validate:"omitempty,is_italian_ipa_code" yaml:"codiceIPA,omitempty"`
 	} `yaml:"riuso,omitempty"`
 
 	Piattaforme struct {

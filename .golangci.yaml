@@ -34,11 +34,9 @@ linters:
 
     # TODO: fix and enable these
     - cyclop
-    - depguard
     - err113
     - errname
     - errorlint
-    - exhaustruct
     - forbidigo
     - forcetypeassert
     - funlen
@@ -52,23 +50,15 @@ linters:
     - ireturn
     - lll
     - nestif
-    - nlreturn
     - perfsprint
-    - prealloc
     - recvcheck
     - revive
-    - tagalign
     - tagliatelle
-    - unused
     - varnamelen
-    - whitespace
     - wrapcheck
-    - wsl
     - gocritic
     - gocyclo
     - noctx
-    - predeclared
-    - unparam
 
   settings:
     wrapcheck:

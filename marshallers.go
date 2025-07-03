@@ -17,6 +17,7 @@ func (u *URL) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	if err != nil {
 		return err
 	}
+
 	*u = (URL)(*urlp)
 
 	return nil
@@ -34,13 +35,16 @@ type UrlOrUrlArray []*URL
 
 func (a *UrlOrUrlArray) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	var multi []*URL
+
 	err := unmarshal(&multi)
 	if err != nil {
 		var single *URL
+
 		err := unmarshal(&single)
 		if err != nil {
 			return err
 		}
+
 		*a = []*URL{single}
 	} else {
 		*a = multi

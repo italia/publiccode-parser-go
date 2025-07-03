@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"net/url"
 	"os"
 	"runtime/debug"
 
@@ -25,6 +24,7 @@ func init() {
 			version = info.Main.Version
 		}
 	}
+
 	if date == "" {
 		date = "(latest)"
 	}
@@ -45,11 +45,13 @@ func main() {
 
 	if *versionPtr {
 		println(version, date)
+
 		return
 	}
 
 	if *helpPtr || len(flag.Args()) < 1 {
 		flag.Usage()
+
 		return
 	}
 
@@ -93,6 +95,7 @@ func main() {
 		if err != nil {
 			fmt.Println(err)
 		}
+
 		if hasValidationErrors(err) {
 			os.Exit(1)
 		}
@@ -119,27 +122,4 @@ func hasValidationErrors(results error) bool {
 	}
 
 	return false
-}
-
-// isValidURL tests a string to determine if it is a well-structured url or not.
-func isValidURL(toTest string) (bool, *url.URL) {
-	_, err := url.ParseRequestURI(toTest)
-	if err != nil {
-		return false, nil
-	}
-
-	u, err := url.Parse(toTest)
-	if err != nil || u.Scheme == "" || u.Host == "" {
-		return false, nil
-	}
-
-	// Check it's an acceptable scheme
-	switch u.Scheme {
-	case "http":
-	case "https":
-	default:
-		return false, nil
-	}
-
-	return true, u
 }

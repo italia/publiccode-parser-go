@@ -32,6 +32,7 @@ func New() *validator.Validate {
 		if name == "-" {
 			return ""
 		}
+
 		return name
 	})
 
@@ -179,6 +180,7 @@ func registrationFunc(tag string, translation string, override bool) validator.R
 	return func(ut ut.Translator) error {
 		if err := ut.Add(tag, translation, override); err != nil {
 			log.Fatalf("Error %s", err.Error())
+
 			return err
 		}
 
