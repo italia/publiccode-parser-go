@@ -52,7 +52,7 @@ type PublicCodeV0 struct {
 
 	Maintenance struct {
 		Type        string         `yaml:"type" validate:"required,oneof=internal contract community none"`
-		Contractors []ContractorV0 `yaml:"contractors,omitempty" validate:"required_if=Type contract,dive"`
+		Contractors []ContractorV0 `yaml:"contractors,omitempty" validate:"required_if=Type contract,excluded_unless=Type contract,dive"`
 		Contacts    []ContactV0    `yaml:"contacts,omitempty" validate:"required_if=Type community,required_if=Type internal,dive"`
 	} `yaml:"maintenance"`
 
