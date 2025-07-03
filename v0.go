@@ -44,7 +44,7 @@ type PublicCodeV0 struct {
 	Description map[string]DescV0 `yaml:"description" validate:"gt=0,bcp47_keys,dive"`
 
 	Legal struct {
-		License            string  `yaml:"license" validate:"required"`
+		License            string  `yaml:"license" validate:"required,is_spdx_expression"`
 		MainCopyrightOwner *string `yaml:"mainCopyrightOwner,omitempty"`
 		RepoOwner          *string `yaml:"repoOwner,omitempty"`
 		AuthorsFile        *string `yaml:"authorsFile,omitempty"`

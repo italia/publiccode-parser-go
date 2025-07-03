@@ -18,6 +18,7 @@ func New() *validator.Validate {
 	_ = validate.RegisterValidation("umin", uMin)
 	_ = validate.RegisterValidation("url_http_url", isHTTPURL)
 	_ = validate.RegisterValidation("url_url", isURL)
+	_ = validate.RegisterValidation("is_spdx_expression", isSPDXExpression)
 
 	_ = validate.RegisterValidation("is_category_v0", isCategoryV0)
 	_ = validate.RegisterValidation("is_scope_v0", isScopeV0)
@@ -124,6 +125,10 @@ func RegisterLocalErrorMessages(v *validator.Validate, trans ut.Translator) erro
 		{
 			tag:         "url_url",
 			translation: "{0} must be a valid URL",
+		},
+		{
+			tag:         "is_spdx_expression",
+			translation: "{0} must be a valid license (see https://spdx.org/licenses)",
 		},
 		{
 			tag:         "is_category_v0",

@@ -438,7 +438,7 @@ func TestInvalidTestcasesV0(t *testing.T) {
 		},
 		"legal_license_missing.yml": ValidationResults{ValidationError{"legal.license", "license is a required field", 41, 3}},
 		"legal_license_invalid.yml": ValidationResults{ValidationError{
-			"legal.license", "invalid license 'Invalid License'", 42, 3,
+			"legal.license", "license must be a valid license (see https://spdx.org/licenses)", 42, 3,
 		}},
 		"legal_authorsFile_missing_file.yml": ValidationResults{
 			ValidationWarning{
