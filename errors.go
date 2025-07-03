@@ -73,9 +73,10 @@ func (e ValidationWarning) MarshalJSON() ([]byte, error) {
 type ValidationResults []error
 
 func (vr ValidationResults) Error() string {
-	var s []string
+	s := make([]string, 0, len(vr))
 	for _, e := range vr {
 		s = append(s, e.Error())
 	}
+
 	return strings.Join(s, "\n")
 }

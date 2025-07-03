@@ -26,6 +26,7 @@ func isIso3166Alpha2Lowercase(fl validator.FieldLevel) bool {
 	if err != nil {
 		return false
 	}
+
 	err = validate.Var(strings.ToUpper(str), "iso3166_1_alpha2")
 
 	return err == nil
@@ -33,16 +34,16 @@ func isIso3166Alpha2Lowercase(fl validator.FieldLevel) bool {
 
 func uMax(fl validator.FieldLevel) bool {
 	length := uniseg.GraphemeClusterCount(fl.Field().String())
-	max, _ := strconv.Atoi(fl.Param())
+	param, _ := strconv.Atoi(fl.Param())
 
-	return length <= max
+	return length <= param
 }
 
 func uMin(fl validator.FieldLevel) bool {
 	length := uniseg.GraphemeClusterCount(fl.Field().String())
-	min, _ := strconv.Atoi(fl.Param())
+	param, _ := strconv.Atoi(fl.Param())
 
-	return length >= min
+	return length >= param
 }
 
 // go-playground/validator doesn't support `http_url` validations on non

@@ -9,7 +9,7 @@ import (
 
 //nolint:unused
 type publicCodeV1 struct {
-	URL *URL `yaml:"url" validate:"required,url_url"`
+	URL *URL `validate:"required,url_url" yaml:"url"`
 }
 
 //nolint:unused

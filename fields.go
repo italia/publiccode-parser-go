@@ -22,6 +22,7 @@ func validateFieldsV0(publiccode PublicCode, parser Parser, network bool) error 
 		if reachable, err := parser.isReachable(*(*url.URL)(publiccodev0.URL), network); !reachable {
 			vr = append(vr, newValidationError("url", "'%s' not reachable: %s", publiccodev0.URL, err.Error()))
 		}
+
 		if !vcsurl.IsRepo((*url.URL)(publiccodev0.URL)) {
 			vr = append(vr, newValidationError("url", "is not a valid code repository"))
 		}
@@ -46,14 +47,15 @@ func validateFieldsV0(publiccode PublicCode, parser Parser, network bool) error 
 	}
 
 	if publiccodev0.Logo != "" {
-		if validLogo, err := parser.validLogo(toCodeHostingURL(publiccodev0.Logo, parser.baseURL), parser, network); !validLogo {
+		if validLogo, err := parser.validLogo(toCodeHostingURL(publiccodev0.Logo, parser.baseURL), network); !validLogo {
 			vr = append(vr, newValidationError("logo", err.Error()))
 		}
 	}
+
 	if publiccodev0.MonochromeLogo != "" {
 		vr = append(vr, ValidationWarning{"monochromeLogo", "This key is DEPRECATED and will be removed in the future", 0, 0})
 
-		if validLogo, err := parser.validLogo(toCodeHostingURL(publiccodev0.MonochromeLogo, parser.baseURL), parser, network); !validLogo {
+		if validLogo, err := parser.validLogo(toCodeHostingURL(publiccodev0.MonochromeLogo, parser.baseURL), network); !validLogo {
 			vr = append(vr, newValidationError("monochromeLogo", err.Error()))
 		}
 	}
@@ -71,6 +73,7 @@ func validateFieldsV0(publiccode PublicCode, parser Parser, network bool) error 
 	if len(publiccodev0.InputTypes) > 0 {
 		vr = append(vr, ValidationWarning{"inputTypes", "This key is DEPRECATED and will be removed in the future", 0, 0})
 	}
+
 	for i, mimeType := range publiccodev0.InputTypes {
 		if !isMIME(mimeType) {
 			vr = append(vr, newValidationError(
@@ -82,6 +85,7 @@ func validateFieldsV0(publiccode PublicCode, parser Parser, network bool) error 
 	if len(publiccodev0.OutputTypes) > 0 {
 		vr = append(vr, ValidationWarning{"outputTypes", "This key is DEPRECATED and will be removed in the future", 0, 0})
 	}
+
 	for i, mimeType := range publiccodev0.OutputTypes {
 		if !isMIME(mimeType) {
 			vr = append(vr, newValidationError(
@@ -110,6 +114,7 @@ func validateFieldsV0(publiccode PublicCode, parser Parser, network bool) error 
 				))
 			}
 		}
+
 		if network && desc.APIDocumentation != nil {
 			if reachable, err := parser.isReachable(*(*url.URL)(desc.APIDocumentation), network); !reachable {
 				vr = append(vr, newValidationError(
@@ -127,6 +132,7 @@ func validateFieldsV0(publiccode PublicCode, parser Parser, network bool) error 
 				))
 			}
 		}
+
 		for i, v := range desc.Videos {
 			_, err := parser.isOEmbedURL((*url.URL)(v))
 			if err != nil {

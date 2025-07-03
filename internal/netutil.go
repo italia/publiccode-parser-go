@@ -19,6 +19,7 @@ func downloadFile(filepath string, url *url.URL, headers map[string]string) erro
 	if err != nil {
 		return err
 	}
+
 	defer func() {
 		_ = out.Close()
 	}()
@@ -47,6 +48,7 @@ func DownloadTmpFile(url *url.URL, headers map[string]string) (string, error) {
 
 	// Download the file in the temp dir.
 	tmpFile := filepath.Join(tmpdir, path.Base(url.Path))
+
 	err = downloadFile(tmpFile, url, headers)
 	if err != nil {
 		return "", err

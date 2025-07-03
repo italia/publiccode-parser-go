@@ -29,8 +29,10 @@ const minLogoWidth = 120
 func getBasicAuth(domain Domain) string {
 	if len(domain.BasicAuth) > 0 {
 		auth := domain.BasicAuth[rand.Intn(len(domain.BasicAuth))]
+
 		return "Basic " + base64.StdEncoding.EncodeToString([]byte(auth))
 	}
+
 	return ""
 }
 
@@ -40,6 +42,7 @@ func stringInSlice(a string, list []string) bool {
 			return true
 		}
 	}
+
 	return false
 }
 
@@ -47,7 +50,9 @@ func isHostInDomain(domain Domain, u string) bool {
 	if len(domain.UseTokenFor) == 0 {
 		return false
 	}
+
 	urlP, _ := url.Parse(u)
+
 	return stringInSlice(urlP.Host, domain.UseTokenFor)
 }
 
@@ -58,6 +63,7 @@ func getHeaderFromDomain(domain Domain, url string) map[string]string {
 	// Set BasicAuth header
 	headers := make(map[string]string)
 	headers["Authorization"] = getBasicAuth(domain)
+
 	return headers
 }
 
@@ -78,6 +84,7 @@ func (p *Parser) isReachable(u url.URL, network bool) (bool, error) {
 	if err != nil {
 		return false, fmt.Errorf("HTTP GET failed for %s: %v", u.String(), err)
 	}
+
 	if r.Status.Code != 200 {
 		return false, fmt.Errorf("HTTP GET returned %d for %s; 200 was expected", r.Status.Code, u.String())
 	}
@@ -143,6 +150,7 @@ func (p *Parser) isImageFile(u url.URL, network bool) (bool, error) {
 	if !slices.Contains(validExt, ext) {
 		return false, fmt.Errorf("invalid file extension for: %s", netutil.DisplayURL(&u))
 	}
+
 	exists := p.fileExists(u, network)
 
 	return exists, fmt.Errorf("no such file : %s", netutil.DisplayURL(&u))
@@ -150,7 +158,7 @@ func (p *Parser) isImageFile(u url.URL, network bool) (bool, error) {
 
 // validLogo returns true if the file path in value is a valid logo.
 // It also checks if the file exists.
-func (p *Parser) validLogo(u url.URL, parser Parser, network bool) (bool, error) {
+func (p *Parser) validLogo(u url.URL, network bool) (bool, error) {
 	validExt := []string{".svg", ".svgz", ".png"}
 	ext := strings.ToLower(filepath.Ext(u.Path))
 
@@ -171,6 +179,7 @@ func (p *Parser) validLogo(u url.URL, parser Parser, network bool) (bool, error)
 		if !network {
 			return true, nil
 		}
+
 		localPath, err = netutil.DownloadTmpFile(&u, getHeaderFromDomain(p.domain, u.String()))
 		if err != nil {
 			return false, err
@@ -193,10 +202,12 @@ func (p *Parser) validLogo(u url.URL, parser Parser, network bool) (bool, error)
 		if err != nil {
 			return false, err
 		}
+
 		image, _, err := image.DecodeConfig(f)
 		if err != nil {
 			return false, err
 		}
+
 		if image.Width < minLogoWidth {
 			return false, fmt.Errorf("invalid image size of %d (min %dpx of width): %s", image.Width, minLogoWidth, netutil.DisplayURL(&u))
 		}

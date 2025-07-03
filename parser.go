@@ -111,6 +111,7 @@ func (p *Parser) ParseStream(in io.Reader) (PublicCode, error) {
 	if version == nil {
 		return nil, ValidationResults{newValidationError("publiccodeYmlVersion", "publiccodeYmlVersion is a required field")}
 	}
+
 	if version.ShortTag() != "!!str" {
 		line, column := getPositionInFile("publiccodeYmlVersion", node)
 
@@ -152,7 +153,9 @@ func (p *Parser) ParseStream(in io.Reader) (PublicCode, error) {
 	}
 
 	var publiccode PublicCode
+
 	var validateFields validateFn
+
 	var decodeResults ValidationResults
 
 	if version.Value[0] == '0' {
@@ -276,6 +279,7 @@ func (p *Parser) Parse(uri string) (PublicCode, error) {
 		if err != nil {
 			return nil, fmt.Errorf("can't GET '%s': %w", uri, err)
 		}
+
 		defer func() {
 			_ = resp.Body.Close()
 		}()
@@ -394,6 +398,7 @@ func decode[T any](data []byte, publiccode *T, node yaml.Node) ValidationResults
 
 	d := yaml.NewDecoder(bytes.NewReader(data))
 	d.KnownFields(true)
+
 	if err := d.Decode(&publiccode); err != nil {
 		switch err := err.(type) {
 		case *yaml.TypeError:
