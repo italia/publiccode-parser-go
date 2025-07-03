@@ -6,7 +6,6 @@ import (
 
 	"github.com/alranel/go-vcsurl/v2"
 	urlutil "github.com/italia/publiccode-parser-go/v4/internal"
-	spdxValidator "github.com/kyoh86/go-spdx/spdx"
 )
 
 type validateFn func(publiccode PublicCode, parser Parser, network bool) error
@@ -18,7 +17,6 @@ func validateFieldsV0(publiccode PublicCode, parser Parser, network bool) error 
 	publiccodev0 := publiccode.(PublicCodeV0)
 
 	var vr ValidationResults
-	var err error
 
 	if publiccodev0.URL != nil && network {
 		if reachable, err := parser.isReachable(*(*url.URL)(publiccodev0.URL), network); !reachable {
@@ -67,16 +65,6 @@ func validateFieldsV0(publiccode PublicCode, parser Parser, network bool) error 
 			u := toCodeHostingURL(*publiccodev0.Legal.AuthorsFile, parser.baseURL)
 
 			vr = append(vr, newValidationError("legal.authorsFile", "'%s' does not exist", urlutil.DisplayURL(&u)))
-		}
-	}
-
-	if publiccodev0.Legal.License != "" {
-		_, err = spdxValidator.Parse(publiccodev0.Legal.License)
-		if err != nil {
-			vr = append(vr, newValidationError(
-				"legal.license",
-				"invalid license '%s'", publiccodev0.Legal.License,
-			))
 		}
 	}
 

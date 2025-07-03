@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/github/go-spdx/v2/spdxexp"
 	"github.com/go-playground/validator/v10"
 	"github.com/rivo/uniseg"
 )
@@ -87,4 +88,10 @@ func bcp47_keys(fl validator.FieldLevel) bool {
 	}
 
 	return true
+}
+
+func isSPDXExpression(fl validator.FieldLevel) bool {
+	valid, _ := spdxexp.ValidateLicenses([]string{fl.Field().String()})
+
+	return valid
 }
