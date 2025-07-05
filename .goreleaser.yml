@@ -49,12 +49,36 @@ changelog:
     - '^test:'
 dockers:
   -
+    use: buildx
     goos: linux
     goarch: amd64
     ids:
       - publiccode-parser
-    skip_push: false
     dockerfile: Dockerfile.goreleaser
     image_templates:
-      - "italia/publiccode-parser-go:latest"
-      - "italia/publiccode-parser-go:{{ .Tag }}"
+      - "italia/publiccode-parser-go:{{ .Tag }}-amd64"
+    build_flag_templates:
+      - "--pull"
+      - "--platform=linux/amd64"
+  -
+    use: buildx
+    goos: linux
+    goarch: arm64
+    ids:
+      - publiccode-parser
+    dockerfile: Dockerfile.goreleaser
+    image_templates:
+      - "italia/publiccode-parser-go:{{ .Tag }}-arm64"
+    build_flag_templates:
+      - "--pull"
+      - "--platform=linux/arm64"
+
+docker_manifests:
+  - name_template: "italia/publiccode-parser-go:latest"
+    image_templates:
+      - "italia/publiccode-parser-go:{{ .Tag }}-amd64"
+      - "italia/publiccode-parser-go:{{ .Tag }}-arm64"
+  - name_template: "italia/publiccode-parser-go:{{ .Tag }}"
+    image_templates:
+      - "italia/publiccode-parser-go:{{ .Tag }}-amd64"
+      - "italia/publiccode-parser-go:{{ .Tag }}-arm64"
