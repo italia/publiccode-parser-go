@@ -876,6 +876,7 @@ EPAP
 EPCAE4NY
 EPNFCMFC
 EPTI
+EQ30LF00
 EQNF6ZOI
 ERDU2BYW
 ERDaSU85
@@ -1856,6 +1857,7 @@ XRKD7FFV
 XSBVCI2X
 XSP47AMQ
 XSS1NXGV
+XSUIG654
 XT1260H2
 XU9NLSWO
 XUGOYUCD
@@ -17608,7 +17610,6 @@ istsc_miic8cs002
 istsc_miic8ct00t
 istsc_miic8cv007
 istsc_miic8cw003
-istsc_miic8cx00v
 istsc_miic8cy00p
 istsc_miic8cz00e
 istsc_miic8d000t
@@ -19918,7 +19919,6 @@ istsc_saic887003
 istsc_saic88800v
 istsc_saic88900p
 istsc_saic89000v
-istsc_saic89100p
 istsc_saic89200e
 istsc_saic89300a
 istsc_saic89600t
