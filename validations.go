@@ -11,7 +11,6 @@ import (
 	"os"
 	"path"
 	"path/filepath"
-	"regexp"
 	"runtime"
 	"slices"
 	"strings"
@@ -214,15 +213,6 @@ func (p *Parser) validLogo(u url.URL, network bool) (bool, error) {
 	}
 
 	return true, nil
-}
-
-// isMIME checks whether the string in input is a well formed MIME or not.
-func isMIME(value string) bool {
-	// Regex for MIME.
-	// Reference: https://github.com/jshttp/media-typer/
-	re := regexp.MustCompile("^ *([A-Za-z0-9][A-Za-z0-9!#$&^_-]{0,126})/([A-Za-z0-9][A-Za-z0-9!#$&^_.+-]{0,126}) *$")
-
-	return re.MatchString(value)
 }
 
 // isOembedURL returns whether the link is from a valid oEmbed provider.

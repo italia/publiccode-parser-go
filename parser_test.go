@@ -256,8 +256,8 @@ func TestInvalidTestcasesV0(t *testing.T) {
 
 		// inputTypes
 		"inputTypes_invalid.yml": ValidationResults{
+			ValidationError{"inputTypes[1]", "inputTypes[1] is not a valid MIME type", 1, 1},
 			ValidationWarning{"inputTypes", "This key is DEPRECATED and will be removed in the future", 14, 1},
-			ValidationError{"inputTypes[1]", "'foobar' is not a MIME type", 1, 1},
 		},
 		"inputTypes_wrong_type.yml": ValidationResults{
 			ValidationError{"inputTypes.foobar", "wrong type for this field", 15, 1},
@@ -265,8 +265,8 @@ func TestInvalidTestcasesV0(t *testing.T) {
 
 		// outputTypes
 		"outputTypes_invalid.yml": ValidationResults{
+			ValidationError{"outputTypes[1]", "outputTypes[1] is not a valid MIME type", 1, 1},
 			ValidationWarning{"outputTypes", "This key is DEPRECATED and will be removed in the future", 14, 1},
-			ValidationError{"outputTypes[1]", "'foobar' is not a MIME type", 1, 1},
 		},
 		"outputTypes_wrong_type.yml": ValidationResults{
 			ValidationError{"outputTypes.foobar", "wrong type for this field", 15, 1},
@@ -593,6 +593,10 @@ func TestValidWithWarningsTestcasesV0(t *testing.T) {
 		},
 		"valid.minimal.v0.3.yml": ValidationResults{
 			ValidationWarning{"publiccodeYmlVersion", "v0.3 is not the latest version, use '0.4.0'. Parsing this file as v0.4.0.", 1, 1},
+		},
+		"valid.mime_types.yml": ValidationResults{
+			ValidationWarning{"inputTypes", "This key is DEPRECATED and will be removed in the future", 48, 1},
+			ValidationWarning{"outputTypes", "This key is DEPRECATED and will be removed in the future", 50, 1},
 		},
 	}
 
