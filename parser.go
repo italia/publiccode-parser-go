@@ -10,7 +10,6 @@ import (
 	"path/filepath"
 	"regexp"
 	"slices"
-	"strconv"
 	"strings"
 	"unicode/utf8"
 
@@ -19,9 +18,10 @@ import (
 	ut "github.com/go-playground/universal-translator"
 	"github.com/go-playground/validator/v10"
 	en_translations "github.com/go-playground/validator/v10/translations/en"
+	"github.com/goccy/go-yaml"
+	"github.com/goccy/go-yaml/ast"
 	urlutil "github.com/italia/publiccode-parser-go/v4/internal"
 	publiccodeValidator "github.com/italia/publiccode-parser-go/v4/validators"
-	"gopkg.in/yaml.v3"
 )
 
 type ParserConfig struct {
@@ -94,61 +94,53 @@ func (p *Parser) ParseStream(in io.Reader) (PublicCode, error) {
 
 	// First, decode the YAML into yaml.Node so we can access line and column
 	// numbers.
-	var node yaml.Node
+	// var node yaml.Node
+	//
+	// d := yaml.NewDecoder(bytes.NewReader(b))
+	// d.KnownFields(true)
+	// err = d.Decode(&node)
+	//
+	// if err == nil && len(node.Content) > 0 {
+	// 	node = *node.Content[0]
+	// } else {
+	// 	// YAML is malformed
+	// 	return nil, ValidationResults{toValidationError(err.Error(), nil)}
+	// }
+	//
+	path, _ := yaml.PathString("$.publiccodeYmlVersion")
 
-	d := yaml.NewDecoder(bytes.NewReader(b))
-	d.KnownFields(true)
-	err = d.Decode(&node)
-
-	if err == nil && len(node.Content) > 0 {
-		node = *node.Content[0]
-	} else {
-		// YAML is malformed
-		return nil, ValidationResults{toValidationError(err.Error(), nil)}
-	}
-
-	_, version := getNodes("publiccodeYmlVersion", &node)
-	if version == nil {
+	var node ast.Node
+	if node, err = path.ReadNode(bytes.NewReader(b)); err != nil {
 		return nil, ValidationResults{newValidationError("publiccodeYmlVersion", "publiccodeYmlVersion is a required field")}
 	}
+	version := node.GetToken().Value
 
-	if version.ShortTag() != "!!str" {
-		line, column := getPositionInFile("publiccodeYmlVersion", node)
+	var ve ValidationResults
 
-		return nil, ValidationResults{ValidationError{
-			Key:         "publiccodeYmlVersion",
-			Description: "wrong type for this field",
-			Line:        line,
-			Column:      column,
-		}}
-	}
-
-	if !slices.Contains(SupportedVersions, version.Value) {
+	if !slices.Contains(SupportedVersions, version) {
 		return nil, ValidationResults{
 			newValidationError("publiccodeYmlVersion", fmt.Sprintf(
 				"unsupported version: '%s'. Supported versions: %s",
-				version.Value,
+				version,
 				strings.Join(SupportedVersions, ", "),
 			)),
 		}
 	}
 
-	var ve ValidationResults
-
-	if slices.Contains(SupportedVersions, version.Value) && !strings.HasPrefix(version.Value, "0.4") {
+	if slices.Contains(SupportedVersions, version) && !strings.HasPrefix(version, "0.4") {
+		position := node.GetToken().Position
 		latestVersion := SupportedVersions[len(SupportedVersions)-1]
-		line, column := getPositionInFile("publiccodeYmlVersion", node)
 
 		ve = append(ve, ValidationWarning{
 			Key: "publiccodeYmlVersion",
 			Description: fmt.Sprintf(
 				"v%s is not the latest version, use '%s'. Parsing this file as v%s.",
-				version.Value,
+				version,
 				latestVersion,
 				latestVersion,
 			),
-			Line:   line,
-			Column: column,
+			Line:   position.Line,
+			Column: position.Column,
 		})
 	}
 
@@ -158,11 +150,11 @@ func (p *Parser) ParseStream(in io.Reader) (PublicCode, error) {
 
 	var decodeResults ValidationResults
 
-	if version.Value[0] == '0' {
+	if version[0] == '0' {
 		v0 := PublicCodeV0{}
 		validateFields = validateFieldsV0
 
-		decodeResults = decode(b, &v0, node)
+		decodeResults = decode(b, &v0)
 		publiccode = v0
 	}
 
@@ -191,6 +183,10 @@ func (p *Parser) ParseStream(in io.Reader) (PublicCode, error) {
 
 	err = validate.Struct(publiccode)
 	if err != nil {
+		var ast ast.Node
+		_ = yaml.UnmarshalWithOptions(b, &ast, yaml.DisallowUnknownField())
+		// TODO: err
+
 		for _, err := range err.(validator.ValidationErrors) {
 			var sb strings.Builder
 
@@ -206,13 +202,20 @@ func (p *Parser) ParseStream(in io.Reader) (PublicCode, error) {
 			m := regexp.MustCompile(`\[([[:alpha:]]+)\]`)
 			key = m.ReplaceAllString(key, ".$1")
 
-			line, column := getPositionInFile(key, node)
+			path, e := yaml.PathString("$." + key)
+			// TODO: err
+
+			if node, e = path.FilterNode(ast); e != nil {
+				return nil, ValidationResults{newValidationError("XXX", "Xx")}
+			}
+
+			position := node.GetToken().Position
 
 			ve = append(ve, ValidationError{
 				Key:         key,
 				Description: sb.String(),
-				Line:        line,
-				Column:      column,
+				Line:        position.Line,
+				Column:      position.Column,
 			})
 		}
 	}
@@ -290,127 +293,61 @@ func (p *Parser) Parse(uri string) (PublicCode, error) {
 	return p.ParseStream(stream)
 }
 
-func getNodes(key string, node *yaml.Node) (*yaml.Node, *yaml.Node) {
-	for i := 0; i < len(node.Content); i += 2 {
-		childNode := *node.Content[i]
-
-		if childNode.Value == key {
-			return &childNode, node.Content[i+1]
-		}
-	}
-
-	return nil, nil
-}
-
-func getPositionInFile(key string, node yaml.Node) (int, int) {
-	n := &node
-
-	keys := strings.Split(key, ".")
-	for _, path := range keys[:len(keys)-1] {
-		_, n = getNodes(path, n)
-
-		// This should not happen, but let's be defensive
-		if n == nil {
-			return 0, 0
-		}
-	}
-
-	parentNode := n
-
-	n, _ = getNodes(keys[len(keys)-1], n)
-
-	if n != nil {
-		return n.Line, n.Column
-	} else {
-		return parentNode.Line, parentNode.Column
-	}
-}
-
-// getKeyAtLine returns the key name at line "line" for the YAML document
-// represented at parentNode.
-func getKeyAtLine(parentNode yaml.Node, line int, path string) string {
-	key := path
-
-	for i, currNode := range parentNode.Content {
-		// If this node is a mapping and the index is odd it means
-		// we are not looking at a key, but at its value. Skip it.
-		if parentNode.Kind == yaml.MappingNode && i%2 != 0 && currNode.Kind == yaml.ScalarNode {
-			continue
-		}
-
-		// This node is a key of a mapping type
-		if parentNode.Kind == yaml.MappingNode && i%2 == 0 {
-			if path == "" {
-				key = currNode.Value
-			} else {
-				key = fmt.Sprintf("%s.%s", path, currNode.Value)
-			}
-		}
-
-		// We want the scalar node (ie. key) not the mapping node which
-		// doesn't have a tag name even if it has the same line number
-		if currNode.Line == line && parentNode.Kind == yaml.MappingNode && currNode.Kind == yaml.ScalarNode {
-			return key
-		}
-
-		if currNode.Kind != yaml.ScalarNode {
-			if k := getKeyAtLine(*currNode, line, key); k != "" {
-				return k
-			}
-		}
-	}
-
-	return ""
-}
-
-func toValidationError(errorText string, node *yaml.Node) ValidationError {
-	r := regexp.MustCompile(`(line ([0-9]+): )`)
-	matches := r.FindStringSubmatch(errorText)
-
-	line := 0
-	if len(matches) > 1 {
-		line, _ = strconv.Atoi(matches[2])
-		errorText = strings.ReplaceAll(errorText, matches[1], "")
-	}
-
-	// Transform unmarshalling errors messages to a user friendlier message
-	r = regexp.MustCompile("^cannot unmarshal")
-	if r.MatchString(errorText) {
-		errorText = "wrong type for this field"
-	}
-
-	var key string
-	if node != nil {
-		key = getKeyAtLine(*node, line, "")
-	}
-
-	return ValidationError{
-		Key:         key,
-		Description: errorText,
-		Line:        line,
-		Column:      1,
-	}
-}
-
 // Decode the YAML into a PublicCode structure, so we get type errors
-func decode[T any](data []byte, publiccode *T, node yaml.Node) ValidationResults {
+func decode[T any](data []byte, publiccode *T) ValidationResults {
 	var ve ValidationResults
 
-	d := yaml.NewDecoder(bytes.NewReader(data))
-	d.KnownFields(true)
-
-	if err := d.Decode(&publiccode); err != nil {
+	if err := yaml.UnmarshalWithOptions(data, &publiccode, yaml.DisallowUnknownField()); err != nil {
 		switch err := err.(type) {
 		case *yaml.TypeError:
-			for _, errorText := range err.Errors {
-				ve = append(ve, toValidationError(errorText, &node))
-			}
+			token := err.Token
+
+			ve = append(ve, ValidationError{
+				// token is the wrong type token,
+				// token.Prev is ":"
+				// token.Prev.Prev is the actual key
+				Key:         token.Prev.Prev.Value,
+				Description: "wrong type for this field",
+				Line:        token.Position.Line,
+				Column:      token.Position.Column,
+			})
 		default:
 			ve = append(ve, newValidationError("", err.Error()))
 		}
 	}
 
 	return ve
+}
+
+type keyFinder struct {
+	key    string
+	result *ast.Node
+}
+
+func (v keyFinder) Visit(node ast.Node) ast.Visitor {
+	if node.GetToken().Value == v.key {
+		v.result = &node
+		return nil
+	}
+
+	return v
+}
+
+func getPositionInFile(key string, node ast.Node) (int, int) {
+	finder := keyFinder{key: key}
+
+	ast.Walk(finder, node)
+
+	// This should not happen, but let's be defensive
+	if finder.result == nil {
+		return 0, 0
+	}
+
+	n := *finder.result
+	position := n.GetToken().Position
+
+	return position.Line, position.Column
+
 }
 
 func toURL(file string) (*url.URL, error) {
