@@ -1,8 +1,8 @@
 package publiccode
 
 import (
+	"github.com/goccy/go-yaml"
 	urlutil "github.com/italia/publiccode-parser-go/v4/internal"
-	"gopkg.in/yaml.v3"
 )
 
 // There's no v1 yet, this is just an unexported placeholder type
