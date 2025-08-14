@@ -12,7 +12,6 @@ import (
 
 func New() *validator.Validate {
 	validate := validator.New(validator.WithRequiredStructEnabled())
-	_ = validate.RegisterValidation("date", isDate)
 	_ = validate.RegisterValidation("is_mime_type", isMIMEType)
 	_ = validate.RegisterValidation("iso3166_1_alpha2_lowercase", isIso3166Alpha2Lowercase)
 	_ = validate.RegisterValidation("umax", uMax)
@@ -27,6 +26,8 @@ func New() *validator.Validate {
 	_ = validate.RegisterValidation("is_italian_ipa_code", isItalianIpaCode)
 
 	_ = validate.RegisterValidation("bcp47_keys", bcp47_keys)
+
+	validate.RegisterAlias("date", "datetime=2006-01-02")
 
 	validate.RegisterTagNameFunc(func(fld reflect.StructField) string {
 		name := strings.SplitN(fld.Tag.Get("yaml"), ",", 2)[0]

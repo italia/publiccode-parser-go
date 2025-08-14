@@ -224,6 +224,9 @@ func TestInvalidTestcasesV0(t *testing.T) {
 		"releaseDate_invalid.yml": ValidationResults{
 			ValidationError{"releaseDate", "releaseDate must be a date with format 'YYYY-MM-DD'", 8, 1},
 		},
+		"releaseDate_datetime.yml": ValidationResults{
+			ValidationError{"releaseDate", "releaseDate must be a date with format 'YYYY-MM-DD'", 8, 1},
+		},
 
 		// logo
 		"logo_wrong_type.yml": ValidationResults{
