@@ -6,18 +6,11 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/github/go-spdx/v2/spdxexp"
 	"github.com/go-playground/validator/v10"
 	"github.com/rivo/uniseg"
 )
-
-func isDate(fl validator.FieldLevel) bool {
-	_, err := time.Parse("2006-01-02", fl.Field().String())
-
-	return err == nil
-}
 
 func isIso3166Alpha2Lowercase(fl validator.FieldLevel) bool {
 	str := fl.Field().String()
