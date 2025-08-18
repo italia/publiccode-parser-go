@@ -14,9 +14,9 @@ type PublicCodeV0 struct {
 	URL              *URL   `validate:"required,url_url"       yaml:"url"`
 	LandingURL       *URL   `validate:"omitnil,url_http_url"   yaml:"landingURL,omitempty"`
 
-	IsBasedOn       UrlOrUrlArray `yaml:"isBasedOn,omitempty"`
+	IsBasedOn       UrlOrUrlArray `validate:"omitempty,dive,url_url" yaml:"isBasedOn,omitempty"`
 	SoftwareVersion string        `yaml:"softwareVersion,omitempty"`
-	ReleaseDate     *string       `validate:"omitnil,date"          yaml:"releaseDate"`
+	ReleaseDate     *string       `validate:"omitnil,date"           yaml:"releaseDate"`
 	Logo            string        `yaml:"logo,omitempty"`
 	MonochromeLogo  string        `yaml:"monochromeLogo,omitempty"`
 
