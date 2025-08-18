@@ -201,10 +201,10 @@ func TestInvalidTestcasesV0(t *testing.T) {
 			ValidationError{"isBasedOn.foobar", "wrong type for this field", 10, 1},
 		},
 		"isBasedOn_bad_url_array.yml": ValidationResults{
-			ValidationError{"isBasedOn", "wrong type for this field", 8, 1},
+			ValidationError{"isBasedOn[1]", "isBasedOn[1] must be a valid URL", 1, 1},
 		},
 		"isBasedOn_bad_url_string.yml": ValidationResults{
-			ValidationError{"isBasedOn", "'???' not reachable: missing URL scheme", 8, 1},
+			ValidationError{"isBasedOn[0]", "isBasedOn[0] must be a valid URL", 1, 1},
 		},
 
 		// softwareVersion
