@@ -8,6 +8,7 @@ import (
 	"path"
 	"path/filepath"
 	"reflect"
+	"slices"
 	"testing"
 )
 
@@ -95,7 +96,8 @@ func TestValidWithWarningTestcasesV0_NoNetwork(t *testing.T) {
 		},
 	}
 
-	testFiles, _ := filepath.Glob("testdata/v0/valid_with_warnings/no-network/*yml")
+	dir := "testdata/v0/valid_with_warnings/no-network/"
+	testFiles, _ := filepath.Glob(dir + "*yml")
 	for _, file := range testFiles {
 		baseName := path.Base(file)
 		if expected[baseName] == nil {
@@ -105,6 +107,11 @@ func TestValidWithWarningTestcasesV0_NoNetwork(t *testing.T) {
 			err := parseNoNetwork(file)
 			checkParseErrors(t, err, testType{file, expected[baseName]})
 		})
+	}
+	for file := range expected {
+		if !slices.Contains(testFiles, dir+file) {
+			t.Errorf("No expected file %s", dir+file)
+		}
 	}
 }
 
@@ -131,7 +138,8 @@ func TestInvalidTestcasesV0_NoNetwork(t *testing.T) {
 		},
 	}
 
-	testFiles, _ := filepath.Glob("testdata/v0/invalid/no-network/*yml")
+	dir := "testdata/v0/invalid/no-network/"
+	testFiles, _ := filepath.Glob(dir + "*yml")
 	for _, file := range testFiles {
 		baseName := path.Base(file)
 		if expected[baseName] == nil {
@@ -142,6 +150,12 @@ func TestInvalidTestcasesV0_NoNetwork(t *testing.T) {
 			checkParseErrors(t, err, testType{file, expected[baseName]})
 		})
 	}
+	for file := range expected {
+		if !slices.Contains(testFiles, dir+file) {
+			t.Errorf("No expected file %s", dir+file)
+		}
+	}
+
 }
 
 func TestInvalidTestcasesV0(t *testing.T) {
@@ -380,9 +394,6 @@ func TestInvalidTestcasesV0(t *testing.T) {
 		"description_en_shortDescription_missing.yml": ValidationResults{
 			ValidationError{"description.en.shortDescription", "shortDescription is a required field", 20, 5},
 		},
-		"description_en_shortDescription_too_short.yml": ValidationResults{
-			ValidationError{"description.en.shortDescription", "shortDescription is a required field", 20, 5},
-		},
 		"description_en_longDescription_missing.yml": ValidationResults{
 			ValidationError{"description.en.longDescription", "longDescription is a required field", 20, 5},
 		},
@@ -576,7 +587,8 @@ func TestInvalidTestcasesV0(t *testing.T) {
 		},
 	}
 
-	testFiles, _ := filepath.Glob("testdata/v0/invalid/*yml")
+	dir := "testdata/v0/invalid/"
+	testFiles, _ := filepath.Glob(dir + "*yml")
 	for _, file := range testFiles {
 		baseName := path.Base(file)
 		if expected[baseName] == nil {
@@ -586,6 +598,11 @@ func TestInvalidTestcasesV0(t *testing.T) {
 			err := parse(file)
 			checkParseErrors(t, err, testType{file, expected[baseName]})
 		})
+	}
+	for file := range expected {
+		if !slices.Contains(testFiles, dir+file) {
+			t.Errorf("No expected file %s", dir+file)
+		}
 	}
 }
 
@@ -612,7 +629,8 @@ func TestValidWithWarningsTestcasesV0(t *testing.T) {
 		},
 	}
 
-	testFiles, _ := filepath.Glob("testdata/v0/valid_with_warnings/*yml")
+	dir := "testdata/v0/valid_with_warnings/"
+	testFiles, _ := filepath.Glob(dir + "*yml")
 	for _, file := range testFiles {
 		baseName := path.Base(file)
 		if expected[baseName] == nil {
@@ -622,6 +640,11 @@ func TestValidWithWarningsTestcasesV0(t *testing.T) {
 			err := parse(file)
 			checkParseErrors(t, err, testType{file, expected[baseName]})
 		})
+	}
+	for file := range expected {
+		if !slices.Contains(testFiles, dir+file) {
+			t.Errorf("No expected file %s", dir+file)
+		}
 	}
 }
 
