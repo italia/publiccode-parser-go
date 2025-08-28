@@ -1,6 +1,7 @@
 package publiccode
 
 import (
+	"encoding/json"
 	"net/url"
 )
 
@@ -25,6 +26,14 @@ func (u *URL) UnmarshalYAML(unmarshal func(interface{}) error) error {
 
 func (u *URL) MarshalYAML() (interface{}, error) {
 	return u.String(), nil
+}
+
+func (u *URL) MarshalJSON() ([]byte, error) {
+	if u == nil {
+		return []byte(`null`), nil
+	}
+
+	return json.Marshal(u.String())
 }
 
 func (u URL) String() string {
