@@ -47,7 +47,7 @@ func validateFieldsV0(publiccode PublicCode, parser Parser, network bool) error 
 	}
 
 	if publiccodev0.Logo != "" {
-		if validLogo, err := parser.validLogo(toCodeHostingURL(publiccodev0.Logo, parser.baseURL), network); !validLogo {
+		if validLogo, err := parser.validLogo(toCodeHostingURL(publiccodev0.Logo, parser.baseURL, parser.localFilePath), network); !validLogo {
 			vr = append(vr, newValidationError("logo", err.Error()))
 		}
 	}
@@ -55,7 +55,7 @@ func validateFieldsV0(publiccode PublicCode, parser Parser, network bool) error 
 	if publiccodev0.MonochromeLogo != "" {
 		vr = append(vr, ValidationWarning{"monochromeLogo", "This key is DEPRECATED and will be removed in the future", 0, 0})
 
-		if validLogo, err := parser.validLogo(toCodeHostingURL(publiccodev0.MonochromeLogo, parser.baseURL), network); !validLogo {
+		if validLogo, err := parser.validLogo(toCodeHostingURL(publiccodev0.MonochromeLogo, parser.baseURL, parser.localFilePath), network); !validLogo {
 			vr = append(vr, newValidationError("monochromeLogo", err.Error()))
 		}
 	}
@@ -63,8 +63,8 @@ func validateFieldsV0(publiccode PublicCode, parser Parser, network bool) error 
 	if publiccodev0.Legal.AuthorsFile != nil {
 		vr = append(vr, ValidationWarning{"legal.authorsFile", "This key is DEPRECATED and will be removed in the future", 0, 0})
 
-		if !parser.fileExists(toCodeHostingURL(*publiccodev0.Legal.AuthorsFile, parser.baseURL), network) {
-			u := toCodeHostingURL(*publiccodev0.Legal.AuthorsFile, parser.baseURL)
+		if !parser.fileExists(toCodeHostingURL(*publiccodev0.Legal.AuthorsFile, parser.baseURL, parser.localFilePath), network) {
+			u := toCodeHostingURL(*publiccodev0.Legal.AuthorsFile, parser.baseURL, parser.localFilePath)
 
 			vr = append(vr, newValidationError("legal.authorsFile", "'%s' does not exist", urlutil.DisplayURL(&u)))
 		}
@@ -109,7 +109,7 @@ func validateFieldsV0(publiccode PublicCode, parser Parser, network bool) error 
 		}
 
 		for i, v := range desc.Screenshots {
-			if isImage, err := parser.isImageFile(toCodeHostingURL(v, parser.baseURL), network); !isImage {
+			if isImage, err := parser.isImageFile(toCodeHostingURL(v, parser.baseURL, parser.localFilePath), network); !isImage {
 				vr = append(vr, newValidationError(
 					fmt.Sprintf("description.%s.screenshots[%d]", lang, i),
 					"'%s' is not an image: %s", v, err.Error(),

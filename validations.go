@@ -96,7 +96,7 @@ func (p *Parser) isReachable(u url.URL, network bool) (bool, error) {
 //
 // It supports relative paths and turns them into remote URLs or file:// URLs
 // depending on the value of baseURL
-func toCodeHostingURL(file string, baseURL *url.URL) url.URL {
+func toCodeHostingURL(file string, baseURL *url.URL, localFilePath string) url.URL {
 	// Check if file is an absolute URL
 	if uri, err := url.ParseRequestURI(file); err == nil {
 		if raw := vcsurl.GetRawFile(uri); raw != nil {
@@ -116,9 +116,8 @@ func toCodeHostingURL(file string, baseURL *url.URL) url.URL {
 		return u
 	}
 
-	// Let's construct a valid URL that will not be used anyway, because
-	// of DisableNetwork == true.
-	return url.URL{Scheme: "file", Path: file}
+	// It's a local file
+	return url.URL{Scheme: "file", Path: path.Join(localFilePath, file)}
 }
 
 // fileExists returns true if the file resource exists.

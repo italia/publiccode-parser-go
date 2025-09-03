@@ -48,6 +48,7 @@ type Parser struct {
 	domain         Domain
 	branch         string
 	baseURL        *url.URL
+	localFilePath  string
 }
 
 // Domain is a single code hosting service.
@@ -274,6 +275,7 @@ func (p *Parser) Parse(uri string) (PublicCode, error) {
 		if err != nil {
 			return nil, fmt.Errorf("can't open file '%s': %w", url.Path, err)
 		}
+		p.localFilePath = url.Path
 	} else {
 		resp, err := http.Get(uri)
 		if err != nil {
