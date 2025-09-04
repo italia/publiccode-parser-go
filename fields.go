@@ -3,6 +3,7 @@ package publiccode
 import (
 	"fmt"
 	"net/url"
+	"strings"
 
 	"github.com/alranel/go-vcsurl/v2"
 	urlutil "github.com/italia/publiccode-parser-go/v4/internal"
@@ -47,7 +48,9 @@ func validateFieldsV0(publiccode PublicCode, parser Parser, network bool) error 
 	}
 
 	if publiccodev0.Logo != "" {
-		if validLogo, err := parser.validLogo(toCodeHostingURL(publiccodev0.Logo, parser.baseURL), network); !validLogo {
+		if _, err := isRelativePathOrURL(publiccodev0.Logo, "logo"); err != nil {
+			vr = append(vr, err)
+		} else if validLogo, err := parser.validLogo(toCodeHostingURL(publiccodev0.Logo, parser.baseURL), network); !validLogo {
 			vr = append(vr, newValidationError("logo", err.Error()))
 		}
 	}
@@ -55,7 +58,9 @@ func validateFieldsV0(publiccode PublicCode, parser Parser, network bool) error 
 	if publiccodev0.MonochromeLogo != "" {
 		vr = append(vr, ValidationWarning{"monochromeLogo", "This key is DEPRECATED and will be removed in the future", 0, 0})
 
-		if validLogo, err := parser.validLogo(toCodeHostingURL(publiccodev0.MonochromeLogo, parser.baseURL), network); !validLogo {
+		if _, err := isRelativePathOrURL(publiccodev0.MonochromeLogo, "monochromeLogo"); err != nil {
+			vr = append(vr, err)
+		} else if validLogo, err := parser.validLogo(toCodeHostingURL(publiccodev0.MonochromeLogo, parser.baseURL), network); !validLogo {
 			vr = append(vr, newValidationError("monochromeLogo", err.Error()))
 		}
 	}
@@ -63,10 +68,12 @@ func validateFieldsV0(publiccode PublicCode, parser Parser, network bool) error 
 	if publiccodev0.Legal.AuthorsFile != nil {
 		vr = append(vr, ValidationWarning{"legal.authorsFile", "This key is DEPRECATED and will be removed in the future", 0, 0})
 
-		if !parser.fileExists(toCodeHostingURL(*publiccodev0.Legal.AuthorsFile, parser.baseURL), network) {
+		if _, err := isRelativePathOrURL(*publiccodev0.Legal.AuthorsFile, "legal.authorsFile"); err != nil {
+			vr = append(vr, err)
+		} else if exists, err := parser.fileExists(toCodeHostingURL(*publiccodev0.Legal.AuthorsFile, parser.baseURL), network); !exists {
 			u := toCodeHostingURL(*publiccodev0.Legal.AuthorsFile, parser.baseURL)
 
-			vr = append(vr, newValidationError("legal.authorsFile", "'%s' does not exist", urlutil.DisplayURL(&u)))
+			vr = append(vr, newValidationError("legal.authorsFile", "'%s' does not exist: %s", urlutil.DisplayURL(&u), err.Error()))
 		}
 	}
 
@@ -109,9 +116,12 @@ func validateFieldsV0(publiccode PublicCode, parser Parser, network bool) error 
 		}
 
 		for i, v := range desc.Screenshots {
-			if isImage, err := parser.isImageFile(toCodeHostingURL(v, parser.baseURL), network); !isImage {
+			keyName := fmt.Sprintf("description.%s.screenshots[%d]", lang, i)
+			if _, err := isRelativePathOrURL(v, keyName); err != nil {
+				vr = append(vr, err)
+			} else if isImage, err := parser.isImageFile(toCodeHostingURL(v, parser.baseURL), network); !isImage {
 				vr = append(vr, newValidationError(
-					fmt.Sprintf("description.%s.screenshots[%d]", lang, i),
+					keyName,
 					"'%s' is not an image: %s", v, err.Error(),
 				))
 			}
@@ -133,4 +143,20 @@ func validateFieldsV0(publiccode PublicCode, parser Parser, network bool) error 
 	}
 
 	return vr
+}
+
+// isRelativePathOrURL checks whether the field contains either a relative filename
+// or an HTTP URL
+//
+//nolint:unparam
+func isRelativePathOrURL(content string, keyName string) (bool, error) {
+	if strings.HasPrefix(content, "/") {
+		return false, newValidationError(keyName, "is an absolute path. Only relative paths or HTTP(s) URLs allowed")
+	}
+
+	if strings.HasPrefix(content, "file:") {
+		return false, newValidationError(keyName, "is a file:// URL. Only relative paths or HTTP(s) URLs allowed")
+	}
+
+	return true, nil
 }
