@@ -122,22 +122,25 @@ func toCodeHostingURL(file string, baseURL *url.URL) url.URL {
 }
 
 // fileExists returns true if the file resource exists.
-func (p *Parser) fileExists(u url.URL, network bool) bool {
+func (p *Parser) fileExists(u url.URL, network bool) (bool, error) {
 	// If we have an absolute local path, perform validation on it, otherwise do it
 	// on the remote URL if any. If none are available, validation is skipped.
 	if u.Scheme == "file" {
 		_, err := os.Stat(u.Path)
+		if err != nil {
+			err = fmt.Errorf("no such file: %s", netutil.DisplayURL(&u))
+		}
 
-		return err == nil
+		return err == nil, err
 	}
 
 	if network {
-		reachable, _ := p.isReachable(u, network)
+		reachable, err := p.isReachable(u, network)
 
-		return reachable
+		return reachable, err
 	}
 
-	return true
+	return true, nil
 }
 
 // isImageFile check whether the string is a valid image. It also checks if the file exists.
@@ -150,9 +153,7 @@ func (p *Parser) isImageFile(u url.URL, network bool) (bool, error) {
 		return false, fmt.Errorf("invalid file extension for: %s", netutil.DisplayURL(&u))
 	}
 
-	exists := p.fileExists(u, network)
-
-	return exists, fmt.Errorf("no such file : %s", netutil.DisplayURL(&u))
+	return p.fileExists(u, network)
 }
 
 // validLogo returns true if the file path in value is a valid logo.
@@ -166,8 +167,8 @@ func (p *Parser) validLogo(u url.URL, network bool) (bool, error) {
 		return false, fmt.Errorf("invalid file extension for: %s", netutil.DisplayURL(&u))
 	}
 
-	if exists := p.fileExists(u, network); !exists {
-		return false, fmt.Errorf("no such file: %s", netutil.DisplayURL(&u))
+	if exists, err := p.fileExists(u, network); !exists {
+		return false, err
 	}
 
 	var localPath string

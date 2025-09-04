@@ -250,7 +250,19 @@ func TestInvalidTestcasesV0(t *testing.T) {
 			ValidationError{"logo", "invalid file extension for: https://raw.githubusercontent.com/italia/developers.italia.it/main/logo.mpg", 18, 1},
 		},
 		"logo_missing_file.yml": ValidationResults{
-			ValidationError{"logo", "no such file: https://raw.githubusercontent.com/italia/developers.italia.it/main/no_such_file.png", 18, 1},
+			ValidationError{"logo", "HTTP GET failed for https://raw.githubusercontent.com/italia/developers.italia.it/main/no_such_file.png: not found", 18, 1},
+		},
+		"logo_absolute_path.yml": ValidationResults{
+			ValidationError{"logo", "is an absolute path. Only relative paths or HTTP(s) URLs allowed", 18, 1},
+		},
+		"logo_file_scheme.yml": ValidationResults{
+			ValidationError{"logo", "is a file:// URL. Only relative paths or HTTP(s) URLs allowed", 18, 1},
+		},
+		"logo_file_scheme2.yml": ValidationResults{
+			ValidationError{"logo", "is a file:// URL. Only relative paths or HTTP(s) URLs allowed", 18, 1},
+		},
+		"logo_file_scheme3.yml": ValidationResults{
+			ValidationError{"logo", "is a file:// URL. Only relative paths or HTTP(s) URLs allowed", 18, 1},
 		},
 
 		// monochromeLogo
@@ -268,7 +280,7 @@ func TestInvalidTestcasesV0(t *testing.T) {
 		},
 		"monochromeLogo_missing_file.yml": ValidationResults{
 			ValidationWarning{"monochromeLogo", "This key is DEPRECATED and will be removed in the future", 18, 1},
-			ValidationError{"monochromeLogo", "no such file: https://raw.githubusercontent.com/italia/developers.italia.it/main/no_such_file.png", 18, 1},
+			ValidationError{"monochromeLogo", "HTTP GET failed for https://raw.githubusercontent.com/italia/developers.italia.it/main/no_such_file.png: not found", 18, 1},
 		},
 
 		// inputTypes
@@ -427,7 +439,7 @@ func TestInvalidTestcasesV0(t *testing.T) {
 		"description_en_screenshots_missing_file.yml": ValidationResults{
 			ValidationError{
 				"description.en.screenshots[0]",
-				"'no_such_file.png' is not an image: no such file : https://raw.githubusercontent.com/italia/developers.italia.it/main/no_such_file.png",
+				"'no_such_file.png' is not an image: HTTP GET failed for https://raw.githubusercontent.com/italia/developers.italia.it/main/no_such_file.png: not found",
 				20,
 				5,
 			},
@@ -463,7 +475,7 @@ func TestInvalidTestcasesV0(t *testing.T) {
 			},
 			ValidationError{
 				"legal.authorsFile",
-				"'https://raw.githubusercontent.com/italia/developers.italia.it/main/no_such_authors_file.txt' does not exist",
+				"'https://raw.githubusercontent.com/italia/developers.italia.it/main/no_such_authors_file.txt' does not exist: HTTP GET failed for https://raw.githubusercontent.com/italia/developers.italia.it/main/no_such_authors_file.txt: not found",
 				42,
 				3,
 			},
