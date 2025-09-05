@@ -50,7 +50,7 @@ func validateFieldsV0(publiccode PublicCode, parser Parser, network bool) error 
 	if publiccodev0.Logo != "" {
 		if _, err := isRelativePathOrURL(publiccodev0.Logo, "logo"); err != nil {
 			vr = append(vr, err)
-		} else if validLogo, err := parser.validLogo(toCodeHostingURL(publiccodev0.Logo, parser.baseURL), network); !validLogo {
+		} else if validLogo, err := parser.validLogo(toCodeHostingURL(publiccodev0.Logo, parser.currentBaseURL), network); !validLogo {
 			vr = append(vr, newValidationError("logo", err.Error()))
 		}
 	}
@@ -60,7 +60,7 @@ func validateFieldsV0(publiccode PublicCode, parser Parser, network bool) error 
 
 		if _, err := isRelativePathOrURL(publiccodev0.MonochromeLogo, "monochromeLogo"); err != nil {
 			vr = append(vr, err)
-		} else if validLogo, err := parser.validLogo(toCodeHostingURL(publiccodev0.MonochromeLogo, parser.baseURL), network); !validLogo {
+		} else if validLogo, err := parser.validLogo(toCodeHostingURL(publiccodev0.MonochromeLogo, parser.currentBaseURL), network); !validLogo {
 			vr = append(vr, newValidationError("monochromeLogo", err.Error()))
 		}
 	}
@@ -70,8 +70,8 @@ func validateFieldsV0(publiccode PublicCode, parser Parser, network bool) error 
 
 		if _, err := isRelativePathOrURL(*publiccodev0.Legal.AuthorsFile, "legal.authorsFile"); err != nil {
 			vr = append(vr, err)
-		} else if exists, err := parser.fileExists(toCodeHostingURL(*publiccodev0.Legal.AuthorsFile, parser.baseURL), network); !exists {
-			u := toCodeHostingURL(*publiccodev0.Legal.AuthorsFile, parser.baseURL)
+		} else if exists, err := parser.fileExists(toCodeHostingURL(*publiccodev0.Legal.AuthorsFile, parser.currentBaseURL), network); !exists {
+			u := toCodeHostingURL(*publiccodev0.Legal.AuthorsFile, parser.currentBaseURL)
 
 			vr = append(vr, newValidationError("legal.authorsFile", "'%s' does not exist: %s", urlutil.DisplayURL(&u), err.Error()))
 		}
@@ -119,7 +119,7 @@ func validateFieldsV0(publiccode PublicCode, parser Parser, network bool) error 
 			keyName := fmt.Sprintf("description.%s.screenshots[%d]", lang, i)
 			if _, err := isRelativePathOrURL(v, keyName); err != nil {
 				vr = append(vr, err)
-			} else if isImage, err := parser.isImageFile(toCodeHostingURL(v, parser.baseURL), network); !isImage {
+			} else if isImage, err := parser.isImageFile(toCodeHostingURL(v, parser.currentBaseURL), network); !isImage {
 				vr = append(vr, newValidationError(
 					keyName,
 					"'%s' is not an image: %s", v, err.Error(),

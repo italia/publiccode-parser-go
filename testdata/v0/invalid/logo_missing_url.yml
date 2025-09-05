@@ -14,8 +14,8 @@ developmentStatus: development
 
 softwareType: "standalone/other"
 
-# Should NOT validate: PNG logo must be a valid PNG
-logo: "assets/img/not-an-image.png"
+# Should NOT validate: logo URL must point to an existing file
+logo: "https://google.com/no_such_file.png"
 
 description:
   en:
