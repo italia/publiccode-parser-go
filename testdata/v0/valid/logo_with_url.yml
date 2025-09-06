@@ -4,7 +4,7 @@ name: Medusa
 url: "https://github.com/italia/developers.italia.it.git"
 
 # Logo with a URL
-logo: "https://raw.githubusercontent.com/italia/publiccode-parser-go/refs/heads/main/testdata/img/logo.png"
+logo: "https://raw.githubusercontent.com/italia/publiccode-parser-go/refs/heads/main/testdata/v0/valid/assets/img/logo.png"
 
 platforms:
   - web
