@@ -711,8 +711,8 @@ func TestRelativePathsOrURLs(t *testing.T) {
 	testRemoteFiles := []testType{
 		// Remote publiccode.yml and relative path in screenshots:
 		// should look for the screenshot remotely relative to this URL
-		{"https://raw.githubusercontent.com/italia/publiccode-parser-go/refs/heads/relative-paths/testdata/v0/invalid/description_en_screenshots_missing_file.yml", ValidationResults{
-			ValidationError{"description.en.screenshots[0]", "'no_such_file.png' is not an image: HTTP GET failed for https://raw.githubusercontent.com/italia/publiccode-parser-go/refs/heads/relative-paths/testdata/v0/invalid/no_such_file.png: not found", 20, 5},
+		{"https://raw.githubusercontent.com/italia/publiccode-parser-go/refs/heads/main/testdata/v0/invalid/description_en_screenshots_missing_file.yml", ValidationResults{
+			ValidationError{"description.en.screenshots[0]", "'no_such_file.png' is not an image: HTTP GET failed for https://raw.githubusercontent.com/italia/publiccode-parser-go/refs/heads/main/testdata/v0/invalid/no_such_file.png: not found", 20, 5},
 		}},
 
 		// Local publiccode.yml and relative path in screenshot:
@@ -723,7 +723,7 @@ func TestRelativePathsOrURLs(t *testing.T) {
 
 		// Remote publiccode.yml and URL in logo:
 		// should look for the logo remotely
-		{"https://raw.githubusercontent.com/italia/publiccode-parser-go/refs/heads/relative-paths/testdata/v0/invalid/logo_missing_url.yml", ValidationResults{
+		{"https://raw.githubusercontent.com/italia/publiccode-parser-go/refs/heads/main/testdata/v0/invalid/logo_missing_url.yml", ValidationResults{
 			ValidationError{"logo", "HTTP GET failed for https://google.com/no_such_file.png: not found", 18, 1},
 		}},
 
@@ -763,7 +763,7 @@ func TestRelativePathsOrURLsNoNetworkRemoteChecks(t *testing.T) {
 
 		// Remote publiccode.yml and URL in logo:
 		// should look for the logo remotely but DisableNetwork is true, so no check is performed.
-		"https://raw.githubusercontent.com/italia/publiccode-parser-go/refs/heads/relative-paths/testdata/v0/invalid/logo_missing_url.yml",
+		"https://raw.githubusercontent.com/italia/publiccode-parser-go/refs/heads/main/testdata/v0/invalid/logo_missing_url.yml",
 
 		// Local publiccode.yml and URL in logo:
 		// should look for the logo remotely but DisableNetwork is true, so no check is performed.
