@@ -11,7 +11,7 @@ landingURL: "https://developers.italia.it"
 isBasedOn: "https://github.com/italia/developers.italia.it.git"
 softwareVersion: "1.0"
 releaseDate: 2017-04-15
-logo: testdata/img/logo.png
+logo: assets/img/logo.png
 
 platforms:
   - android
@@ -143,35 +143,35 @@ description:
     localisedName: Medusa
     shortDescription: "A really interesting software."
     longDescription: >
-          Very long description of this software, also split
-          on multiple rows. You should note what the software
-          is and why one should need it. This is 158 characters.
-          Very long description of this software, also split
-          on multiple rows. You should note what the software
-          is and why one should need it. This is 316 characters.
-          Very long description of this software, also split
-          on multiple rows. You should note what the software
-          is and why one should need it. This is 474 characters.
-          Very long description of this software, also split
-          on multiple rows. You should note what the software
-          is and why one should need it. This is 632 characters.
+      Very long description of this software, also split
+      on multiple rows. You should note what the software
+      is and why one should need it. This is 158 characters.
+      Very long description of this software, also split
+      on multiple rows. You should note what the software
+      is and why one should need it. This is 316 characters.
+      Very long description of this software, also split
+      on multiple rows. You should note what the software
+      is and why one should need it. This is 474 characters.
+      Very long description of this software, also split
+      on multiple rows. You should note what the software
+      is and why one should need it. This is 632 characters.
 
     documentation: "https://docs.italia.it"
     apiDocumentation: "https://developers.italia.it/it/api"
 
     features:
-       - Very important feature
-       - Will run without a problem
-       - Has zero bugs
-       - Solves all the problems of the world
+      - Very important feature
+      - Will run without a problem
+      - Has zero bugs
+      - Solves all the problems of the world
     screenshots:
-       - testdata/img/sshot1.png
-       - testdata/img/sshot2.png
-       - testdata/img/sshot3.png
+      - assets/img/sshot1.png
+      - assets/img/sshot2.png
+      - assets/img/sshot3.png
     videos:
-       - https://www.youtube.com/watch?v=RaHmGbBOP84
+      - https://www.youtube.com/watch?v=RaHmGbBOP84
     awards:
-       - 1st Price Software of the year
+      - 1st Price Software of the year
 
 legal:
   license: AGPL-3.0-or-later

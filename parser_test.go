@@ -3,6 +3,7 @@ package publiccode
 import (
 	"bytes"
 	"fmt"
+	"log"
 	"net/url"
 	"os"
 	"path"
@@ -85,6 +86,18 @@ func checkParseErrors(t *testing.T, err error, test testType) {
 	}
 }
 
+var cwd string
+
+func TestMain(m *testing.M) {
+	var err error
+
+	cwd, err = os.Getwd()
+	if err != nil {
+		log.Fatalf("failed to get cwd: %v", err)
+	}
+	os.Exit(m.Run())
+}
+
 func TestValidTestcasesV0_NoNetwork(t *testing.T) {
 	checkValidFilesNoNetwork("testdata/v0/valid/no-network/*.yml", t)
 }
@@ -119,7 +132,7 @@ func TestInvalidTestcasesV0_NoNetwork(t *testing.T) {
 	expected := map[string]error{
 		// logo
 		"logo_missing_file.yml": ValidationResults{
-			ValidationError{"logo", "no such file: no_such_file.png", 18, 1},
+			ValidationError{"logo", "no such file: " + cwd + "/testdata/v0/invalid/no-network/no_such_file.png", 18, 1},
 		},
 		"logo_invalid_png.yml": ValidationResults{
 			ValidationError{"logo", "image: unknown format", 18, 1},
@@ -247,10 +260,10 @@ func TestInvalidTestcasesV0(t *testing.T) {
 			ValidationError{"logo", "wrong type for this field", 18, 1},
 		},
 		"logo_unsupported_extension.yml": ValidationResults{
-			ValidationError{"logo", "invalid file extension for: https://raw.githubusercontent.com/italia/developers.italia.it/main/logo.mpg", 18, 1},
+			ValidationError{"logo", "invalid file extension for: " + cwd + "/testdata/v0/invalid/logo.mpg", 18, 1},
 		},
 		"logo_missing_file.yml": ValidationResults{
-			ValidationError{"logo", "HTTP GET failed for https://raw.githubusercontent.com/italia/developers.italia.it/main/no_such_file.png: not found", 18, 1},
+			ValidationError{"logo", "no such file: " + cwd + "/testdata/v0/invalid/no_such_file.png", 18, 1},
 		},
 		"logo_absolute_path.yml": ValidationResults{
 			ValidationError{"logo", "is an absolute path. Only relative paths or HTTP(s) URLs allowed", 18, 1},
@@ -264,6 +277,10 @@ func TestInvalidTestcasesV0(t *testing.T) {
 		"logo_file_scheme3.yml": ValidationResults{
 			ValidationError{"logo", "is a file:// URL. Only relative paths or HTTP(s) URLs allowed", 18, 1},
 		},
+		// Local publiccode.yml and URL in logo: should look for the logo remotely
+		"logo_missing_url.yml": ValidationResults{
+			ValidationError{"logo", "HTTP GET failed for https://google.com/no_such_file.png: not found", 18, 1},
+		},
 
 		// monochromeLogo
 		"monochromeLogo_wrong_type.yml": ValidationResults{
@@ -273,14 +290,14 @@ func TestInvalidTestcasesV0(t *testing.T) {
 			ValidationWarning{"monochromeLogo", "This key is DEPRECATED and will be removed in the future", 18, 1},
 			ValidationError{
 				"monochromeLogo",
-				"invalid file extension for: https://raw.githubusercontent.com/italia/developers.italia.it/main/monochromeLogo.mpg",
+				"invalid file extension for: " + cwd + "/testdata/v0/invalid/monochromeLogo.mpg",
 				18,
 				1,
 			},
 		},
 		"monochromeLogo_missing_file.yml": ValidationResults{
 			ValidationWarning{"monochromeLogo", "This key is DEPRECATED and will be removed in the future", 18, 1},
-			ValidationError{"monochromeLogo", "HTTP GET failed for https://raw.githubusercontent.com/italia/developers.italia.it/main/no_such_file.png: not found", 18, 1},
+			ValidationError{"monochromeLogo", "no such file: " + cwd + "/testdata/v0/invalid/no_such_file.png", 18, 1},
 		},
 
 		// inputTypes
@@ -439,7 +456,7 @@ func TestInvalidTestcasesV0(t *testing.T) {
 		"description_en_screenshots_missing_file.yml": ValidationResults{
 			ValidationError{
 				"description.en.screenshots[0]",
-				"'no_such_file.png' is not an image: HTTP GET failed for https://raw.githubusercontent.com/italia/developers.italia.it/main/no_such_file.png: not found",
+				"'no_such_file.png' is not an image: no such file: " + cwd + "/testdata/v0/invalid/no_such_file.png",
 				20,
 				5,
 			},
@@ -475,7 +492,7 @@ func TestInvalidTestcasesV0(t *testing.T) {
 			},
 			ValidationError{
 				"legal.authorsFile",
-				"'https://raw.githubusercontent.com/italia/developers.italia.it/main/no_such_authors_file.txt' does not exist: HTTP GET failed for https://raw.githubusercontent.com/italia/developers.italia.it/main/no_such_authors_file.txt: not found",
+				"'" + cwd + "/testdata/v0/invalid/no_such_authors_file.txt' does not exist: no such file: " + cwd + "/testdata/v0/invalid/no_such_authors_file.txt",
 				42,
 				3,
 			},
@@ -688,6 +705,108 @@ func TestDecodeValueErrorsRemote(t *testing.T) {
 	}
 }
 
+// Test that files in fields with relative paths or URLs (ie. logo, screenshots, etc.)
+// are checked and expanded correctly
+func TestRelativePathsOrURLs(t *testing.T) {
+	testRemoteFiles := []testType{
+		// Remote publiccode.yml and relative path in screenshots:
+		// should look for the screenshot remotely relative to this URL
+		{"https://raw.githubusercontent.com/italia/publiccode-parser-go/refs/heads/relative-paths/testdata/v0/invalid/description_en_screenshots_missing_file.yml", ValidationResults{
+			ValidationError{"description.en.screenshots[0]", "'no_such_file.png' is not an image: HTTP GET failed for https://raw.githubusercontent.com/italia/publiccode-parser-go/refs/heads/relative-paths/testdata/v0/invalid/no_such_file.png: not found", 20, 5},
+		}},
+
+		// Local publiccode.yml and relative path in screenshot:
+		// should look for the logo relative to this path in the filesystem
+		{"testdata/v0/invalid/description_en_screenshots_missing_file.yml", ValidationResults{
+			ValidationError{"description.en.screenshots[0]", "'no_such_file.png' is not an image: no such file: " + cwd + "/testdata/v0/invalid/no_such_file.png", 20, 5},
+		}},
+
+		// Remote publiccode.yml and URL in logo:
+		// should look for the logo remotely
+		{"https://raw.githubusercontent.com/italia/publiccode-parser-go/refs/heads/relative-paths/testdata/v0/invalid/logo_missing_url.yml", ValidationResults{
+			ValidationError{"logo", "HTTP GET failed for https://google.com/no_such_file.png: not found", 18, 1},
+		}},
+
+		// Local publiccode.yml and URL in logo:
+		// should look for the logo remotely
+		//
+		// (already tested in TestInvalidTestcasesV0)
+		// "testdata/v0/invalid/logo_missing_url.yml", ValidationResults{
+		//	ValidationError{"logo", "HTTP GET failed for https://google.com/no_such_file.png: not found", 18, 1},
+		//}},
+	}
+
+	parser, err := NewDefaultParser()
+	if err != nil {
+		t.Errorf("Can't create parser: %v", err)
+	}
+
+	for _, test := range testRemoteFiles {
+		t.Run(fmt.Sprintf("%v", test.err), func(t *testing.T) {
+			var err error
+
+			_, err = parser.Parse(test.file)
+
+			checkParseErrors(t, err, test)
+		})
+	}
+}
+
+// Test that files in fields with relative paths or URLs (ie. logo, screenshots, etc.)
+// are checked and expanded correctly when DisableNetwork is true
+func TestRelativePathsOrURLsNoNetworkRemoteChecks(t *testing.T) {
+	testRemoteFiles := []string{
+		// Remote publiccode.yml and relative path in screenshots:
+		// should look for the screenshot remotely relative to this URL,
+		// but DisableNetwork is true, so no check is performed.
+		"https://raw.githubusercontent.com/italia/publiccode-parser-go/refs/heads/main/testdata/v0/invalid/description_en_screenshots_missing_file.yml",
+
+		// Remote publiccode.yml and URL in logo:
+		// should look for the logo remotely but DisableNetwork is true, so no check is performed.
+		"https://raw.githubusercontent.com/italia/publiccode-parser-go/refs/heads/relative-paths/testdata/v0/invalid/logo_missing_url.yml",
+
+		// Local publiccode.yml and URL in logo:
+		// should look for the logo remotely but DisableNetwork is true, so no check is performed.
+		"testdata/v0/invalid/logo_missing_url.yml",
+	}
+
+	for _, file := range testRemoteFiles {
+		t.Run(file, func(t *testing.T) {
+			if err := parseNoNetwork(file); err != nil {
+				t.Errorf("[%s] validation failed for valid file: %T - %s\n", file, err, err)
+			}
+		})
+	}
+}
+
+// Test that files in fields with relative paths or URLs (ie. logo, screenshots, etc.)
+// are checked and expanded correctly when DisableNetwork is true
+func TestRelativePathsOrURLsNoNetwork(t *testing.T) {
+	testFiles := []testType{
+		// Local publiccode.yml and relative path in screenshot:
+		// should look for the logo relative to this path in the filesystem.
+		// DisableNetwork doesn't affect this so the check *IS* performed.
+		{"testdata/v0/invalid/description_en_screenshots_missing_file.yml", ValidationResults{
+			ValidationError{"description.en.screenshots[0]", "'no_such_file.png' is not an image: no such file: " + cwd + "/testdata/v0/invalid/no_such_file.png", 20, 5},
+		}},
+	}
+
+	parser, err := NewParser(ParserConfig{DisableNetwork: true})
+	if err != nil {
+		t.Errorf("Can't create parser: %v", err)
+	}
+
+	for _, test := range testFiles {
+		t.Run(fmt.Sprintf("%v", test.err), func(t *testing.T) {
+			var err error
+
+			_, err = parser.Parse(test.file)
+
+			checkParseErrors(t, err, test)
+		})
+	}
+}
+
 func TestUrlMissingWithoutPath(t *testing.T) {
 	expected := map[string]error{
 		"url_missing.yml": ValidationResults{
@@ -763,10 +882,7 @@ func TestExport(t *testing.T) {
 
 // Test the toURL function
 func TestToURL(t *testing.T) {
-	cwd, err := os.Getwd()
-	if err != nil {
-		t.Errorf("Can't get current working directory")
-	}
+	var err error
 
 	expected := map[string]*url.URL{
 		"file.txt":                              &url.URL{Scheme: "file", Path: fmt.Sprintf("%s/file.txt", cwd)},

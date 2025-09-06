@@ -106,19 +106,13 @@ func toCodeHostingURL(file string, baseURL *url.URL) url.URL {
 		return *uri
 	}
 
-	// baseURL can be nil if we didn't autodetect it because
-	// of DisableNetwork == true.
-	if baseURL != nil {
-		// If file is a relative path, let's just append it to our baseURL
-		u := *baseURL
-		u.Path = path.Join(u.Path, file)
+	// We always pass the computed base URL here, with a fallback to the cwd,
+	// so baseURL won't be nil. I'd be a programming mistake in case it is, so
+	// it'll be good to crash here.
+	u := *baseURL
+	u.Path = path.Join(u.Path, file)
 
-		return u
-	}
-
-	// Let's construct a valid URL that will not be used anyway, because
-	// of DisableNetwork == true.
-	return url.URL{Scheme: "file", Path: file}
+	return u
 }
 
 // fileExists returns true if the file resource exists.

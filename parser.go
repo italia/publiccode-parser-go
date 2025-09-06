@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"path"
 	"path/filepath"
 	"regexp"
 	"slices"
@@ -48,6 +49,14 @@ type Parser struct {
 	domain         Domain
 	branch         string
 	baseURL        *url.URL
+	fileURL        *url.URL
+
+	// This is the baseURL we'll try to compute and use between
+	// Parse{,Stream)() calls.
+	//
+	// XXX: It's an hack and it requires to fix the design mistake in the public API.
+	// This makes Parse{,Stream}() not thread safe.
+	currentBaseURL *url.URL
 }
 
 // Domain is a single code hosting service.
@@ -217,11 +226,22 @@ func (p *Parser) ParseStream(in io.Reader) (PublicCode, error) {
 		}
 	}
 
-	// baseURL was not set to a local path, let's autodetect it from the
-	// publiccode.yml url key
-	//
-	// We need the baseURL to perform network checks.
-	if p.baseURL == nil && !p.disableNetwork && publiccode.Url() != nil {
+	p.currentBaseURL = nil
+
+	// baseURL was not set by the user (with ParserConfig{BaseURL: "..."})),
+	// We need a base URL to perform external checks on relative files (eg. logo).
+	if p.baseURL == nil {
+		// If we parsed from an actual local or remote file, use its dir
+		if p.fileURL != nil {
+			u := *p.fileURL
+
+			p.currentBaseURL = &u
+			p.currentBaseURL.Path = path.Dir(p.fileURL.Path)
+		}
+	}
+
+	// Still no base URL: we parsed from a stream, try to use the publiccode.yml's `url` field
+	if p.currentBaseURL == nil && !p.disableNetwork && publiccode.Url() != nil {
 		rawRoot, err := vcsurl.GetRawRoot((*url.URL)(publiccode.Url()), p.branch)
 		if err != nil {
 			line, column := getPositionInFile("url", node)
@@ -233,12 +253,24 @@ func (p *Parser) ParseStream(in io.Reader) (PublicCode, error) {
 				Column:      column,
 			})
 
-			// Return early because proceeding with no baseURL would result in a lot
+			// Return early because proceeding with no base URL would result in a lot
 			// of duplicate errors stemming from its absence.
 			return publiccode, ve
 		}
 
-		p.baseURL = rawRoot
+		p.currentBaseURL = rawRoot
+	}
+
+	// Still no base URL: DisableNetwork is true, use the current working directory as a fallback
+	if p.currentBaseURL == nil {
+		cwd, err := os.Getwd()
+		if err != nil {
+			ve = append(ve, newValidationError("", fmt.Sprintf("no baseURL set and failed to get working directory: %s", err)))
+
+			return publiccode, ve
+		}
+
+		p.currentBaseURL = &url.URL{Scheme: "file", Path: cwd}
 	}
 
 	if err = validateFields(publiccode, *p, !p.disableNetwork); err != nil {
@@ -269,6 +301,8 @@ func (p *Parser) Parse(uri string) (PublicCode, error) {
 		return nil, fmt.Errorf("invalid URL '%s': %w", uri, err)
 	}
 
+	p.fileURL = url
+
 	if url.Scheme == "file" {
 		stream, err = os.Open(url.Path)
 		if err != nil {
@@ -282,6 +316,7 @@ func (p *Parser) Parse(uri string) (PublicCode, error) {
 
 		defer func() {
 			_ = resp.Body.Close()
+			p.fileURL = nil
 		}()
 
 		stream = resp.Body

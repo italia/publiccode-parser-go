@@ -2,7 +2,9 @@ publiccodeYmlVersion: "0.4"
 
 name: Medusa
 url: "https://github.com/italia/developers.italia.it.git"
-releaseDate: "2017-04-15"
+
+# Logo with a URL
+logo: "https://raw.githubusercontent.com/italia/publiccode-parser-go/refs/heads/main/testdata/img/logo.png"
 
 platforms:
   - web
@@ -14,11 +16,8 @@ developmentStatus: development
 
 softwareType: "standalone/other"
 
-# Should NOT validate: PNG logo must be a valid PNG
-logo: "assets/img/not-an-image.png"
-
 description:
-  en:
+  en_GB:
     localisedName: Medusa
     shortDescription: >
       A rather short description which
