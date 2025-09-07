@@ -2,8 +2,8 @@ package netutil
 
 import (
 	"bytes"
+	"fmt"
 	"io"
-	"log"
 	"net/url"
 	"os"
 	"path"
@@ -43,7 +43,7 @@ func DownloadTmpFile(url *url.URL, headers map[string]string) (string, error) {
 	// Create a temp dir
 	tmpdir, err := os.MkdirTemp("", "publiccode.yml-parser-go")
 	if err != nil {
-		log.Fatal(err)
+		return "", fmt.Errorf("creating temp dir: %w", err)
 	}
 
 	// Download the file in the temp dir.
