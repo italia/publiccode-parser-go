@@ -180,9 +180,17 @@ func (p *Parser) validLogo(u url.URL, network bool) (bool, error) {
 		}
 
 		defer func() {
-			file := path.Dir(localPath)
-			if err := os.Remove(file); err != nil {
-				fmt.Fprintf(os.Stderr, "failed to remove %s: %v\n", file, err)
+			if localPath == "" {
+				return
+			}
+
+			if err := os.Remove(localPath); err != nil {
+				fmt.Fprintf(os.Stderr, "failed to remove %s: %v\n", localPath, err)
+			}
+
+			dir := path.Dir(localPath)
+			if err = os.Remove(dir); err != nil {
+				fmt.Fprintf(os.Stderr, "failed to remove %s: %v\n", dir, err)
 			}
 		}()
 	} else {
