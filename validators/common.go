@@ -51,6 +51,7 @@ func isHTTPURL(fl validator.FieldLevel) bool {
 		return err == nil
 	}
 
+	//nolint:forbidigo // If we hit this, it's a programming error caught at runtime, it's good to panic.
 	panic(fmt.Sprintf("Bad field type for %T. Must be implement fmt.Stringer", fl.Field().Interface()))
 }
 
@@ -65,6 +66,7 @@ func isURL(fl validator.FieldLevel) bool {
 		return err == nil
 	}
 
+	//nolint:forbidigo // If we hit this, it's a programming error caught at runtime, it's good to panic.
 	panic(fmt.Sprintf("Bad field type for %T. Must be implement fmt.Stringer", fl.Field().Interface()))
 }
 
@@ -73,6 +75,7 @@ func bcp47_keys(fl validator.FieldLevel) bool {
 	validate := validator.New(validator.WithRequiredStructEnabled())
 
 	if fl.Field().Kind() != reflect.Map {
+		//nolint:forbidigo // If we hit this, it's a programming error caught at runtime, it's good to panic.
 		panic(fmt.Sprintf("Bad field type for %T. Must be a map", fl.Field().Interface()))
 	}
 
