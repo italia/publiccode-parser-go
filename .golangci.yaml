@@ -37,7 +37,6 @@ linters:
     - err113
     - errname
     - errorlint
-    - forbidigo
     - forcetypeassert
     - funlen
     - gochecknoglobals
@@ -90,6 +89,10 @@ linters:
       os-setenv: true
       os-create-temp: true
       os-temp-dir: false
+    forbidigo:
+      forbid:
+        - pattern: ^(fmt\.Print(|f|ln)|print|println)$
+        - pattern: ^panic$
 
   exclusions:
     generated: lax
@@ -102,6 +105,12 @@ linters:
       - third_party$
       - builtin$
       - examples$
+    rules:
+      # Allow prints and panics in publiccode-parser/, as it's the
+      # CLI tool.
+      - path: publiccode-parser/
+        linters:
+          - forbidigo
 
 formatters:
   enable:
