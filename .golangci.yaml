@@ -93,6 +93,8 @@ linters:
       forbid:
         - pattern: ^(fmt\.Print(|f|ln)|print|println)$
         - pattern: ^panic$
+        - pattern: ^log\.Fatal.*$
+        - pattern: ^os\.Exit$
 
   exclusions:
     generated: lax

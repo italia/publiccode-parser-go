@@ -205,6 +205,7 @@ func RegisterLocalErrorMessages(v *validator.Validate, trans ut.Translator) erro
 func registrationFunc(tag string, translation string, override bool) validator.RegisterTranslationsFunc {
 	return func(ut ut.Translator) error {
 		if err := ut.Add(tag, translation, override); err != nil {
+			//nolint:forbidigo // Programming error caught at runtime, it's right to panic
 			log.Fatalf("Error %s", err.Error())
 
 			return err
