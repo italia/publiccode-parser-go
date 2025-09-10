@@ -238,6 +238,10 @@ func (p *Parser) ParseStream(in io.Reader) (PublicCode, error) {
 			p.currentBaseURL = &u
 			p.currentBaseURL.Path = path.Dir(p.fileURL.Path)
 		}
+	} else {
+		u := *p.baseURL
+
+		p.currentBaseURL = &u
 	}
 
 	// Still no base URL: we parsed from a stream, try to use the publiccode.yml's `url` field

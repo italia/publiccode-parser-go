@@ -117,6 +117,11 @@ func toCodeHostingURL(file string, baseURL *url.URL) url.URL {
 
 // fileExists returns true if the file resource exists.
 func (p *Parser) fileExists(u url.URL, network bool) (bool, error) {
+	// Don't check if we are running in WASM because there's no stat(2) there
+	if runtime.GOARCH == "wasm" {
+		return true, nil
+	}
+
 	// If we have an absolute local path, perform validation on it, otherwise do it
 	// on the remote URL if any. If none are available, validation is skipped.
 	if u.Scheme == "file" {
