@@ -1,7 +1,12 @@
+# TODO: enable when
+# https://github.com/italia/publiccode-parser-go/issues/47
+# is fixed.
 publiccodeYmlVersion: "0.4"
 
 name: Medusa
 url: "https://github.com/italia/developers.italia.it.git"
+softwareVersion: "dev"
+releaseDate: "2017-04-15"
 
 platforms:
   - web
@@ -14,7 +19,9 @@ developmentStatus: development
 softwareType: "standalone/other"
 
 description:
-  en-GB:
+  # Should NOT validate: even if this a valid POSIX language tag
+  # it's NOT a valid BCP47 language tag
+  en_GB:
     localisedName: Medusa
     shortDescription: >
           A rather short description which
@@ -39,13 +46,12 @@ legal:
   license: AGPL-3.0-or-later
 
 maintenance:
-  type: "none"
+  type: "community"
 
-  # `contacts` is allowed when type is "none" as well
   contacts:
-    - name: John Smith
+    - name: Francesco Rossi
 
 localisation:
   localisationReady: true
   availableLanguages:
-    - en
+     - fr
