@@ -56,7 +56,7 @@ func validateFieldsV0(publiccode PublicCode, parser Parser, network bool) error 
 	}
 
 	if publiccodev0.MonochromeLogo != "" {
-		vr = append(vr, ValidationWarning{"monochromeLogo", "This key is DEPRECATED and will be removed in the future", 0, 0})
+		vr = append(vr, ValidationWarning{"monochromeLogo", "This key is DEPRECATED and will be removed in the future. Use 'logo' instead", 0, 0})
 
 		if _, err := isRelativePathOrURL(publiccodev0.MonochromeLogo, "monochromeLogo"); err != nil {
 			vr = append(vr, err)
@@ -66,7 +66,7 @@ func validateFieldsV0(publiccode PublicCode, parser Parser, network bool) error 
 	}
 
 	if publiccodev0.Legal.AuthorsFile != nil {
-		vr = append(vr, ValidationWarning{"legal.authorsFile", "This key is DEPRECATED and will be removed in the future", 0, 0})
+		vr = append(vr, ValidationWarning{"legal.authorsFile", "This key is DEPRECATED and will be removed in the future. It's safe to drop it", 0, 0})
 
 		if _, err := isRelativePathOrURL(*publiccodev0.Legal.AuthorsFile, "legal.authorsFile"); err != nil {
 			vr = append(vr, err)
@@ -78,11 +78,11 @@ func validateFieldsV0(publiccode PublicCode, parser Parser, network bool) error 
 	}
 
 	if len(publiccodev0.InputTypes) > 0 {
-		vr = append(vr, ValidationWarning{"inputTypes", "This key is DEPRECATED and will be removed in the future", 0, 0})
+		vr = append(vr, ValidationWarning{"inputTypes", "This key is DEPRECATED and will be removed in the future. It's safe to drop it", 0, 0})
 	}
 
 	if len(publiccodev0.OutputTypes) > 0 {
-		vr = append(vr, ValidationWarning{"outputTypes", "This key is DEPRECATED and will be removed in the future", 0, 0})
+		vr = append(vr, ValidationWarning{"outputTypes", "This key is DEPRECATED and will be removed in the future. It's safe to drop it", 0, 0})
 	}
 
 	for lang, desc := range publiccodev0.Description {
@@ -93,7 +93,7 @@ func validateFieldsV0(publiccode PublicCode, parser Parser, network bool) error 
 		if len(desc.GenericName) > 0 {
 			vr = append(vr, ValidationWarning{
 				fmt.Sprintf("description.%s.genericName", lang),
-				"This key is DEPRECATED and will be removed in the future", 0, 0,
+				"This key is DEPRECATED and will be removed in the future. It's safe to drop it", 0, 0,
 			})
 		}
 
