@@ -105,7 +105,7 @@ func TestValidTestcasesV0_NoNetwork(t *testing.T) {
 func TestValidWithWarningTestcasesV0_NoNetwork(t *testing.T) {
 	expected := map[string]error{
 		"authorsFile.yml": ValidationResults{
-			ValidationWarning{"legal.authorsFile", "This key is DEPRECATED and will be removed in the future", 72, 3},
+			ValidationWarning{"legal.authorsFile", "This key is DEPRECATED and will be removed in the future. It's safe to drop it", 72, 3},
 		},
 	}
 
@@ -146,7 +146,7 @@ func TestInvalidTestcasesV0_NoNetwork(t *testing.T) {
 
 		// monochromeLogo
 		"monochromeLogo_invalid_png.yml": ValidationResults{
-			ValidationWarning{"monochromeLogo", "This key is DEPRECATED and will be removed in the future", 18, 1},
+			ValidationWarning{"monochromeLogo", "This key is DEPRECATED and will be removed in the future. Use 'logo' instead", 18, 1},
 			ValidationError{"monochromeLogo", "image: unknown format", 18, 1},
 		},
 	}
@@ -287,7 +287,7 @@ func TestInvalidTestcasesV0(t *testing.T) {
 			ValidationError{"monochromeLogo", "wrong type for this field", 18, 1},
 		},
 		"monochromeLogo_unsupported_extension.yml": ValidationResults{
-			ValidationWarning{"monochromeLogo", "This key is DEPRECATED and will be removed in the future", 18, 1},
+			ValidationWarning{"monochromeLogo", "This key is DEPRECATED and will be removed in the future. Use 'logo' instead", 18, 1},
 			ValidationError{
 				"monochromeLogo",
 				"invalid file extension for: " + cwd + "/testdata/v0/invalid/monochromeLogo.mpg",
@@ -296,14 +296,14 @@ func TestInvalidTestcasesV0(t *testing.T) {
 			},
 		},
 		"monochromeLogo_missing_file.yml": ValidationResults{
-			ValidationWarning{"monochromeLogo", "This key is DEPRECATED and will be removed in the future", 18, 1},
+			ValidationWarning{"monochromeLogo", "This key is DEPRECATED and will be removed in the future. Use 'logo' instead", 18, 1},
 			ValidationError{"monochromeLogo", "no such file: " + cwd + "/testdata/v0/invalid/no_such_file.png", 18, 1},
 		},
 
 		// inputTypes
 		"inputTypes_invalid.yml": ValidationResults{
 			ValidationError{"inputTypes[1]", "inputTypes[1] is not a valid MIME type", 1, 1},
-			ValidationWarning{"inputTypes", "This key is DEPRECATED and will be removed in the future", 14, 1},
+			ValidationWarning{"inputTypes", "This key is DEPRECATED and will be removed in the future. It's safe to drop it", 14, 1},
 		},
 		"inputTypes_wrong_type.yml": ValidationResults{
 			ValidationError{"inputTypes.foobar", "wrong type for this field", 15, 1},
@@ -312,7 +312,7 @@ func TestInvalidTestcasesV0(t *testing.T) {
 		// outputTypes
 		"outputTypes_invalid.yml": ValidationResults{
 			ValidationError{"outputTypes[1]", "outputTypes[1] is not a valid MIME type", 1, 1},
-			ValidationWarning{"outputTypes", "This key is DEPRECATED and will be removed in the future", 14, 1},
+			ValidationWarning{"outputTypes", "This key is DEPRECATED and will be removed in the future. It's safe to drop it", 14, 1},
 		},
 		"outputTypes_wrong_type.yml": ValidationResults{
 			ValidationError{"outputTypes.foobar", "wrong type for this field", 15, 1},
@@ -418,7 +418,7 @@ func TestInvalidTestcasesV0(t *testing.T) {
 		},
 		"description_en_genericName_too_long.yml": ValidationResults{
 			ValidationError{"description.en.genericName", "genericName must be a maximum of 35 characters in length", 22, 5},
-			ValidationWarning{"description.en.genericName", "This key is DEPRECATED and will be removed in the future", 22, 5},
+			ValidationWarning{"description.en.genericName", "This key is DEPRECATED and will be removed in the future. It's safe to drop it", 22, 5},
 		},
 		"description_en_shortDescription_missing.yml": ValidationResults{
 			ValidationError{"description.en.shortDescription", "shortDescription is a required field", 20, 5},
@@ -486,7 +486,7 @@ func TestInvalidTestcasesV0(t *testing.T) {
 		"legal_authorsFile_missing_file.yml": ValidationResults{
 			ValidationWarning{
 				"legal.authorsFile",
-				"This key is DEPRECATED and will be removed in the future",
+				"This key is DEPRECATED and will be removed in the future. It's safe to drop it",
 				42,
 				3,
 			},
@@ -644,7 +644,7 @@ func TestValidTestcasesV0(t *testing.T) {
 func TestValidWithWarningsTestcasesV0(t *testing.T) {
 	expected := map[string]error{
 		"unicode_grapheme_clusters.yml": ValidationResults{
-			ValidationWarning{"description.en.genericName", "This key is DEPRECATED and will be removed in the future", 23, 5},
+			ValidationWarning{"description.en.genericName", "This key is DEPRECATED and will be removed in the future. It's safe to drop it", 23, 5},
 		},
 		"valid.minimal.v0.2.yml": ValidationResults{
 			ValidationWarning{"publiccodeYmlVersion", "v0.2 is not the latest version, use '0.4.0'. Parsing this file as v0.4.0.", 1, 1},
@@ -653,8 +653,8 @@ func TestValidWithWarningsTestcasesV0(t *testing.T) {
 			ValidationWarning{"publiccodeYmlVersion", "v0.3 is not the latest version, use '0.4.0'. Parsing this file as v0.4.0.", 1, 1},
 		},
 		"valid.mime_types.yml": ValidationResults{
-			ValidationWarning{"inputTypes", "This key is DEPRECATED and will be removed in the future", 48, 1},
-			ValidationWarning{"outputTypes", "This key is DEPRECATED and will be removed in the future", 50, 1},
+			ValidationWarning{"inputTypes", "This key is DEPRECATED and will be removed in the future. It's safe to drop it", 48, 1},
+			ValidationWarning{"outputTypes", "This key is DEPRECATED and will be removed in the future. It's safe to drop it", 50, 1},
 		},
 	}
 
@@ -684,8 +684,8 @@ func TestDecodeValueErrorsRemote(t *testing.T) {
 			ValidationWarning{
 				"publiccodeYmlVersion", "v0.2 is not the latest version, use '0.4.0'. Parsing this file as v0.4.0.", 1, 1,
 			},
-			ValidationWarning{"legal.authorsFile", "This key is DEPRECATED and will be removed in the future", 48, 3},
-			ValidationWarning{"description.it.genericName", "This key is DEPRECATED and will be removed in the future", 12, 5},
+			ValidationWarning{"legal.authorsFile", "This key is DEPRECATED and will be removed in the future. It's safe to drop it", 48, 3},
+			ValidationWarning{"description.it.genericName", "This key is DEPRECATED and will be removed in the future. It's safe to drop it", 12, 5},
 		}},
 	}
 
