@@ -614,6 +614,9 @@ func TestInvalidTestcasesV0(t *testing.T) {
 			ValidationError{"localisation.localisationReady", "localisationReady is a required field", 4, 15},
 			ValidationError{"localisation.availableLanguages", "availableLanguages is a required field", 4, 15},
 		},
+		"unknown_field.yml": ValidationResults{
+			ValidationError{"foobar", "field foobar not found in type publiccode.PublicCodeV0", 10, 1},
+		},
 	}
 
 	dir := "testdata/v0/invalid/"
