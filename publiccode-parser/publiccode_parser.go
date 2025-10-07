@@ -38,7 +38,6 @@ func main() {
 	localBasePathPtr := flag.String("path", "", "Use this local directory as base path when checking for files existence instead of using the `url` key in publiccode.yml")
 	disableNetworkPtr := flag.Bool("no-network", false, "Disables checks that require network connections (URL existence and oEmbed). This makes validation much faster.")
 	disableExternalChecksPtr := flag.Bool("no-external-checks", false, "Disables ALL checks that reference external resources such as remote URLs or local file existence. Implies --no-network")
-	_ = flag.String("export", "", "(DEPRECATED) Provided for backward compatibility only")
 	jsonOutputPtr := flag.Bool("json", false, "Output the validation errors as a JSON list.")
 	helpPtr := flag.Bool("help", false, "Display command line usage.")
 	versionPtr := flag.Bool("version", false, "Display current software version.")
