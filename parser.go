@@ -20,8 +20,8 @@ import (
 	ut "github.com/go-playground/universal-translator"
 	"github.com/go-playground/validator/v10"
 	en_translations "github.com/go-playground/validator/v10/translations/en"
-	urlutil "github.com/italia/publiccode-parser-go/v4/internal"
-	publiccodeValidator "github.com/italia/publiccode-parser-go/v4/validators"
+	urlutil "github.com/italia/publiccode-parser-go/v5/internal"
+	publiccodeValidator "github.com/italia/publiccode-parser-go/v5/validators"
 	"gopkg.in/yaml.v3"
 )
 

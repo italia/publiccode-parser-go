@@ -8,8 +8,8 @@ import (
 	"runtime/debug"
 
 	"github.com/alranel/go-vcsurl/v2"
-	publiccode "github.com/italia/publiccode-parser-go/v4"
-	urlutil "github.com/italia/publiccode-parser-go/v4/internal"
+	publiccode "github.com/italia/publiccode-parser-go/v5"
+	urlutil "github.com/italia/publiccode-parser-go/v5/internal"
 )
 
 var (

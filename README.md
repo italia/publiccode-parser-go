@@ -39,7 +39,7 @@ from the command line.
 To get the latest development version use:
 
 ```shell
-go install github.com/italia/publiccode-parser-go/v4/publiccode-parser@latest
+go install github.com/italia/publiccode-parser-go/v5/publiccode-parser@latest
 publiccode-parser mypubliccode.yml
 ```
 

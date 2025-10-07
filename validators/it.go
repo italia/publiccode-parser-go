@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/go-playground/validator/v10"
-	"github.com/italia/publiccode-parser-go/v4/data"
+	"github.com/italia/publiccode-parser-go/v5/data"
 )
 
 // isCodiceIPA returns true if the field is a valid Italian Public Administration Code
