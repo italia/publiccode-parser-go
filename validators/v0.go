@@ -113,6 +113,7 @@ func isCategoryV0(fl validator.FieldLevel) bool {
 		"whistleblowing",
 		"website-builder",
 		"workflow-management",
+		"other",
 	}
 
 	return slices.Contains(supportedCategories, fl.Field().String())
