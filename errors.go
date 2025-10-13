@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-// A generic parse error.
+// ParseError is generic parse error.
 type ParseError struct {
 	Reason string
 }
@@ -36,6 +36,7 @@ func (e ValidationError) MarshalJSON() ([]byte, error) {
 
 	return json.Marshal(&struct {
 		*Ve
+
 		Type string `json:"type"`
 	}{
 		Ve:   (*Ve)(&e),
@@ -63,6 +64,7 @@ func (e ValidationWarning) MarshalJSON() ([]byte, error) {
 
 	return json.Marshal(&struct {
 		*Ve
+
 		Type string `json:"type"`
 	}{
 		Ve:   (*Ve)(&e),
