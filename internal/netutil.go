@@ -38,6 +38,7 @@ func downloadFile(filepath string, url *url.URL, headers map[string]string) erro
 	return err
 }
 
+// DownloadTmpFile downloads the passed URL to a temporary directory.
 // Caller is responsible for removing the temporary directory.
 func DownloadTmpFile(url *url.URL, headers map[string]string) (string, error) {
 	// Create a temp dir

@@ -28,6 +28,10 @@ linters:
     # https://github.com/italia/developers-italia-api/issues/190)
     # Don't feel about chasing this one down
     - musttag
+    # Meh
+    - noinlineerr
+    # Deprecated
+    - wsl
 
     # More false positive than actual issues
     - mnd
