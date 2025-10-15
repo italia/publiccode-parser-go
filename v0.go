@@ -29,6 +29,11 @@ type PublicCodeV0 struct {
 
 	UsedBy *[]string `json:"usedBy,omitempty" yaml:"usedBy,omitempty"`
 
+	FundedBy *[]struct {
+		Name string  `json:"name"          validate:"required"                   yaml:"name"`
+		URI  *string `json:"uri,omitempty" validate:"omitempty,organisation_uri" yaml:"uri,omitempty"`
+	} `json:"fundedBy,omitempty" validate:"omitempty,dive" yaml:"fundedBy,omitempty"`
+
 	Roadmap *URL `json:"roadmap,omitempty" validate:"omitnil,url_http_url" yaml:"roadmap,omitempty"`
 
 	DevelopmentStatus string `json:"developmentStatus" validate:"required,oneof=concept development beta stable obsolete" yaml:"developmentStatus"`
