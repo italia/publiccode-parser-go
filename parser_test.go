@@ -342,6 +342,23 @@ func TestInvalidTestcasesV0(t *testing.T) {
 			ValidationError{"usedBy", "wrong type for this field", 14, 1},
 		},
 
+		// fundedBy
+		"fundedBy_wrong_uri.yml": ValidationResults{
+			ValidationError{"fundedBy[0].uri", "uri is not a valid URI", 0, 0},
+		},
+		"fundedBy_wrong_type.yml": ValidationResults{
+			ValidationError{"fundedBy.name", "wrong type for this field", 18, 1},
+		},
+		"fundedBy_name_missing.yml": ValidationResults{
+			ValidationError{"fundedBy[0].name", "name is a required field", 0, 0},
+		},
+		"fundedBy_uri_wrong_italian_pa.yml": ValidationResults{
+			ValidationError{"fundedBy[0].uri", "uri is not a valid URI", 0, 0},
+		},
+		"fundedBy_uri_wrong_italian_pa2.yml": ValidationResults{
+			ValidationError{"fundedBy[0].uri", "uri must be a valid Italian Public Administration Code (iPA) with format 'urn:x-italian-pa:[codiceIPA]' (see https://www.indicepa.gov.it/public-services/opendata-read-service.php?dstype=FS&filename=amministrazioni.txt)", 0, 0},
+		},
+
 		// roadmap
 		"roadmap_invalid.yml": ValidationResults{
 			ValidationError{"roadmap", "roadmap must be an HTTP URL", 4, 1},

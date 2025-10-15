@@ -2,6 +2,7 @@ package validators
 
 import (
 	"fmt"
+	"net/url"
 	"reflect"
 	"regexp"
 	"strconv"
@@ -68,6 +69,40 @@ func isURL(fl validator.FieldLevel) bool {
 
 	//nolint:forbidigo // If we hit this, it's a programming error caught at runtime, it's good to panic.
 	panic(fmt.Sprintf("Bad field type for %T. Must be implement fmt.Stringer", fl.Field().Interface()))
+}
+
+func isOrganisationURI(fl validator.FieldLevel) bool {
+	validate := New()
+
+	field := fl.Field().String()
+
+	u, err := url.ParseRequestURI(field)
+	if err != nil {
+		return false
+	}
+
+	// Validate URNs as well
+	if strings.EqualFold(u.Scheme, "urn") {
+		err := validate.Var(field, "urn_rfc2141")
+		if err != nil {
+			return false
+		}
+
+		if strings.HasPrefix(u.Opaque, "x-italian-pa:") {
+			ipa := strings.ReplaceAll(u.Opaque, "x-italian-pa:", "")
+			err := validate.Var(ipa, "is_italian_ipa_code")
+
+			return err == nil
+		}
+
+		return true
+	}
+
+	if u.Scheme == "" || u.Host == "" {
+		return false
+	}
+
+	return true
 }
 
 // Custom validator to work around https://github.com/go-playground/validator/issues/1260

@@ -18,6 +18,7 @@ func New() *validator.Validate {
 	_ = validate.RegisterValidation("umin", uMin)
 	_ = validate.RegisterValidation("url_http_url", isHTTPURL)
 	_ = validate.RegisterValidation("url_url", isURL)
+	_ = validate.RegisterValidation("organisation_uri", isOrganisationURI)
 	_ = validate.RegisterValidation("is_spdx_expression", isSPDXExpression)
 
 	_ = validate.RegisterValidation("is_category_v0", isCategoryV0)
@@ -141,6 +142,39 @@ func RegisterLocalErrorMessages(v *validator.Validate, trans ut.Translator) erro
 			},
 			customTransFunc: func(ut ut.Translator, fe validator.FieldError) string {
 				t, _ := ut.T("umin", fe.Field(), fe.Param())
+
+				return t
+			},
+		},
+		{
+			tag: "organisation_uri",
+			customRegisFunc: func(ut ut.Translator) error {
+				err := ut.Add("organisation_uri", "{0} is not a valid URI", false)
+				if err != nil {
+					return err
+				}
+
+				err = ut.Add(
+					"organisation_uri_invalid_italian_pa",
+					"{0} must be a valid Italian Public Administration Code (iPA) with format 'urn:x-italian-pa:[codiceIPA]' (see https://www.indicepa.gov.it/public-services/opendata-read-service.php?dstype=FS&filename=amministrazioni.txt)",
+					false)
+				if err != nil {
+					return err
+				}
+
+				return nil
+			},
+			customTransFunc: func(ut ut.Translator, fe validator.FieldError) string {
+				field := fe.Field()
+				val, _ := fe.Value().(string)
+
+				if strings.HasPrefix(val, "urn:x-italian-pa:") {
+					t, _ := ut.T("organisation_uri_invalid_italian_pa", field)
+
+					return t
+				}
+
+				t, _ := ut.T("organisation_uri", field)
 
 				return t
 			},
