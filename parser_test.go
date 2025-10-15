@@ -684,6 +684,9 @@ func TestValidWithWarningsTestcasesV0(t *testing.T) {
 			ValidationWarning{"inputTypes", "This key is DEPRECATED and will be removed in the future. It's safe to drop it", 48, 1},
 			ValidationWarning{"outputTypes", "This key is DEPRECATED and will be removed in the future. It's safe to drop it", 50, 1},
 		},
+		"valid_with_it_conforme.yml": ValidationResults{
+			ValidationWarning{"it.conforme", "This key is DEPRECATED and will be removed in the future. It's safe to drop it", 120, 3},
+		},
 	}
 
 	dir := "testdata/v0/valid_with_warnings/"

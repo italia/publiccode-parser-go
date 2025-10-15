@@ -40,34 +40,34 @@ description:
     localisedName: Medusa
     shortDescription: "A really interesting software."
     longDescription: >
-          Very long description of this software, also split
-          on multiple rows. You should note what the software
-          is and why one should need it. This is 158 characters.
-          Very long description of this software, also split
-          on multiple rows. You should note what the software
-          is and why one should need it. This is 316 characters.
-          Very long description of this software, also split
-          on multiple rows. You should note what the software
-          is and why one should need it. This is 474 characters.
-          Very long description of this software, also split
-          on multiple rows. You should note what the software
-          is and why one should need it. This is 632 characters.
+      Very long description of this software, also split
+      on multiple rows. You should note what the software
+      is and why one should need it. This is 158 characters.
+      Very long description of this software, also split
+      on multiple rows. You should note what the software
+      is and why one should need it. This is 316 characters.
+      Very long description of this software, also split
+      on multiple rows. You should note what the software
+      is and why one should need it. This is 474 characters.
+      Very long description of this software, also split
+      on multiple rows. You should note what the software
+      is and why one should need it. This is 632 characters.
 
     documentation: "https://docs.italia.it"
     apiDocumentation: "https://developers.italia.it/it/api"
 
     features:
-       - Very important feature
-       - Will run without a problem
-       - Has zero bugs
-       - Solves all the problems of the world
-    videos:                             # Demo videos of the software
-       - https://www.youtube.com/watch?v=RaHmGbBOP84
+      - Very important feature
+      - Will run without a problem
+      - Has zero bugs
+      - Solves all the problems of the world
+    videos: # Demo videos of the software
+      - https://www.youtube.com/watch?v=RaHmGbBOP84
     awards:
-       - 1st Price Software of the year
+      - 1st Price Software of the year
 
 legal:
-  license: AGPL-3.0-or-later        # SPDX expression of license
+  license: AGPL-3.0-or-later # SPDX expression of license
   mainCopyrightOwner: City of Chicago
   repoOwner: City of Chicago
 
@@ -119,12 +119,6 @@ dependsOn:
       optional: true
 
 it:
-  conforme:
-    lineeGuidaDesign: true
-    modelloInteroperabilita: true
-    misureMinimeSicurezza: true
-    gdpr: true
-
   riuso:
     codiceIPA: c_h501
 

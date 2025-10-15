@@ -227,12 +227,6 @@ dependsOn:
       optional: true
 
 it:
-  conforme:
-    lineeGuidaDesign: true
-    modelloInteroperabilita: true
-    misureMinimeSicurezza: true
-    gdpr: true
-
   riuso:
     codiceIPA: c_h501
 

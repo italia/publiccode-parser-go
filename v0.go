@@ -78,7 +78,7 @@ type PublicCodeV0 struct {
 		Hardware    *[]DependencyV0 `json:"hardware,omitempty"    validate:"omitempty,dive" yaml:"hardware,omitempty"`
 	} `json:"dependsOn,omitempty" yaml:"dependsOn,omitempty"`
 
-	It ITSectionV0 `json:"it" yaml:"it"`
+	It *ITSectionV0 `json:"it,omitempty" yaml:"it,omitempty"`
 }
 
 // DescV0 is a general description of the software.
@@ -129,12 +129,12 @@ type DependencyV0 struct {
 type ITSectionV0 struct {
 	CountryExtensionVersion *string `json:"countryExtensionVersion" validate:"omitnil,oneof=0.2 1.0" yaml:"countryExtensionVersion"`
 
-	Conforme struct {
-		LineeGuidaDesign        bool `json:"lineeGuidaDesign,omitempty" yaml:"lineeGuidaDesign,omitempty"`
-		ModelloInteroperabilita bool `json:"modelloInteroperabilita"    yaml:"modelloInteroperabilita"`
-		MisureMinimeSicurezza   bool `json:"misureMinimeSicurezza"      yaml:"misureMinimeSicurezza"`
-		GDPR                    bool `json:"gdpr"                       yaml:"gdpr"`
-	} `yaml:"conforme" json:"conforme"`
+	Conforme *struct {
+		LineeGuidaDesign        *bool `json:"lineeGuidaDesign,omitempty"        yaml:"lineeGuidaDesign,omitempty"`
+		ModelloInteroperabilita *bool `json:"modelloInteroperabilita,omitempty" yaml:"modelloInteroperabilita,omitempty"`
+		MisureMinimeSicurezza   *bool `json:"misureMinimeSicurezza,omitempty"   yaml:"misureMinimeSicurezza,omitempty"`
+		GDPR                    *bool `json:"gdpr,omitempty"                    yaml:"gdpr,omitempty"`
+	} `json:"conforme,omitempty" yaml:"conforme,omitempty"`
 
 	Riuso struct {
 		CodiceIPA string `json:"codiceIPA,omitempty" validate:"omitempty,is_italian_ipa_code" yaml:"codiceIPA,omitempty"`

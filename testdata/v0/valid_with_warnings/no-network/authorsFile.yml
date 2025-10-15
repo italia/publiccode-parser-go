@@ -109,14 +109,8 @@ dependsOn: # List of dependencies. The only mandatory list is the proprietary on
     - name: NFC Reader2
       optional: true
 
-# IT: Italian extension.
 it:
   countryExtensionVersion: "0.2"
-  conforme:
-    lineeGuidaDesign: false
-    modelloInteroperabilita: false
-    misureMinimeSicurezza: false
-    gdpr: false
 
   riuso:
     # Codice IPA della PA che ha pubblicato questo repo (repo-owner)

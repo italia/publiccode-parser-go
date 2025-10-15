@@ -4,9 +4,6 @@ name: Medusa
 applicationSuite: MegaProductivitySuite
 url: "https://github.com/italia/developers.italia.it.git"
 
-# Should not validate: landingURL must be a valid URL
-landingURL: "???"
-
 isBasedOn: "https://github.com/italia/developers.italia.it.git"
 softwareVersion: "1.0"
 releaseDate: 2017-04-15
@@ -119,6 +116,14 @@ dependsOn:
       optional: true
 
 it:
+  # Should have warnings for it.conforme, because it is deprecated
+  conforme:
+    lineeGuidaDesign: true
+    modelloInteroperabilita: true
+    misureMinimeSicurezza: true
+    # Fields can also be nil
+    # gdpr:
+
   riuso:
     codiceIPA: c_h501
 

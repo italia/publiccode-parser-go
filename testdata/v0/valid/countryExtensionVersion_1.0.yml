@@ -38,31 +38,31 @@ description:
     localisedName: Medusa
     shortDescription: "A really interesting software."
     longDescription: >
-          Very long description of this software, also split
-          on multiple rows. You should note what the software
-          is and why one should need it. This is 158 characters.
-          Very long description of this software, also split
-          on multiple rows. You should note what the software
-          is and why one should need it. This is 316 characters.
-          Very long description of this software, also split
-          on multiple rows. You should note what the software
-          is and why one should need it. This is 474 characters.
-          Very long description of this software, also split
-          on multiple rows. You should note what the software
-          is and why one should need it. This is 632 characters.
+      Very long description of this software, also split
+      on multiple rows. You should note what the software
+      is and why one should need it. This is 158 characters.
+      Very long description of this software, also split
+      on multiple rows. You should note what the software
+      is and why one should need it. This is 316 characters.
+      Very long description of this software, also split
+      on multiple rows. You should note what the software
+      is and why one should need it. This is 474 characters.
+      Very long description of this software, also split
+      on multiple rows. You should note what the software
+      is and why one should need it. This is 632 characters.
 
     documentation: "https://docs.italia.it"
     apiDocumentation: "https://developers.italia.it/it/api"
 
     features:
-       - Very important feature
-       - Will run without a problem
-       - Has zero bugs
-       - Solves all the problems of the world
+      - Very important feature
+      - Will run without a problem
+      - Has zero bugs
+      - Solves all the problems of the world
     videos:
-       - https://www.youtube.com/watch?v=RaHmGbBOP84
+      - https://www.youtube.com/watch?v=RaHmGbBOP84
     awards:
-       - 1st Price Software of the year
+      - 1st Price Software of the year
 
 legal:
   license: AGPL-3.0-or-later
@@ -74,7 +74,7 @@ maintenance:
   contacts:
     - email: mrossi@cittametropolitana.it
       name: Mario Rossi
-      phone: '+390412501953'
+      phone: "+390412501953"
 
 localisation:
   localisationReady: true
@@ -106,11 +106,6 @@ dependsOn:
 
 it:
   countryExtensionVersion: "1.0"
-  conforme:
-    lineeGuidaDesign: false
-    modelloInteroperabilita: false
-    misureMinimeSicurezza: false
-    gdpr: false
 
   riuso:
     codiceIPA: c_h501
