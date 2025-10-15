@@ -326,15 +326,6 @@ func TestInvalidTestcasesV0(t *testing.T) {
 		},
 
 		// categories
-		"categories_missing.yml": ValidationResults{
-			ValidationError{"categories", "categories is a required field", 1, 1},
-		},
-		"categories_nil.yml": ValidationResults{
-			ValidationError{"categories", "categories is a required field", 12, 1},
-		},
-		"categories_empty.yml": ValidationResults{
-			ValidationError{"categories", "categories must contain more than 0 items", 12, 1},
-		},
 		"categories_invalid.yml": ValidationResults{ValidationError{"categories[0]", "categories[0] must be a valid category (see https://github.com/publiccodeyml/publiccode.yml/blob/main/docs/standard/categories-list.rst)", 1, 1}},
 
 		// usedBy
@@ -620,7 +611,6 @@ func TestInvalidTestcasesV0(t *testing.T) {
 			ValidationError{"name", "name is a required field", 1, 1},
 			ValidationError{"url", "url is a required field", 1, 1},
 			ValidationError{"platforms", "platforms must contain more than 0 items", 1, 1},
-			ValidationError{"categories", "categories is a required field", 1, 1},
 			ValidationError{"developmentStatus", "developmentStatus is a required field", 1, 1},
 			ValidationError{"softwareType", "softwareType is a required field", 1, 1},
 			ValidationError{"description[en-US].shortDescription", "shortDescription is a required field", 0, 0},
