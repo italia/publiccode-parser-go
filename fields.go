@@ -138,6 +138,13 @@ func validateFieldsV0(publiccode PublicCode, parser Parser, network bool) error 
 		}
 	}
 
+	if publiccodev0.It != nil && publiccodev0.It.Conforme != nil {
+		vr = append(vr, ValidationWarning{
+			"it.conforme",
+			"This key is DEPRECATED and will be removed in the future. It's safe to drop it", 0, 0,
+		})
+	}
+
 	if len(vr) == 0 {
 		return nil
 	}
