@@ -15,9 +15,11 @@ developmentStatus: development
 softwareType: "standalone/other"
 
 intendedAudience:
-  unsupportedCountries:
-    # Should NOT validate: this is not a valid country
-    - Mouseton
+  countries:
+    - IT
+    - DE
+    # Should NOT validate: mixed case
+    - Fr
 
 description:
   en:

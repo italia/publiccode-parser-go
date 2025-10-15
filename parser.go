@@ -91,7 +91,7 @@ func NewDefaultParser() (*Parser, error) {
 }
 
 // ParseStream reads the data and tries to parse it. Returns an error if fails.
-func (p *Parser) ParseStream(in io.Reader) (PublicCode, error) {
+func (p *Parser) ParseStream(in io.Reader) (PublicCode, error) { //nolint:maintidx
 	b, err := io.ReadAll(in)
 	if err != nil {
 		return nil, ValidationResults{newValidationError("", fmt.Sprintf("Can't read the stream: %v", err))}
@@ -288,6 +288,12 @@ func (p *Parser) ParseStream(in io.Reader) (PublicCode, error) {
 				ve = append(ve, err)
 			}
 		}
+	}
+
+	// If the deprecated 'it' was used instead of 'IT', copy the data
+	// in the canonical 'IT' field.
+	if v0, ok := publiccode.(PublicCodeV0); ok {
+		v0.IT = v0.It
 	}
 
 	if len(ve) == 0 {

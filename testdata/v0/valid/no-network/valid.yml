@@ -133,10 +133,10 @@ softwareType: "standalone/other"
 
 intendedAudience:
   countries:
-    - it
-    - de
+    - IT
+    - DE
   unsupportedCountries:
-    - us
+    - US
 
 description:
   en:
@@ -226,7 +226,7 @@ dependsOn:
     - name: NFC Reader
       optional: true
 
-it:
+IT:
   riuso:
     codiceIPA: c_h501
 
