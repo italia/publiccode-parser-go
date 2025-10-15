@@ -300,6 +300,24 @@ func TestInvalidTestcasesV0(t *testing.T) {
 			ValidationError{"monochromeLogo", "no such file: " + cwd + "/testdata/v0/invalid/no_such_file.png", 18, 1},
 		},
 
+		// organisation
+		"organisation_wrong_uri.yml": ValidationResults{
+			ValidationError{"organisation.uri", "uri is not a valid URI", 19, 3},
+		},
+		"organisation_wrong_type.yml": ValidationResults{
+			ValidationError{"organisation.name", "wrong type for this field", 18, 1},
+			ValidationError{"organisation.name", "name is a required field", 18, 3},
+		},
+		"organisation_name_missing.yml": ValidationResults{
+			ValidationError{"organisation.name", "name is a required field", 17, 3},
+		},
+		"organisation_uri_wrong_italian_pa.yml": ValidationResults{
+			ValidationError{"organisation.uri", "uri is not a valid URI", 20, 3},
+		},
+		"organisation_uri_wrong_italian_pa2.yml": ValidationResults{
+			ValidationError{"organisation.uri", "uri must be a valid Italian Public Administration Code (iPA) with format 'urn:x-italian-pa:[codiceIPA]' (see https://www.indicepa.gov.it/public-services/opendata-read-service.php?dstype=FS&filename=amministrazioni.txt)", 19, 3},
+		},
+
 		// inputTypes
 		"inputTypes_invalid.yml": ValidationResults{
 			ValidationError{"inputTypes[1]", "inputTypes[1] is not a valid MIME type", 1, 1},
