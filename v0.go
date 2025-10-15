@@ -20,6 +20,11 @@ type PublicCodeV0 struct {
 	Logo            string        `json:"logo,omitempty"            yaml:"logo,omitempty"`
 	MonochromeLogo  string        `json:"monochromeLogo,omitempty"  yaml:"monochromeLogo,omitempty"`
 
+	Organisation *struct {
+		Name string  `json:"name"          validate:"required"                   yaml:"name"`
+		URI  *string `json:"uri,omitempty" validate:"omitempty,organisation_uri" yaml:"uri,omitempty"`
+	} `json:"organisation,omitempty" yaml:"organisation,omitempty"`
+
 	InputTypes  []string `json:"inputTypes,omitempty"  validate:"omitempty,dive,is_mime_type" yaml:"inputTypes,omitempty"`
 	OutputTypes []string `json:"outputTypes,omitempty" validate:"omitempty,dive,is_mime_type" yaml:"outputTypes,omitempty"`
 
