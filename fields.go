@@ -118,6 +118,10 @@ func validateFieldsV0(publiccode PublicCode, parser Parser, network bool) error 
 		}
 	}
 
+	if publiccodev0.Legal.RepoOwner != nil {
+		vr = append(vr, ValidationWarning{"legal.repoOwner", "This key is DEPRECATED and will be removed in the future. Use 'organisation.name' instead", 0, 0})
+	}
+
 	if publiccodev0.InputTypes != nil {
 		vr = append(vr, ValidationWarning{"inputTypes", "This key is DEPRECATED and will be removed in the future. It's safe to drop it", 0, 0})
 	}
