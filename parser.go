@@ -163,9 +163,8 @@ func (p *Parser) ParseStream(in io.Reader) (PublicCode, error) { //nolint:mainti
 		ve = append(ve, ValidationWarning{
 			Key: "publiccodeYmlVersion",
 			Description: fmt.Sprintf(
-				"v%s is not the latest version, use '%s'. Parsing this file as v%s.",
+				"v%s is not the latest version, use '0'. Parsing this file as v%s.",
 				version.Value,
-				latestVersion,
 				latestVersion,
 			),
 			Line:   line,
