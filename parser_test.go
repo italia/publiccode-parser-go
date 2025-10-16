@@ -626,8 +626,8 @@ func TestInvalidTestcasesV0(t *testing.T) {
 			ValidationError{"IT.riuso.codiceIPA", "codiceIPA must be a valid Italian Public Administration Code (iPA) (see https://www.indicepa.gov.it/public-services/opendata-read-service.php?dstype=FS&filename=amministrazioni.txt)", 55, 5},
 		},
 		"it_IT_duplicated.yml": ValidationResults{
-			ValidationWarning{"it", "Lowercase country codes are DEPRECATED and will be removed in the future. Use 'IT' instead", 119, 1},
-			ValidationError{"it", "'IT' key already present. Remove this key", 119, 1},
+			ValidationWarning{"it", "Lowercase country codes are DEPRECATED and will be removed in the future. Use 'IT' instead", 116, 1},
+			ValidationError{"it", "'IT' key already present. Remove this key", 116, 1},
 		},
 		"it_wrong_case.yml": ValidationResults{
 			ValidationError{"It", "field It not found in type publiccode.PublicCodeV0", 107, 1},
@@ -711,6 +711,9 @@ func TestValidWithWarningsTestcasesV0(t *testing.T) {
 		},
 		"valid_with_legal_repoOwner.yml": ValidationResults{
 			ValidationWarning{"legal.repoOwner", "This key is DEPRECATED and will be removed in the future. Use 'organisation.name' instead", 70, 3},
+		},
+		"valid_with_IT_riuso_codiceIPA.yml": ValidationResults{
+			ValidationWarning{"IT.riuso.codiceIPA", "This key is DEPRECATED and will be removed in the future. Use 'organisation.uri' and set it to 'urn:x-italian-pa:pcm' instead", 119, 5},
 		},
 	}
 

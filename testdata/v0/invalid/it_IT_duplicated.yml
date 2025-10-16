@@ -107,9 +107,6 @@ dependsOn:
 IT:
   countryExtensionVersion: "1.0"
 
-  riuso:
-    codiceIPA: c_h501
-
   piattaforme:
     spid: false
     pagopa: false
@@ -118,9 +115,6 @@ IT:
 
 it:
   countryExtensionVersion: "1.0"
-
-  riuso:
-    codiceIPA: c_h501
 
   piattaforme:
     spid: false

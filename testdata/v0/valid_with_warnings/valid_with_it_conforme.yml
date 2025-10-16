@@ -123,9 +123,6 @@ IT:
     # Fields can also be nil
     # gdpr:
 
-  riuso:
-    codiceIPA: c_h501
-
   piattaforme:
     spid: true
     pagopa: true
