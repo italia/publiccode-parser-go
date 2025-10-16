@@ -18,8 +18,8 @@ import (
 	"github.com/alranel/go-vcsurl/v2"
 	"github.com/dyatlov/go-oembed/oembed"
 	httpclient "github.com/italia/httpclient-lib-go"
-	"github.com/italia/publiccode-parser-go/v4/data"
-	netutil "github.com/italia/publiccode-parser-go/v4/internal"
+	"github.com/italia/publiccode-parser-go/v5/data"
+	netutil "github.com/italia/publiccode-parser-go/v5/internal"
 )
 
 // Despite the spec requires at least 1000px, we temporarily release this constraint to 120px.

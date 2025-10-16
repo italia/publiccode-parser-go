@@ -1,7 +1,7 @@
 package publiccode
 
 import (
-	urlutil "github.com/italia/publiccode-parser-go/v4/internal"
+	urlutil "github.com/italia/publiccode-parser-go/v5/internal"
 	"gopkg.in/yaml.v3"
 )
 

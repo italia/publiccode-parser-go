@@ -5,7 +5,6 @@
 FROM alpine:3
 
 COPY publiccode-parser /usr/local/bin/publiccode-parser
-RUN ln -s /usr/local/bin/publiccode-parser /usr/local/bin/pcvalidate
 
 # git and openssh-client are needed by CircleCI when using
 # publiccode-parser-orb, which uses this image.

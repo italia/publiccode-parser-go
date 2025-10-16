@@ -1,4 +1,4 @@
-module github.com/italia/publiccode-parser-go/v4
+module github.com/italia/publiccode-parser-go/v5
 
 require (
 	github.com/alranel/go-vcsurl/v2 v2.0.2
