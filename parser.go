@@ -156,7 +156,7 @@ func (p *Parser) ParseStream(in io.Reader) (PublicCode, error) { //nolint:mainti
 
 	var ve ValidationResults
 
-	if slices.Contains(SupportedVersions, version.Value) && version.Value != "0" && !strings.HasPrefix(version.Value, "0.4") {
+	if slices.Contains(SupportedVersions, version.Value) && version.Value != "0" && !strings.HasPrefix(version.Value, "0.5") {
 		latestVersion := SupportedVersions[len(SupportedVersions)-1]
 		line, column := getPositionInFile("publiccodeYmlVersion", node)
 
