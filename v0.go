@@ -17,16 +17,16 @@ type PublicCodeV0 struct {
 	IsBasedOn       UrlOrUrlArray `json:"isBasedOn,omitempty"       validate:"omitempty,dive,url_url" yaml:"isBasedOn,omitempty"`
 	SoftwareVersion string        `json:"softwareVersion,omitempty" yaml:"softwareVersion,omitempty"`
 	ReleaseDate     *string       `json:"releaseDate"               validate:"omitnil,date"           yaml:"releaseDate"`
-	Logo            string        `json:"logo,omitempty"            yaml:"logo,omitempty"`
-	MonochromeLogo  string        `json:"monochromeLogo,omitempty"  yaml:"monochromeLogo,omitempty"`
+	Logo            *string       `json:"logo,omitempty"            yaml:"logo,omitempty"`
+	MonochromeLogo  *string       `json:"monochromeLogo,omitempty"  yaml:"monochromeLogo,omitempty"`
 
 	Organisation *struct {
 		Name string  `json:"name"          validate:"required"                   yaml:"name"`
 		URI  *string `json:"uri,omitempty" validate:"omitempty,organisation_uri" yaml:"uri,omitempty"`
 	} `json:"organisation,omitempty" yaml:"organisation,omitempty"`
 
-	InputTypes  []string `json:"inputTypes,omitempty"  validate:"omitempty,dive,is_mime_type" yaml:"inputTypes,omitempty"`
-	OutputTypes []string `json:"outputTypes,omitempty" validate:"omitempty,dive,is_mime_type" yaml:"outputTypes,omitempty"`
+	InputTypes  *[]string `json:"inputTypes,omitempty"  validate:"omitempty,dive,is_mime_type" yaml:"inputTypes,omitempty"`
+	OutputTypes *[]string `json:"outputTypes,omitempty" validate:"omitempty,dive,is_mime_type" yaml:"outputTypes,omitempty"`
 
 	Platforms []string `json:"platforms" validate:"gt=0" yaml:"platforms"`
 
@@ -61,9 +61,9 @@ type PublicCodeV0 struct {
 	} `yaml:"legal" json:"legal"`
 
 	Maintenance struct {
-		Type        string         `json:"type"                  validate:"required,oneof=internal contract community none"              yaml:"type"`
-		Contractors []ContractorV0 `json:"contractors,omitempty" validate:"required_if=Type contract,excluded_unless=Type contract,dive" yaml:"contractors,omitempty"`
-		Contacts    []ContactV0    `json:"contacts,omitempty"    validate:"required_if=Type community,required_if=Type internal,dive"    yaml:"contacts,omitempty"`
+		Type        string          `json:"type"                  validate:"required,oneof=internal contract community none"                        yaml:"type"`
+		Contractors *[]ContractorV0 `json:"contractors,omitempty" validate:"required_if=Type contract,excluded_unless=Type contract,omitempty,dive" yaml:"contractors,omitempty"`
+		Contacts    *[]ContactV0    `json:"contacts,omitempty"    validate:"required_if=Type community,required_if=Type internal,omitempty,dive"    yaml:"contacts,omitempty"`
 	} `yaml:"maintenance" json:"maintenance"`
 
 	Localisation struct {

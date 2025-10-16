@@ -48,24 +48,24 @@ func validateFieldsV0(publiccode PublicCode, parser Parser, network bool) error 
 		}
 	}
 
-	if publiccodev0.Logo != "" {
-		if _, err := isRelativePathOrURL(publiccodev0.Logo, "logo"); err != nil {
+	if publiccodev0.Logo != nil && *publiccodev0.Logo != "" {
+		if _, err := isRelativePathOrURL(*publiccodev0.Logo, "logo"); err != nil {
 			vr = append(vr, err)
 		} else if !parser.disableExternalChecks {
-			validLogo, err := parser.validLogo(toCodeHostingURL(publiccodev0.Logo, parser.currentBaseURL), network)
+			validLogo, err := parser.validLogo(toCodeHostingURL(*publiccodev0.Logo, parser.currentBaseURL), network)
 			if !validLogo {
 				vr = append(vr, newValidationError("logo", err.Error()))
 			}
 		}
 	}
 
-	if publiccodev0.MonochromeLogo != "" {
+	if publiccodev0.MonochromeLogo != nil && *publiccodev0.MonochromeLogo != "" {
 		vr = append(vr, ValidationWarning{"monochromeLogo", "This key is DEPRECATED and will be removed in the future. Use 'logo' instead", 0, 0})
 
-		if _, err := isRelativePathOrURL(publiccodev0.MonochromeLogo, "monochromeLogo"); err != nil {
+		if _, err := isRelativePathOrURL(*publiccodev0.MonochromeLogo, "monochromeLogo"); err != nil {
 			vr = append(vr, err)
 		} else if !parser.disableExternalChecks {
-			validLogo, err := parser.validLogo(toCodeHostingURL(publiccodev0.MonochromeLogo, parser.currentBaseURL), network)
+			validLogo, err := parser.validLogo(toCodeHostingURL(*publiccodev0.MonochromeLogo, parser.currentBaseURL), network)
 			if !validLogo {
 				vr = append(vr, newValidationError("monochromeLogo", err.Error()))
 			}
@@ -118,11 +118,11 @@ func validateFieldsV0(publiccode PublicCode, parser Parser, network bool) error 
 		}
 	}
 
-	if len(publiccodev0.InputTypes) > 0 {
+	if publiccodev0.InputTypes != nil {
 		vr = append(vr, ValidationWarning{"inputTypes", "This key is DEPRECATED and will be removed in the future. It's safe to drop it", 0, 0})
 	}
 
-	if len(publiccodev0.OutputTypes) > 0 {
+	if publiccodev0.OutputTypes != nil {
 		vr = append(vr, ValidationWarning{"outputTypes", "This key is DEPRECATED and will be removed in the future. It's safe to drop it", 0, 0})
 	}
 
