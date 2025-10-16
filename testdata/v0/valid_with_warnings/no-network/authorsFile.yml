@@ -29,10 +29,10 @@ softwareType: "standalone/other"
 
 intendedAudience:
   countries:
-    - it
-    - de
+    - IT
+    - DE
   unsupportedCountries: # Explicitly unsupported countries
-    - us
+    - US
 
 description:
   en:
@@ -109,7 +109,7 @@ dependsOn: # List of dependencies. The only mandatory list is the proprietary on
     - name: NFC Reader2
       optional: true
 
-it:
+IT:
   countryExtensionVersion: "0.2"
 
   riuso:

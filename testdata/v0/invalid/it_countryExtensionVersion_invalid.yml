@@ -8,7 +8,7 @@ platforms:
   - web
 
 # Should NOT validate: invalid countryExtensionVersion
-it:
+IT:
   countryExtensionVersion: "1.1"
 
 categories:
@@ -22,23 +22,23 @@ description:
   en:
     localisedName: Medusa
     shortDescription: >
-          A rather short description which
-          is probably useless
+      A rather short description which
+      is probably useless
     longDescription: >
-          Very long description of this software, also split
-          on multiple rows. You should note what the software
-          is and why one should need it. This is 158 characters.
-          Very long description of this software, also split
-          on multiple rows. You should note what the software
-          is and why one should need it. This is 316 characters.
-          Very long description of this software, also split
-          on multiple rows. You should note what the software
-          is and why one should need it. This is 474 characters.
-          Very long description of this software, also split
-          on multiple rows. You should note what the software
-          is and why one should need it. This is 632 characters.
+      Very long description of this software, also split
+      on multiple rows. You should note what the software
+      is and why one should need it. This is 158 characters.
+      Very long description of this software, also split
+      on multiple rows. You should note what the software
+      is and why one should need it. This is 316 characters.
+      Very long description of this software, also split
+      on multiple rows. You should note what the software
+      is and why one should need it. This is 474 characters.
+      Very long description of this software, also split
+      on multiple rows. You should note what the software
+      is and why one should need it. This is 632 characters.
     features:
-       - Just one feature
+      - Just one feature
 
 legal:
   license: AGPL-3.0-or-later

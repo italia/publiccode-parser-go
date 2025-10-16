@@ -28,10 +28,10 @@ softwareType: "standalone/other"
 
 intendedAudience:
   countries:
-    - it
-    - de
+    - IT
+    - DE
   unsupportedCountries:
-    - us
+    - US
 
 description:
   en:
@@ -104,7 +104,7 @@ dependsOn:
     - name: NFC Reader2
       optional: true
 
-it:
+IT:
   countryExtensionVersion: "1.0"
 
   # No `conforme`: should be still valid and its fields set to null

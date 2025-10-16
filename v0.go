@@ -47,9 +47,9 @@ type PublicCodeV0 struct {
 	SoftwareType string `json:"softwareType" validate:"required,oneof=standalone/mobile standalone/iot standalone/desktop standalone/web standalone/backend standalone/other addon library configurationFiles" yaml:"softwareType"`
 
 	IntendedAudience *struct {
-		Scope                *[]string `json:"scope,omitempty"                validate:"omitempty,dive,is_scope_v0"                yaml:"scope,omitempty"`
-		Countries            *[]string `json:"countries,omitempty"            validate:"omitempty,dive,iso3166_1_alpha2_lowercase" yaml:"countries,omitempty"`
-		UnsupportedCountries *[]string `json:"unsupportedCountries,omitempty" validate:"omitempty,dive,iso3166_1_alpha2_lowercase" yaml:"unsupportedCountries,omitempty"`
+		Scope                *[]string `json:"scope,omitempty"                validate:"omitempty,dive,is_scope_v0"                     yaml:"scope,omitempty"`
+		Countries            *[]string `json:"countries,omitempty"            validate:"omitempty,dive,iso3166_1_alpha2_lower_or_upper" yaml:"countries,omitempty"`
+		UnsupportedCountries *[]string `json:"unsupportedCountries,omitempty" validate:"omitempty,dive,iso3166_1_alpha2_lower_or_upper" yaml:"unsupportedCountries,omitempty"`
 	} `json:"intendedAudience,omitempty" yaml:"intendedAudience,omitempty"`
 
 	Description map[string]DescV0 `json:"description" validate:"gt=0,bcp47_keys,dive" yaml:"description"`
@@ -78,6 +78,10 @@ type PublicCodeV0 struct {
 		Hardware    *[]DependencyV0 `json:"hardware,omitempty"    validate:"omitempty,dive" yaml:"hardware,omitempty"`
 	} `json:"dependsOn,omitempty" yaml:"dependsOn,omitempty"`
 
+	IT *ITSectionV0 `json:"IT,omitempty" yaml:"IT,omitempty"`
+
+	// Don't use, this is provided for backwards compatibility.
+	// IT always has the same data.
 	It *ITSectionV0 `json:"it,omitempty" yaml:"it,omitempty"`
 }
 

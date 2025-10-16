@@ -409,14 +409,16 @@ func TestInvalidTestcasesV0(t *testing.T) {
 			ValidationError{"intendedAudience", "wrong type for this field", 18, 1},
 		},
 		"intendedAudience_countries_invalid_country.yml": ValidationResults{
-			ValidationError{"intendedAudience.countries[1]", "countries[1] must be a valid lowercase ISO 3166-1 alpha-2 two-letter country code", 18, 5},
-			ValidationError{"intendedAudience.countries[2]", "countries[2] must be a valid lowercase ISO 3166-1 alpha-2 two-letter country code", 18, 5},
+			ValidationError{"intendedAudience.countries[2]", "countries[2] must be a valid ISO 3166-1 alpha-2 two-letter country code", 18, 3},
+		},
+		"intendedAudience_countries_invalid_iso_3166_1_alpha_2.yml": ValidationResults{
+			ValidationError{"intendedAudience.countries[2]", "countries[2] must be a valid ISO 3166-1 alpha-2 two-letter country code", 18, 3},
 		},
 		"intendedAudience_countries_wrong_type.yml": ValidationResults{
 			ValidationError{"intendedAudience.countries", "wrong type for this field", 19, 1},
 		},
 		"intendedAudience_unsupportedCountries_invalid_country.yml": ValidationResults{
-			ValidationError{"intendedAudience.unsupportedCountries[0]", "unsupportedCountries[0] must be a valid lowercase ISO 3166-1 alpha-2 two-letter country code", 18, 5},
+			ValidationError{"intendedAudience.unsupportedCountries[0]", "unsupportedCountries[0] must be a valid ISO 3166-1 alpha-2 two-letter country code", 18, 3},
 		},
 		"intendedAudience_unsupportedCountries_wrong_type.yml": ValidationResults{
 			ValidationError{"intendedAudience.unsupportedCountries", "wrong type for this field", 19, 1},
@@ -616,10 +618,17 @@ func TestInvalidTestcasesV0(t *testing.T) {
 
 		// it.*
 		"it_countryExtensionVersion_invalid.yml": ValidationResults{
-			ValidationError{"it.countryExtensionVersion", "countryExtensionVersion must be one of the following: \"0.2\" or \"1.0\"", 12, 3},
+			ValidationError{"IT.countryExtensionVersion", "countryExtensionVersion must be one of the following: \"0.2\" or \"1.0\"", 12, 3},
 		},
 		"it_riuso_codiceIPA_invalid.yml": ValidationResults{
-			ValidationError{"it.riuso.codiceIPA", "codiceIPA must be a valid Italian Public Administration Code (iPA) (see https://www.indicepa.gov.it/public-services/opendata-read-service.php?dstype=FS&filename=amministrazioni.txt)", 55, 5},
+			ValidationError{"IT.riuso.codiceIPA", "codiceIPA must be a valid Italian Public Administration Code (iPA) (see https://www.indicepa.gov.it/public-services/opendata-read-service.php?dstype=FS&filename=amministrazioni.txt)", 55, 5},
+		},
+		"it_IT_duplicated.yml": ValidationResults{
+			ValidationWarning{"it", "Lowercase country codes are DEPRECATED and will be removed in the future. Use 'IT' instead", 120, 1},
+			ValidationError{"it", "'IT' key already present. Remove this key", 120, 1},
+		},
+		"it_wrong_case.yml": ValidationResults{
+			ValidationError{"It", "field It not found in type publiccode.PublicCodeV0", 108, 1},
 		},
 
 		// misc
@@ -685,7 +694,15 @@ func TestValidWithWarningsTestcasesV0(t *testing.T) {
 			ValidationWarning{"outputTypes", "This key is DEPRECATED and will be removed in the future. It's safe to drop it", 50, 1},
 		},
 		"valid_with_it_conforme.yml": ValidationResults{
-			ValidationWarning{"it.conforme", "This key is DEPRECATED and will be removed in the future. It's safe to drop it", 120, 3},
+			ValidationWarning{"IT.conforme", "This key is DEPRECATED and will be removed in the future. It's safe to drop it", 120, 3},
+		},
+		"valid_with_country_specific_section_downcase.yml": ValidationResults{
+			ValidationWarning{"it", "Lowercase country codes are DEPRECATED and will be removed in the future. Use 'IT' instead", 108, 1},
+		},
+		"valid_with_lowercase_countries.yml": ValidationResults{
+			ValidationWarning{"intendedAudience.countries[0]", "Lowercase country codes are DEPRECATED. Use uppercase instead ('IT')", 30, 3},
+			ValidationWarning{"intendedAudience.countries[1]", "Lowercase country codes are DEPRECATED. Use uppercase instead ('DE')", 30, 3},
+			ValidationWarning{"intendedAudience.unsupportedCountries[0]", "Lowercase country codes are DEPRECATED. Use uppercase instead ('US')", 30, 3},
 		},
 	}
 
@@ -717,6 +734,7 @@ func TestDecodeValueErrorsRemote(t *testing.T) {
 			},
 			ValidationWarning{"legal.authorsFile", "This key is DEPRECATED and will be removed in the future. It's safe to drop it", 48, 3},
 			ValidationWarning{"description.it.genericName", "This key is DEPRECATED and will be removed in the future. It's safe to drop it", 12, 5},
+			ValidationWarning{"it", "Lowercase country codes are DEPRECATED and will be removed in the future. Use 'IT' instead", 37, 1},
 		}},
 	}
 

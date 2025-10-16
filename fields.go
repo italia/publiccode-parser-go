@@ -7,6 +7,7 @@ import (
 
 	"github.com/alranel/go-vcsurl/v2"
 	urlutil "github.com/italia/publiccode-parser-go/v4/internal"
+	publiccodeValidator "github.com/italia/publiccode-parser-go/v4/validators"
 )
 
 type validateFn func(publiccode PublicCode, parser Parser, network bool) error
@@ -14,7 +15,7 @@ type validateFn func(publiccode PublicCode, parser Parser, network bool) error
 // validateFields validates publiccode with additional rules not validatable
 // with a simple YAML schema.
 // It returns any error encountered as ValidationResults.
-func validateFieldsV0(publiccode PublicCode, parser Parser, network bool) error {
+func validateFieldsV0(publiccode PublicCode, parser Parser, network bool) error { //nolint:maintidx
 	publiccodev0 := publiccode.(PublicCodeV0)
 
 	var vr ValidationResults
@@ -62,6 +63,37 @@ func validateFieldsV0(publiccode PublicCode, parser Parser, network bool) error 
 			vr = append(vr, err)
 		} else if validLogo, err := parser.validLogo(toCodeHostingURL(publiccodev0.MonochromeLogo, parser.currentBaseURL), network); !validLogo {
 			vr = append(vr, newValidationError("monochromeLogo", err.Error()))
+		}
+	}
+
+	if publiccodev0.IntendedAudience != nil {
+		// This is not ideal, but we need to revalidate the countries
+		// here, because otherwise we could get a warning and the advice
+		// to use uppercase on an invalid country.
+		validate := publiccodeValidator.New()
+
+		if publiccodev0.IntendedAudience.Countries != nil {
+			for i, c := range *publiccodev0.IntendedAudience.Countries {
+				if validate.Var(c, "iso3166_1_alpha2_lower_or_upper") == nil && c == strings.ToLower(c) {
+					vr = append(vr, ValidationWarning{
+						fmt.Sprintf("intendedAudience.countries[%d]", i),
+						fmt.Sprintf("Lowercase country codes are DEPRECATED. Use uppercase instead ('%s')", strings.ToUpper(c)),
+						0, 0,
+					})
+				}
+			}
+		}
+
+		if publiccodev0.IntendedAudience.UnsupportedCountries != nil {
+			for i, c := range *publiccodev0.IntendedAudience.UnsupportedCountries {
+				if validate.Var(c, "iso3166_1_alpha2_lower_or_upper") == nil && c == strings.ToLower(c) {
+					vr = append(vr, ValidationWarning{
+						fmt.Sprintf("intendedAudience.unsupportedCountries[%d]", i),
+						fmt.Sprintf("Lowercase country codes are DEPRECATED. Use uppercase instead ('%s')", strings.ToUpper(c)),
+						0, 0,
+					})
+				}
+			}
 		}
 	}
 
@@ -138,11 +170,23 @@ func validateFieldsV0(publiccode PublicCode, parser Parser, network bool) error 
 		}
 	}
 
-	if publiccodev0.It != nil && publiccodev0.It.Conforme != nil {
+	if (publiccodev0.It != nil && publiccodev0.It.Conforme != nil) ||
+		(publiccodev0.IT != nil && publiccodev0.IT.Conforme != nil) {
 		vr = append(vr, ValidationWarning{
-			"it.conforme",
+			"IT.conforme",
 			"This key is DEPRECATED and will be removed in the future. It's safe to drop it", 0, 0,
 		})
+	}
+
+	if publiccodev0.It != nil {
+		vr = append(vr, ValidationWarning{
+			"it",
+			"Lowercase country codes are DEPRECATED and will be removed in the future. Use 'IT' instead", 0, 0,
+		})
+	}
+
+	if publiccodev0.IT != nil && publiccodev0.It != nil {
+		vr = append(vr, newValidationError("it", "'IT' key already present. Remove this key"))
 	}
 
 	if len(vr) == 0 {

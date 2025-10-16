@@ -13,16 +13,16 @@ import (
 	"github.com/rivo/uniseg"
 )
 
-func isIso3166Alpha2Lowercase(fl validator.FieldLevel) bool {
+func isIso3166Alpha2LowerOrUpper(fl validator.FieldLevel) bool {
 	str := fl.Field().String()
 	validate := validator.New(validator.WithRequiredStructEnabled())
 
-	err := validate.Var(str, "lowercase")
-	if err != nil {
+	// Either all lower or all upper, don't allow mixed case
+	if str != strings.ToLower(str) && str != strings.ToUpper(str) {
 		return false
 	}
 
-	err = validate.Var(strings.ToUpper(str), "iso3166_1_alpha2")
+	err := validate.Var(strings.ToUpper(str), "iso3166_1_alpha2")
 
 	return err == nil
 }

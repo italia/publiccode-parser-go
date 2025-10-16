@@ -13,7 +13,7 @@ import (
 func New() *validator.Validate {
 	validate := validator.New(validator.WithRequiredStructEnabled())
 	_ = validate.RegisterValidation("is_mime_type", isMIMEType)
-	_ = validate.RegisterValidation("iso3166_1_alpha2_lowercase", isIso3166Alpha2Lowercase)
+	_ = validate.RegisterValidation("iso3166_1_alpha2_lower_or_upper", isIso3166Alpha2LowerOrUpper)
 	_ = validate.RegisterValidation("umax", uMax)
 	_ = validate.RegisterValidation("umin", uMin)
 	_ = validate.RegisterValidation("url_http_url", isHTTPURL)
@@ -204,8 +204,8 @@ func RegisterLocalErrorMessages(v *validator.Validate, trans ut.Translator) erro
 			translation: "{0} must be a valid Italian Public Administration Code (iPA) (see https://www.indicepa.gov.it/public-services/opendata-read-service.php?dstype=FS&filename=amministrazioni.txt)",
 		},
 		{
-			tag:         "iso3166_1_alpha2_lowercase",
-			translation: "{0} must be a valid lowercase ISO 3166-1 alpha-2 two-letter country code",
+			tag:         "iso3166_1_alpha2_lower_or_upper",
+			translation: "{0} must be a valid ISO 3166-1 alpha-2 two-letter country code",
 		},
 		{
 			tag:         "bcp47_language_tag",
