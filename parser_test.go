@@ -728,13 +728,10 @@ func TestValidWithWarningsTestcasesV0(t *testing.T) {
 // Test publiccode.yml remote files for key errors.
 func TestDecodeValueErrorsRemote(t *testing.T) {
 	testRemoteFiles := []testType{
-		{"https://raw.githubusercontent.com/italia/publiccode-editor/master/publiccode.yml", ValidationResults{
-			ValidationWarning{
-				"publiccodeYmlVersion", "v0.2 is not the latest version, use '0.4.0'. Parsing this file as v0.4.0.", 1, 1,
-			},
-			ValidationWarning{"legal.authorsFile", "This key is DEPRECATED and will be removed in the future. It's safe to drop it", 48, 3},
-			ValidationWarning{"description.it.genericName", "This key is DEPRECATED and will be removed in the future. It's safe to drop it", 12, 5},
-			ValidationWarning{"it", "Lowercase country codes are DEPRECATED and will be removed in the future. Use 'IT' instead", 37, 1},
+		{"https://raw.githubusercontent.com/italia/publiccode-parser-go/refs/heads/main/testdata/v0/valid_with_warnings/valid_with_lowercase_countries.yml", ValidationResults{
+			ValidationWarning{"intendedAudience.countries[0]", "Lowercase country codes are DEPRECATED. Use uppercase instead ('IT')", 30, 3},
+			ValidationWarning{"intendedAudience.countries[1]", "Lowercase country codes are DEPRECATED. Use uppercase instead ('DE')", 30, 3},
+			ValidationWarning{"intendedAudience.unsupportedCountries[0]", "Lowercase country codes are DEPRECATED. Use uppercase instead ('US')", 30, 3},
 		}},
 	}
 
