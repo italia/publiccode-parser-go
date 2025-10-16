@@ -111,10 +111,6 @@ dependsOn: # List of dependencies. The only mandatory list is the proprietary on
 IT:
   countryExtensionVersion: "0.2"
 
-  riuso:
-    # Codice IPA della PA che ha pubblicato questo repo (repo-owner)
-    codiceIPA: c_h501
-
   piattaforme:
     spid: false
     pagopa: false

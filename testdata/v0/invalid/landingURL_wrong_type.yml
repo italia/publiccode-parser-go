@@ -114,9 +114,6 @@ dependsOn:
       optional: true
 
 IT:
-  riuso:
-    codiceIPA: c_h501
-
   piattaforme:
     spid: true
     pagopa: true

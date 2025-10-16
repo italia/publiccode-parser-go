@@ -113,9 +113,6 @@ IT:
   #   misureMinimeSicurezza: false
   #   gdpr: false
 
-  riuso:
-    codiceIPA: c_h501
-
   piattaforme:
     spid: false
     pagopa: false

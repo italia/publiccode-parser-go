@@ -176,6 +176,10 @@ legal:
   license: AGPL-3.0-or-later
   mainCopyrightOwner: City of Chicago
 
+organisation:
+  name: PCM
+  uri: urn:x-italian-pa:c_h501
+
 maintenance:
   type: "contract"
 
@@ -225,9 +229,6 @@ dependsOn:
       optional: true
 
 IT:
-  riuso:
-    codiceIPA: c_h501
-
   piattaforme:
     spid: true
     pagopa: true

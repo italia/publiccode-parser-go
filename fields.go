@@ -186,23 +186,45 @@ func validateFieldsV0(publiccode PublicCode, parser Parser, network bool) error 
 		}
 	}
 
-	if (publiccodev0.It != nil && publiccodev0.It.Conforme != nil) ||
-		(publiccodev0.IT != nil && publiccodev0.IT.Conforme != nil) {
-		vr = append(vr, ValidationWarning{
-			"IT.conforme",
-			"This key is DEPRECATED and will be removed in the future. It's safe to drop it", 0, 0,
-		})
-	}
+	it := publiccodev0.IT
 
 	if publiccodev0.It != nil {
 		vr = append(vr, ValidationWarning{
 			"it",
 			"Lowercase country codes are DEPRECATED and will be removed in the future. Use 'IT' instead", 0, 0,
 		})
+
+		it = publiccodev0.It
 	}
 
 	if publiccodev0.IT != nil && publiccodev0.It != nil {
 		vr = append(vr, newValidationError("it", "'IT' key already present. Remove this key"))
+
+		it = publiccodev0.IT
+	}
+
+	if it != nil {
+		if it.Conforme != nil {
+			vr = append(vr, ValidationWarning{
+				"IT.conforme",
+				"This key is DEPRECATED and will be removed in the future. It's safe to drop it", 0, 0,
+			})
+		}
+
+		if it.Riuso.CodiceIPA != "" {
+			validate := publiccodeValidator.New()
+
+			if validate.Var(it.Riuso.CodiceIPA, "is_italian_ipa_code") == nil {
+				vr = append(vr, ValidationWarning{
+					"IT.riuso.codiceIPA",
+					fmt.Sprintf(
+						"This key is DEPRECATED and will be removed in the future. Use 'organisation.uri' and set it to 'urn:x-italian-pa:%s' instead",
+						it.Riuso.CodiceIPA,
+					),
+					0, 0,
+				})
+			}
+		}
 	}
 
 	if len(vr) == 0 {
