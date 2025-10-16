@@ -30,8 +30,7 @@ type PublicCodeV0 struct {
 
 	Platforms []string `json:"platforms" validate:"gt=0" yaml:"platforms"`
 
-	// TODO:: make it a pointer in v5
-	Categories []string `json:"categories,omitempty" validate:"dive,is_category_v0" yaml:"categories,omitempty"`
+	Categories *[]string `json:"categories,omitempty" validate:"omitempty,dive,is_category_v0" yaml:"categories,omitempty"`
 
 	UsedBy *[]string `json:"usedBy,omitempty" yaml:"usedBy,omitempty"`
 
