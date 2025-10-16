@@ -4,9 +4,6 @@ name: Medusa
 applicationSuite: MegaProductivitySuite
 url: "https://github.com/italia/developers.italia.it.git"
 
-# Should not validate: landingURL must be a valid URL
-landingURL: "???"
-
 isBasedOn: "https://github.com/italia/developers.italia.it.git"
 softwareVersion: "1.0"
 releaseDate: 2017-04-15
@@ -61,20 +58,22 @@ description:
       - Will run without a problem
       - Has zero bugs
       - Solves all the problems of the world
-    videos: # Demo videos of the software
+    videos:
       - https://www.youtube.com/watch?v=RaHmGbBOP84
     awards:
       - 1st Price Software of the year
 
 legal:
-  license: AGPL-3.0-or-later # SPDX expression of license
+  license: AGPL-3.0-or-later
   mainCopyrightOwner: City of Chicago
+  # repoOwner is deprecated
+  repoOwner: City of Chicago
 
 maintenance:
   type: "contract"
 
   contractors:
-    - name: "Fornitore Privato SPA" # if maintainance is a contract
+    - name: "Fornitore Privato SPA"
       website: "https://developers.italia.it"
       until: "2019-01-01"
 
@@ -116,13 +115,3 @@ dependsOn:
   hardware:
     - name: NFC Reader
       optional: true
-
-IT:
-  riuso:
-    codiceIPA: c_h501
-
-  piattaforme:
-    spid: true
-    pagopa: true
-    cie: true
-    anpr: true

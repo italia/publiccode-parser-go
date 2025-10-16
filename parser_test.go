@@ -105,7 +105,7 @@ func TestValidTestcasesV0_NoNetwork(t *testing.T) {
 func TestValidWithWarningTestcasesV0_NoNetwork(t *testing.T) {
 	expected := map[string]error{
 		"authorsFile.yml": ValidationResults{
-			ValidationWarning{"legal.authorsFile", "This key is DEPRECATED and will be removed in the future. It's safe to drop it", 72, 3},
+			ValidationWarning{"legal.authorsFile", "This key is DEPRECATED and will be removed in the future. It's safe to drop it", 71, 3},
 		},
 	}
 
@@ -626,11 +626,11 @@ func TestInvalidTestcasesV0(t *testing.T) {
 			ValidationError{"IT.riuso.codiceIPA", "codiceIPA must be a valid Italian Public Administration Code (iPA) (see https://www.indicepa.gov.it/public-services/opendata-read-service.php?dstype=FS&filename=amministrazioni.txt)", 55, 5},
 		},
 		"it_IT_duplicated.yml": ValidationResults{
-			ValidationWarning{"it", "Lowercase country codes are DEPRECATED and will be removed in the future. Use 'IT' instead", 120, 1},
-			ValidationError{"it", "'IT' key already present. Remove this key", 120, 1},
+			ValidationWarning{"it", "Lowercase country codes are DEPRECATED and will be removed in the future. Use 'IT' instead", 119, 1},
+			ValidationError{"it", "'IT' key already present. Remove this key", 119, 1},
 		},
 		"it_wrong_case.yml": ValidationResults{
-			ValidationError{"It", "field It not found in type publiccode.PublicCodeV0", 108, 1},
+			ValidationError{"It", "field It not found in type publiccode.PublicCodeV0", 107, 1},
 		},
 
 		// misc
@@ -699,15 +699,18 @@ func TestValidWithWarningsTestcasesV0(t *testing.T) {
 			ValidationWarning{"outputTypes", "This key is DEPRECATED and will be removed in the future. It's safe to drop it", 50, 1},
 		},
 		"valid_with_it_conforme.yml": ValidationResults{
-			ValidationWarning{"IT.conforme", "This key is DEPRECATED and will be removed in the future. It's safe to drop it", 120, 3},
+			ValidationWarning{"IT.conforme", "This key is DEPRECATED and will be removed in the future. It's safe to drop it", 119, 3},
 		},
 		"valid_with_country_specific_section_downcase.yml": ValidationResults{
-			ValidationWarning{"it", "Lowercase country codes are DEPRECATED and will be removed in the future. Use 'IT' instead", 108, 1},
+			ValidationWarning{"it", "Lowercase country codes are DEPRECATED and will be removed in the future. Use 'IT' instead", 107, 1},
 		},
 		"valid_with_lowercase_countries.yml": ValidationResults{
 			ValidationWarning{"intendedAudience.countries[0]", "Lowercase country codes are DEPRECATED. Use uppercase instead ('IT')", 30, 3},
 			ValidationWarning{"intendedAudience.countries[1]", "Lowercase country codes are DEPRECATED. Use uppercase instead ('DE')", 30, 3},
 			ValidationWarning{"intendedAudience.unsupportedCountries[0]", "Lowercase country codes are DEPRECATED. Use uppercase instead ('US')", 30, 3},
+		},
+		"valid_with_legal_repoOwner.yml": ValidationResults{
+			ValidationWarning{"legal.repoOwner", "This key is DEPRECATED and will be removed in the future. Use 'organisation.name' instead", 70, 3},
 		},
 	}
 
