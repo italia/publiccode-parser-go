@@ -1,7 +1,7 @@
 # TODO: enable when
 # https://github.com/italia/publiccode-parser-go/issues/47
 # is fixed.
-publiccodeYmlVersion: "0.4"
+publiccodeYmlVersion: "0"
 
 name: Medusa
 url: "https://github.com/italia/developers.italia.it.git"

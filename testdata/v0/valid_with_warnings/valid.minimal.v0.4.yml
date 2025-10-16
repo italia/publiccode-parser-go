@@ -2,23 +2,17 @@ publiccodeYmlVersion: "0"
 
 name: Medusa
 url: "https://github.com/italia/developers.italia.it.git"
+releaseDate: "2017-04-15"
 
 platforms:
   - web
-
-categories:
-  - cloud-management
 
 developmentStatus: development
 
 softwareType: "standalone/other"
 
-organisation:
-  name: foobar
-  uri: urn:foobar:example
-
 description:
-  en-GB:
+  en:
     localisedName: Medusa
     shortDescription: >
       A rather short description which

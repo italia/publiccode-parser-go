@@ -1,6 +1,6 @@
 # This file is ISO-8859-1 èñçödëd thus not a valid publiccode.yml.
 
-publiccodeYmlVersion: "0.4"
+publiccodeYmlVersion: "0"
 
 name: Medusa
 url: "https://github.com/italia/developers.italia.it.git"

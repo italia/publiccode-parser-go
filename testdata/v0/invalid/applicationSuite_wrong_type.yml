@@ -1,4 +1,4 @@
-publiccodeYmlVersion: "0.4"
+publiccodeYmlVersion: "0"
 
 # Should NOT validate: applicationSuite must be a string
 applicationSuite: []
