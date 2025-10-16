@@ -325,6 +325,7 @@ func TestInvalidTestcasesV0(t *testing.T) {
 		},
 		"inputTypes_wrong_type.yml": ValidationResults{
 			ValidationError{"inputTypes.foobar", "wrong type for this field", 15, 1},
+			ValidationWarning{"inputTypes", "This key is DEPRECATED and will be removed in the future. It's safe to drop it", 14, 1},
 		},
 
 		// outputTypes
@@ -334,6 +335,7 @@ func TestInvalidTestcasesV0(t *testing.T) {
 		},
 		"outputTypes_wrong_type.yml": ValidationResults{
 			ValidationError{"outputTypes.foobar", "wrong type for this field", 15, 1},
+			ValidationWarning{"outputTypes", "This key is DEPRECATED and will be removed in the future. It's safe to drop it", 14, 1},
 		},
 
 		// platforms
