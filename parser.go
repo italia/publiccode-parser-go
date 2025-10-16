@@ -26,9 +26,15 @@ import (
 )
 
 type ParserConfig struct {
-	// DisableNetwork disables all network tests (URL existence and Oembed). This
+	// DisableNetwork disables all network tests (eg. URL existence). This
 	// results in much faster parsing.
 	DisableNetwork bool
+
+	// DisableExternalChecks disables ALL the additional checks on external files
+	// and resources, local or remote (eg. existence, images actually being images, etc.).
+	//
+	// It implies DisableNetwork = true.
+	DisableExternalChecks bool
 
 	// Domain will have domain specific settings, including basic auth if provided
 	// this will avoid strong quota limit imposed by code hosting platform
@@ -45,11 +51,12 @@ type ParserConfig struct {
 
 // Parser is a helper class for parsing publiccode.yml files.
 type Parser struct {
-	disableNetwork bool
-	domain         Domain
-	branch         string
-	baseURL        *url.URL
-	fileURL        *url.URL
+	disableNetwork        bool
+	disableExternalChecks bool
+	domain                Domain
+	branch                string
+	baseURL               *url.URL
+	fileURL               *url.URL
 
 	// This is the baseURL we'll try to compute and use between
 	// Parse{,Stream)() calls.
@@ -70,10 +77,15 @@ type Domain struct {
 // NewParser initializes and returns a new Parser object following the settings in
 // ParserConfig.
 func NewParser(config ParserConfig) (*Parser, error) {
+	if config.DisableExternalChecks {
+		config.DisableNetwork = true
+	}
+
 	parser := Parser{
-		disableNetwork: config.DisableNetwork,
-		domain:         config.Domain,
-		branch:         config.Branch,
+		disableNetwork:        config.DisableNetwork,
+		disableExternalChecks: config.DisableExternalChecks,
+		domain:                config.Domain,
+		branch:                config.Branch,
 	}
 
 	if config.BaseURL != "" {
