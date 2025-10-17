@@ -306,10 +306,10 @@ func TestInvalidTestcasesV0(t *testing.T) {
 		},
 		"organisation_wrong_type.yml": ValidationResults{
 			ValidationError{"organisation.name", "wrong type for this field", 18, 1},
-			ValidationError{"organisation.name", "name is a required field", 18, 3},
+			ValidationError{"organisation.uri", "uri is a required field", 18, 3},
 		},
-		"organisation_name_missing.yml": ValidationResults{
-			ValidationError{"organisation.name", "name is a required field", 17, 3},
+		"organisation_uri_missing.yml": ValidationResults{
+			ValidationError{"organisation.uri", "uri is a required field", 18, 3},
 		},
 		"organisation_uri_wrong_italian_pa.yml": ValidationResults{
 			ValidationError{"organisation.uri", "uri is not a valid URI", 20, 3},
@@ -360,8 +360,8 @@ func TestInvalidTestcasesV0(t *testing.T) {
 		"fundedBy_wrong_type.yml": ValidationResults{
 			ValidationError{"fundedBy.name", "wrong type for this field", 18, 1},
 		},
-		"fundedBy_name_missing.yml": ValidationResults{
-			ValidationError{"fundedBy[0].name", "name is a required field", 0, 0},
+		"fundedBy_uri_missing.yml": ValidationResults{
+			ValidationError{"fundedBy[0].uri", "uri is a required field", 0, 0},
 		},
 		"fundedBy_uri_wrong_italian_pa.yml": ValidationResults{
 			ValidationError{"fundedBy[0].uri", "uri is not a valid URI", 0, 0},

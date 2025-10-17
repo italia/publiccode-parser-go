@@ -14,7 +14,7 @@ developmentStatus: development
 softwareType: "standalone/other"
 
 organisation:
-  name: foobar
+  uri: urn:x-custom:id
 
 description:
   en-GB:
