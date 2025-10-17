@@ -13,10 +13,10 @@ developmentStatus: development
 
 softwareType: "standalone/other"
 
-fundedBy:
-  - uri: "https://example.org"
-    # Should NOT validate: name is missing
-    # name: foobar
+organisation:
+  # Should NOT validate: uri is missing
+  name: foobar
+  # uri: "https://example.org"
 
 description:
   en-GB:

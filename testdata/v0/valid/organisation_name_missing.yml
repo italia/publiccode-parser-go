@@ -15,7 +15,7 @@ softwareType: "standalone/other"
 
 organisation:
   uri: "https://example.org"
-  # Should NOT validate: name is missing
+  # Should validate: name is optional
   # name: foobar
 
 description:

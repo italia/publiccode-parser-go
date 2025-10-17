@@ -21,8 +21,8 @@ type PublicCodeV0 struct {
 	MonochromeLogo  *string       `json:"monochromeLogo,omitempty"  yaml:"monochromeLogo,omitempty"`
 
 	Organisation *struct {
-		Name string  `json:"name"          validate:"required"                   yaml:"name"`
-		URI  *string `json:"uri,omitempty" validate:"omitempty,organisation_uri" yaml:"uri,omitempty"`
+		Name *string `json:"name,omitempty" yaml:"name,omitempty"`
+		URI  string  `json:"uri"            validate:"required,organisation_uri" yaml:"uri"`
 	} `json:"organisation,omitempty" yaml:"organisation,omitempty"`
 
 	InputTypes  *[]string `json:"inputTypes,omitempty"  validate:"omitempty,dive,is_mime_type" yaml:"inputTypes,omitempty"`
@@ -35,8 +35,8 @@ type PublicCodeV0 struct {
 	UsedBy *[]string `json:"usedBy,omitempty" yaml:"usedBy,omitempty"`
 
 	FundedBy *[]struct {
-		Name string  `json:"name"          validate:"required"                   yaml:"name"`
-		URI  *string `json:"uri,omitempty" validate:"omitempty,organisation_uri" yaml:"uri,omitempty"`
+		Name *string `json:"name,omitempty" yaml:"name,omitempty"`
+		URI  string  `json:"uri"            validate:"required,organisation_uri" yaml:"uri"`
 	} `json:"fundedBy,omitempty" validate:"omitempty,dive" yaml:"fundedBy,omitempty"`
 
 	Roadmap *URL `json:"roadmap,omitempty" validate:"omitnil,url_http_url" yaml:"roadmap,omitempty"`

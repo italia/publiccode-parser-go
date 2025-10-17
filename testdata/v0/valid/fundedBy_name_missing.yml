@@ -14,7 +14,9 @@ developmentStatus: development
 softwareType: "standalone/other"
 
 fundedBy:
-  - uri: http://example.org/my-organisation
+  - uri: "https://example.org"
+    # Should validate: name is optional
+    # name: foobar
 
 description:
   en-GB:
