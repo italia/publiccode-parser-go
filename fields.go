@@ -16,7 +16,7 @@ type validateFn func(publiccode PublicCode, parser Parser, network bool) error
 // with a simple YAML schema.
 // It returns any error encountered as ValidationResults.
 func validateFieldsV0(publiccode PublicCode, parser Parser, network bool) error { //nolint:maintidx
-	publiccodev0 := publiccode.(PublicCodeV0)
+	publiccodev0 := publiccode.(*PublicCodeV0)
 
 	var vr ValidationResults
 

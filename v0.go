@@ -20,10 +20,7 @@ type PublicCodeV0 struct {
 	Logo            *string       `json:"logo,omitempty"            yaml:"logo,omitempty"`
 	MonochromeLogo  *string       `json:"monochromeLogo,omitempty"  yaml:"monochromeLogo,omitempty"`
 
-	Organisation *struct {
-		Name *string `json:"name,omitempty" yaml:"name,omitempty"`
-		URI  string  `json:"uri"            validate:"required,organisation_uri" yaml:"uri"`
-	} `json:"organisation,omitempty" yaml:"organisation,omitempty"`
+	Organisation *OrganisationV0 `json:"organisation,omitempty" yaml:"organisation,omitempty"`
 
 	InputTypes  *[]string `json:"inputTypes,omitempty"  validate:"omitempty,dive,is_mime_type" yaml:"inputTypes,omitempty"`
 	OutputTypes *[]string `json:"outputTypes,omitempty" validate:"omitempty,dive,is_mime_type" yaml:"outputTypes,omitempty"`
@@ -34,10 +31,7 @@ type PublicCodeV0 struct {
 
 	UsedBy *[]string `json:"usedBy,omitempty" yaml:"usedBy,omitempty"`
 
-	FundedBy *[]struct {
-		Name *string `json:"name,omitempty" yaml:"name,omitempty"`
-		URI  string  `json:"uri"            validate:"required,organisation_uri" yaml:"uri"`
-	} `json:"fundedBy,omitempty" validate:"omitempty,dive" yaml:"fundedBy,omitempty"`
+	FundedBy *[]OrganisationV0 `json:"fundedBy,omitempty" validate:"omitempty,dive" yaml:"fundedBy,omitempty"`
 
 	Roadmap *URL `json:"roadmap,omitempty" validate:"omitnil,url_http_url" yaml:"roadmap,omitempty"`
 
@@ -123,6 +117,12 @@ type DependencyV0 struct {
 	Version    *string `json:"version,omitempty"    yaml:"version,omitempty"`
 }
 
+// OrganisationV0 describes a real world organisation.
+type OrganisationV0 struct {
+	Name *string `json:"name,omitempty" yaml:"name,omitempty"`
+	URI  string  `json:"uri"            validate:"required,organisation_uri" yaml:"uri"`
+}
+
 // Country-specific sections
 //
 // While the standard is structured to be meaningful on an international level,
@@ -157,6 +157,13 @@ func (p PublicCodeV0) Version() uint {
 }
 
 func (p PublicCodeV0) ToYAML() ([]byte, error) {
+	// Don't marshal lowercase country section.
+	// The uppercase one is always guaranteed to have the same data
+	// because we copy it for backwards compatibility
+	if p.It != nil {
+		p.It = nil
+	}
+
 	return yaml.Marshal(p)
 }
 
