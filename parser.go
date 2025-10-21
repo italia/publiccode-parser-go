@@ -270,7 +270,7 @@ func (p *Parser) ParseStream(in io.Reader) (PublicCode, error) { //nolint:mainti
 
 			// Return early because proceeding with no base URL would result in a lot
 			// of duplicate errors stemming from its absence.
-			return publiccode, ve
+			return asPublicCode(publiccode), ve
 		}
 
 		p.currentBaseURL = rawRoot
@@ -282,7 +282,7 @@ func (p *Parser) ParseStream(in io.Reader) (PublicCode, error) { //nolint:mainti
 		if err != nil {
 			ve = append(ve, newValidationError("", fmt.Sprintf("no baseURL set and failed to get working directory: %s", err)))
 
-			return publiccode, ve
+			return asPublicCode(publiccode), ve
 		}
 
 		p.currentBaseURL = &url.URL{Scheme: "file", Path: cwd}
@@ -322,10 +322,10 @@ func (p *Parser) ParseStream(in io.Reader) (PublicCode, error) { //nolint:mainti
 	}
 
 	if len(ve) == 0 {
-		return publiccode, nil
+		return asPublicCode(publiccode), nil
 	}
 
-	return publiccode, ve
+	return asPublicCode(publiccode), ve
 }
 
 func (p *Parser) Parse(uri string) (PublicCode, error) {
@@ -358,6 +358,16 @@ func (p *Parser) Parse(uri string) (PublicCode, error) {
 	}
 
 	return p.ParseStream(stream)
+}
+
+// Ensure the returned value implements PublicCode as a struct, not as a pointer
+func asPublicCode(pc PublicCode) PublicCode {
+	switch v := pc.(type) {
+	case *PublicCodeV0:
+		return *v
+	default:
+		return v
+	}
 }
 
 func getNodes(key string, node *yaml.Node) (*yaml.Node, *yaml.Node) {
