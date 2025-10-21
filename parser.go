@@ -179,10 +179,10 @@ func (p *Parser) ParseStream(in io.Reader) (PublicCode, error) { //nolint:mainti
 	var decodeResults ValidationResults
 
 	if version.Value[0] == '0' {
-		v0 := PublicCodeV0{}
+		v0 := &PublicCodeV0{}
 		validateFields = validateFieldsV0
 
-		decodeResults = decode(b, &v0, node)
+		decodeResults = decode(b, v0, node)
 		publiccode = v0
 	}
 
@@ -301,10 +301,24 @@ func (p *Parser) ParseStream(in io.Reader) (PublicCode, error) { //nolint:mainti
 		}
 	}
 
-	// If the deprecated 'it' was used instead of 'IT', copy the data
-	// in the canonical 'IT' field.
-	if v0, ok := publiccode.(PublicCodeV0); ok {
-		v0.IT = v0.It
+	// v0: Copy data from deprecated fields to the canonical ones, where possible
+	if v0, ok := publiccode.(*PublicCodeV0); ok {
+		// Auto-copy the deprecated field into the new one, so we can guarantee
+		// to the user that `IT` is always the field to check
+		if v0.It != nil && v0.IT == nil {
+			v0.IT = v0.It
+		}
+
+		it := v0.IT
+
+		// Auto-copy the deprecated field into the new one, so we can guarantee
+		// to the user that `organisation` is always the field to check
+		if it != nil && it.Riuso.CodiceIPA != "" && v0.Organisation == nil {
+			v0.Organisation = &OrganisationV0{}
+
+			v0.Organisation.URI = "urn:x-italian-pa:" + it.Riuso.CodiceIPA
+			v0.Organisation.Name = v0.Legal.RepoOwner
+		}
 	}
 
 	if len(ve) == 0 {
