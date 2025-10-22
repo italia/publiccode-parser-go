@@ -115,8 +115,7 @@ refactoring might be needed.
 
 ## Maintainers
 
-This software is maintained by the
-[Developers Italia](https://developers.italia.it/) team.
+This software is maintained by community contributors.
 
 ## License
 
