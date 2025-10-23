@@ -1,3 +1,5 @@
+<!-- markdownlint-disable MD033 -->
+<!-- MD033/no-inline-html -->
 # publiccode.yml parser for Go
 
 [![Join the #publiccode channel](https://img.shields.io/badge/Slack%20channel-%23publiccode-blue.svg?logo=slack)](https://developersitalia.slack.com/messages/CAM3F785T)
@@ -16,10 +18,13 @@ This parser performs syntactic and semantic validation according to the
 
 - Go library and CLI tool (`publiccode-parser`)
 - Supports the latest version of the `publiccode.yml` Standard
-- `publiccode-parser` can output validation errors as JSON or in [errorformat](https://vim-jp.org/vimdoc-en/quickfix.html#error-file-format) friendly way
-- Verifies the existence of URLs by checking the response for URL fields (can be disabled)
+- `publiccode-parser` can output validation errors as JSON or in
+  [errorformat](https://vim-jp.org/vimdoc-en/quickfix.html#error-file-format)
+  friendly way
+- Verifies the existence of URLs by checking the response for URL fields
+  (can be disabled)
 
-## Example usage as a library
+## As a library
 
 ```go
 parser, err := publiccode.NewDefaultParser()
@@ -31,26 +36,35 @@ publiccode, err := parser.Parse("file:///path/to/local/dir/publiccode.yml")
 // parse.Parse("https://github.com/example/example/publiccode.yml")
 ```
 
-## Validation from command line
+[![Go Reference](https://pkg.go.dev/badge/github.com/italia/publiccode-parser-go/v5.svg)](https://pkg.go.dev/github.com/italia/publiccode-parser-go/v5)
 
-The `publiccode-parser` binary which be used for validating a `publiccode.yml`
+## From command line
+
+The `publiccode-parser` binary can be used to validate a `publiccode.yml`
 from the command line.
 
-To get the latest development version use:
+To get the latest version use:
 
 ```shell
 go install github.com/italia/publiccode-parser-go/v5/publiccode-parser@latest
-publiccode-parser mypubliccode.yml
 ```
 
-To get the latest stable version go to the [release page](https://github.com/italia/publiccode-parser-go/releases/latest)
-and grab the one for your arch.
+Or get a precompiled package from the [release page](https://github.com/italia/publiccode-parser-go/releases/latest)
+
+Example:
+
+```shell
+$ publiccode-parser mypubliccode.yml
+publiccode.yml:36:1: error: developmentStatus: developmentStatus must be one of the following: "concept", "development", "beta", "stable" or "obsolete"
+publiccode.yml:48:3: warning: legal.authorsFile: This key is DEPRECATED and will be removed in the future. It's safe to drop it
+publiccode.yml:12:5: warning: description.en.genericName: This key is DEPRECATED and will be removed in the future. It's safe to drop it
+```
 
 Run `publiccode-parser --help` for the available command line flags.
 
 The tool returns 0 in case of successful validation, 1 otherwise.
 
-## Easy validation with Docker
+## With Docker
 
 You can easily validate your files using Docker on your local machine or in your
 CI pipeline:
@@ -68,8 +82,11 @@ docker build -t italia/publiccode-parser-go .
 
 ### Examples
 
+<details>
+  <summary>Click to expand</summary>
+
 The examples assume that your `publiccode.yml` file is on your local machine,
-at `/home/my-user/publiccodes/publiccode.yml`
+at `/opt/publiccodes/publiccode.yml`
 
 - Validate and print the canonicalized file
 
@@ -101,17 +118,23 @@ at `/home/my-user/publiccodes/publiccode.yml`
   docker run -it --entrypoint /bin/sh italia/publiccode-parser-go
   ```
 
+</details>
+
 ## Contributing
 
 Contributing is always appreciated.
 Feel free to open issues, fork or submit a Pull Request.
-If you want to know more about how to add new fields, check out [CONTRIBUTING.md](CONTRIBUTING.md).
-In order to support other country-specific extensions in addition to Italy some
-refactoring might be needed.
+If you want to know more about how to add new fields, check out the
+[publiccode.yml project](https://github.com/publiccodeyml/publiccode.yml)
+and its [CONTRIBUTING.md](https://github.com/publiccodeyml/publiccode.yml/blob/main/CONTRIBUTING.md)
+guidelines.
 
 ## See also
 
-* [publiccode-crawler](https://github.com/italia/publiccode-crawler) - a Go crawler that uses this library
+- [publiccode-parser-php](https://github.com/bfabio/publiccode-parser-php) - PHP
+  bindings for this library
+- [publiccode-crawler](https://github.com/italia/publiccode-crawler) - a Go
+  crawler that uses this library
 
 ## Maintainers
 
@@ -119,7 +142,8 @@ This software is maintained by community contributors.
 
 ## License
 
-© 2018-present Team per la Trasformazione Digitale - Presidenza del Consiglio dei Ministri
+© 2018-present Team per la Trasformazione Digitale - Presidenza del Consiglio
+dei Ministri
 
 Licensed under the EUPL 1.2.
 The version control system provides attribution for specific lines of code.
