@@ -52,7 +52,8 @@ func validateFieldsV0(publiccode PublicCode, parser Parser, network bool) error 
 		if _, err := isRelativePathOrURL(*publiccodev0.Logo, "logo"); err != nil {
 			vr = append(vr, err)
 		} else if !parser.disableExternalChecks {
-			validLogo, err := parser.validLogo(toCodeHostingURL(*publiccodev0.Logo, parser.currentBaseURL), network)
+			u, isGitRepo := toCodeHostingURL(*publiccodev0.Logo, parser.currentBaseURL, parser.allowLocalGitClone)
+			validLogo, err := parser.validLogo(u, network, isGitRepo)
 			if !validLogo {
 				vr = append(vr, newValidationError("logo", err.Error()))
 			}
@@ -65,7 +66,8 @@ func validateFieldsV0(publiccode PublicCode, parser Parser, network bool) error 
 		if _, err := isRelativePathOrURL(*publiccodev0.MonochromeLogo, "monochromeLogo"); err != nil {
 			vr = append(vr, err)
 		} else if !parser.disableExternalChecks {
-			validLogo, err := parser.validLogo(toCodeHostingURL(*publiccodev0.MonochromeLogo, parser.currentBaseURL), network)
+			u, isGitRepo := toCodeHostingURL(*publiccodev0.MonochromeLogo, parser.currentBaseURL, parser.allowLocalGitClone)
+			validLogo, err := parser.validLogo(u, network, isGitRepo)
 			if !validLogo {
 				vr = append(vr, newValidationError("monochromeLogo", err.Error()))
 			}
@@ -109,10 +111,9 @@ func validateFieldsV0(publiccode PublicCode, parser Parser, network bool) error 
 		if _, err := isRelativePathOrURL(*publiccodev0.Legal.AuthorsFile, "legal.authorsFile"); err != nil {
 			vr = append(vr, err)
 		} else if !parser.disableExternalChecks {
-			exists, err := parser.fileExists(toCodeHostingURL(*publiccodev0.Legal.AuthorsFile, parser.currentBaseURL), network)
+			u, isGitRepo := toCodeHostingURL(*publiccodev0.Legal.AuthorsFile, parser.currentBaseURL, parser.allowLocalGitClone)
+			exists, err := parser.fileExists(u, network, isGitRepo)
 			if !exists {
-				u := toCodeHostingURL(*publiccodev0.Legal.AuthorsFile, parser.currentBaseURL)
-
 				vr = append(vr, newValidationError("legal.authorsFile", "'%s' does not exist: %s", urlutil.DisplayURL(&u), err.Error()))
 			}
 		}
@@ -165,7 +166,8 @@ func validateFieldsV0(publiccode PublicCode, parser Parser, network bool) error 
 			if _, err := isRelativePathOrURL(v, keyName); err != nil {
 				vr = append(vr, err)
 			} else if !parser.disableExternalChecks {
-				isImage, err := parser.isImageFile(toCodeHostingURL(v, parser.currentBaseURL), network)
+				u, isGitRepo := toCodeHostingURL(v, parser.currentBaseURL, parser.allowLocalGitClone)
+				isImage, err := parser.isImageFile(u, network, isGitRepo)
 				if !isImage {
 					vr = append(vr, newValidationError(
 						keyName,

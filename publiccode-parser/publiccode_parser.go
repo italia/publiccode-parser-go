@@ -38,6 +38,7 @@ func main() {
 	localBasePathPtr := flag.String("path", "", "Use this local directory as base path when checking for files existence instead of using the `url` key in publiccode.yml")
 	disableNetworkPtr := flag.Bool("no-network", false, "Disables checks that require network connections (URL existence and oEmbed). This makes validation much faster.")
 	disableExternalChecksPtr := flag.Bool("no-external-checks", false, "Disables ALL checks that reference external resources such as remote URLs or local file existence. Implies --no-network")
+	allowLocalGitClonePtr := flag.Bool("allow-local-git-clone", false, "Allow cloning Git repositories locally to check file existence for generic Git repos not supported by specific hosting providers.")
 	jsonOutputPtr := flag.Bool("json", false, "Output the validation errors as a JSON list.")
 	helpPtr := flag.Bool("help", false, "Display command line usage.")
 	versionPtr := flag.Bool("version", false, "Display current software version.")
@@ -68,11 +69,17 @@ func main() {
 	config := publiccode.ParserConfig{BaseURL: *localBasePathPtr}
 	config.DisableNetwork = *disableNetworkPtr
 	config.DisableExternalChecks = *disableExternalChecksPtr
+	config.AllowLocalGitClone = *allowLocalGitClonePtr
 
 	p, err := publiccode.NewParser(config)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error creating Parser: %s\n", err.Error())
 		os.Exit(1)
+	}
+
+	// Ensure cleanup of any temporary Git repositories
+	if config.AllowLocalGitClone {
+		defer p.Cleanup()
 	}
 
 	_, err = p.Parse(publiccodeFile)
