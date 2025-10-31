@@ -79,7 +79,11 @@ func main() {
 
 	// Ensure cleanup of any temporary Git repositories
 	if config.AllowLocalGitClone {
-		defer p.Cleanup()
+		defer func() {
+			if err := p.Cleanup(); err != nil {
+				fmt.Fprintf(os.Stderr, "failed to cleanup temporary Git repositories: %v\n", err)
+			}
+		}()
 	}
 
 	_, err = p.Parse(publiccodeFile)

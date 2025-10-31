@@ -47,12 +47,14 @@ func (g *gitHelper) cloneRepo(repoURL string) (string, error) {
 	if len(repoName) > 100 {
 		repoName = repoName[:100]
 	}
+
 	clonePath := filepath.Join(g.tempDir, repoName)
 
 	// Perform sparse clone
 	args := []string{"clone", "--filter=blob:none", "--no-checkout"}
 	args = append(args, repoURL, clonePath)
 	cmd := exec.Command("git", args...)
+
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		return "", fmt.Errorf("git clone failed: %w\nOutput: %s", err, output)
@@ -61,13 +63,16 @@ func (g *gitHelper) cloneRepo(repoURL string) (string, error) {
 	// Initialize sparse checkout
 	cmd = exec.Command("git", "sparse-checkout", "init", "--cone")
 	cmd.Dir = clonePath
+
 	output, err = cmd.CombinedOutput()
 	if err != nil {
 		os.RemoveAll(clonePath)
+
 		return "", fmt.Errorf("git sparse-checkout init failed: %w\nOutput: %s", err, output)
 	}
 
 	g.clonedRepos[repoURL] = clonePath
+
 	return clonePath, nil
 }
 
@@ -78,11 +83,13 @@ func (g *gitHelper) checkoutFile(repoPath string, filePath string) error {
 	if dir != "." && dir != "" {
 		cmd := exec.Command("git", "sparse-checkout", "add", dir)
 		cmd.Dir = repoPath
+
 		_, err := cmd.CombinedOutput()
 		if err != nil {
 			// Try to add the specific file if directory fails
 			cmd = exec.Command("git", "sparse-checkout", "add", filePath)
 			cmd.Dir = repoPath
+
 			output, err := cmd.CombinedOutput()
 			if err != nil {
 				return fmt.Errorf("git sparse-checkout add failed: %w\nOutput: %s", err, output)
@@ -93,6 +100,7 @@ func (g *gitHelper) checkoutFile(repoPath string, filePath string) error {
 	// Checkout the file
 	cmd := exec.Command("git", "checkout", "HEAD", "--", filePath)
 	cmd.Dir = repoPath
+
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		// File might not exist in the repository
@@ -114,7 +122,7 @@ func (g *gitHelper) fileExistsInRepo(repoURL string, filePath string) (bool, str
 	err = g.checkoutFile(clonePath, filePath)
 	if err != nil {
 		// File doesn't exist in the repository
-		return false, "", nil
+		return false, "", err
 	}
 
 	// File exists and has been checked out
@@ -132,6 +140,7 @@ func (g *gitHelper) cleanup() error {
 	if g.tempDir != "" {
 		return os.RemoveAll(g.tempDir)
 	}
+
 	return nil
 }
 
@@ -175,6 +184,7 @@ func getRepoURL(u *url.URL) string {
 	if idx := strings.Index(repoURL.Path, ".git/"); idx != -1 {
 		// Keep everything up to and including .git
 		repoURL.Path = repoURL.Path[:idx+4]
+
 		return repoURL.String()
 	}
 
@@ -211,6 +221,7 @@ func (p *Parser) checkFileInGitRepo(u *url.URL) (bool, string, error) {
 
 	// Extract repository URL and file path
 	repoURL := getRepoURL(u)
+
 	filePath, err := extractFilePathFromURL(u)
 	if err != nil {
 		return false, "", fmt.Errorf("failed to extract file path from URL %s: %w", u.String(), err)
@@ -219,6 +230,7 @@ func (p *Parser) checkFileInGitRepo(u *url.URL) (bool, string, error) {
 	if p.gitRepoCache == nil {
 		p.gitRepoCache = make(map[string]string)
 	}
+
 	if cachedPath, ok := p.gitRepoCache[repoURL]; ok {
 		// Check if file exists in cached repo
 		localPath := filepath.Join(cachedPath, filePath)
@@ -237,7 +249,11 @@ func (p *Parser) checkFileInGitRepo(u *url.URL) (bool, string, error) {
 	// Check if file exists in repository
 	exists, localPath, err := helper.fileExistsInRepo(repoURL, filePath)
 	if err != nil {
-		helper.cleanup() // Clean up on error
+		// Clean up on error
+		if cleanupErr := helper.cleanup(); cleanupErr != nil {
+			fmt.Fprintf(os.Stderr, "failed to cleanup Git helper: %v\n", cleanupErr)
+		}
+
 		return false, "", fmt.Errorf("failed to check file in repo %s: %w", repoURL, err)
 	}
 
@@ -247,12 +263,15 @@ func (p *Parser) checkFileInGitRepo(u *url.URL) (bool, string, error) {
 		if len(helper.clonedRepos) > 0 {
 			for _, clonePath := range helper.clonedRepos {
 				p.gitRepoCache[repoURL] = clonePath
+
 				break
 			}
 		}
 	} else {
 		// If file doesn't exist, clean up immediately
-		helper.cleanup()
+		if cleanupErr := helper.cleanup(); cleanupErr != nil {
+			fmt.Fprintf(os.Stderr, "failed to cleanup Git helper: %v\n", cleanupErr)
+		}
 	}
 
 	return exists, localPath, nil

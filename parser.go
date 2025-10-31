@@ -110,7 +110,11 @@ func NewParser(config ParserConfig) (*Parser, error) {
 	return &parser, nil
 }
 
-// Removes any temporary Git repositories cloned during parsing.
+func NewDefaultParser() (*Parser, error) {
+	return NewParser(ParserConfig{})
+}
+
+// Cleanup removes any temporary Git repositories cloned during parsing.
 func (p *Parser) Cleanup() error {
 	if p.gitRepoCache == nil {
 		return nil
@@ -138,11 +142,8 @@ func (p *Parser) Cleanup() error {
 
 	// Clear the cache
 	p.gitRepoCache = make(map[string]string)
-	return nil
-}
 
-func NewDefaultParser() (*Parser, error) {
-	return NewParser(ParserConfig{})
+	return nil
 }
 
 // ParseStream reads the data and tries to parse it. Returns an error if fails.
