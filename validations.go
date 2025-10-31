@@ -95,15 +95,22 @@ func (p *Parser) isReachable(u url.URL, network bool) (bool, error) {
 // code hosting URLs to their raw URL.
 //
 // It supports relative paths and turns them into remote URLs or file:// URLs
-// depending on the value of baseURL
-func toCodeHostingURL(file string, baseURL *url.URL) url.URL {
+// depending on the value of baseURL.
+// If a URL is not supported by vcsurl, but it looks like a Git repository,
+// it returns the URL as-is.
+func toCodeHostingURL(file string, baseURL *url.URL, allowGitClone bool) (url.URL, bool) {
 	// Check if file is an absolute URL
 	if uri, err := url.ParseRequestURI(file); err == nil {
 		if raw := vcsurl.GetRawFile(uri); raw != nil {
-			return *raw
+			return *raw, false
 		}
 
-		return *uri
+		// Check if it's a Git repository URL that we can clone
+		if allowGitClone && isGitURL(uri) {
+			return *uri, true
+		}
+
+		return *uri, false
 	}
 
 	// We always pass the computed base URL here, with a fallback to the cwd,
@@ -112,11 +119,16 @@ func toCodeHostingURL(file string, baseURL *url.URL) url.URL {
 	u := *baseURL
 	u.Path = path.Join(u.Path, file)
 
-	return u
+	// Check if the base URL itself it's a Git repository
+	if allowGitClone && isGitURL(&u) {
+		return u, true
+	}
+
+	return u, false
 }
 
-// fileExists returns true if the file resource exists.
-func (p *Parser) fileExists(u url.URL, network bool) (bool, error) {
+// Returns true if the file resource exists.
+func (p *Parser) fileExists(u url.URL, network bool, isGitRepo bool) (bool, error) {
 	// Don't check if we are running in WASM because there's no stat(2) there
 	if runtime.GOARCH == "wasm" {
 		return true, nil
@@ -133,6 +145,15 @@ func (p *Parser) fileExists(u url.URL, network bool) (bool, error) {
 		return err == nil, err
 	}
 
+	// Check file existence via Git clone
+	if isGitRepo && p.allowLocalGitClone && network {
+		exists, _, err := p.checkFileInGitRepo(&u)
+		if err == nil {
+			return exists, nil
+		}
+	}
+
+	// Check file existence via HTTP request
 	if network {
 		reachable, err := p.isReachable(u, network)
 
@@ -142,9 +163,9 @@ func (p *Parser) fileExists(u url.URL, network bool) (bool, error) {
 	return true, nil
 }
 
-// isImageFile check whether the string is a valid image. It also checks if the file exists.
-// It returns true if it is an image or false if it's not and an error, if any
-func (p *Parser) isImageFile(u url.URL, network bool) (bool, error) {
+// Checks whether the string is a valid image. It also checks if the file exists.
+// It returns true if it is an image or false if it's not and an error, if any.
+func (p *Parser) isImageFile(u url.URL, network bool, isGitRepo bool) (bool, error) {
 	validExt := []string{".jpg", ".png"}
 	ext := strings.ToLower(filepath.Ext(u.Path))
 
@@ -152,12 +173,12 @@ func (p *Parser) isImageFile(u url.URL, network bool) (bool, error) {
 		return false, fmt.Errorf("invalid file extension for: %s", netutil.DisplayURL(&u))
 	}
 
-	return p.fileExists(u, network)
+	return p.fileExists(u, network, isGitRepo)
 }
 
-// validLogo returns true if the file path in value is a valid logo.
+// Returns true if the file path in value is a valid logo.
 // It also checks if the file exists.
-func (p *Parser) validLogo(u url.URL, network bool) (bool, error) {
+func (p *Parser) validLogo(u url.URL, network bool, isGitRepo bool) (bool, error) {
 	validExt := []string{".svg", ".svgz", ".png"}
 	ext := strings.ToLower(filepath.Ext(u.Path))
 
@@ -166,13 +187,22 @@ func (p *Parser) validLogo(u url.URL, network bool) (bool, error) {
 		return false, fmt.Errorf("invalid file extension for: %s", netutil.DisplayURL(&u))
 	}
 
-	if exists, err := p.fileExists(u, network); !exists {
+	if exists, err := p.fileExists(u, network, isGitRepo); !exists {
 		return false, err
 	}
 
 	var localPath string
-	// Remote. Create a temp dir, download and check the file. Remove the temp dir.
-	if u.Scheme != "file" {
+
+	// If it's a Git repository, try to get the file locally
+	if isGitRepo && p.allowLocalGitClone && network {
+		exists, gitLocalPath, err := p.checkFileInGitRepo(&u)
+		if err == nil && exists {
+			localPath = gitLocalPath
+		}
+	}
+
+	// If we don't have a local path yet and it's a remote file, download it
+	if localPath == "" && u.Scheme != "file" {
 		var err error
 
 		if !network {
@@ -198,17 +228,18 @@ func (p *Parser) validLogo(u url.URL, network bool) (bool, error) {
 				fmt.Fprintf(os.Stderr, "failed to remove %s: %v\n", dir, err)
 			}
 		}()
-	} else {
+	} else if localPath == "" && u.Scheme == "file" {
 		localPath = u.Path
 	}
 
-	if ext == ".png" {
+	if localPath != "" && ext == ".png" {
 		image.RegisterFormat("png", "png", png.Decode, png.DecodeConfig)
 
 		f, err := os.Open(localPath)
 		if err != nil {
 			return false, err
 		}
+		defer f.Close()
 
 		image, _, err := image.DecodeConfig(f)
 		if err != nil {
