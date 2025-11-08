@@ -95,9 +95,9 @@ localisation:
   localisationReady: true
   availableLanguages:
     - en
-    - ita
-    - fra
-    - deu
+    - it
+    - fr
+    - de
 
 dependsOn:
   open:

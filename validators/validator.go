@@ -208,8 +208,9 @@ func RegisterLocalErrorMessages(v *validator.Validate, trans ut.Translator) erro
 			translation: "{0} must be a valid ISO 3166-1 alpha-2 two-letter country code",
 		},
 		{
-			tag:         "bcp47_language_tag",
+			tag:         "bcp47_strict_language_tag",
 			translation: "{0} must be a valid BCP 47 language",
+			override:    true,
 		},
 		{
 			tag:         "bcp47_keys",

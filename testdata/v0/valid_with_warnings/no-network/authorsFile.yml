@@ -83,9 +83,9 @@ localisation:
   # Languages already available
   availableLanguages:
     - en
-    - ita
-    - fra
-    - deu
+    - it
+    - fr
+    - de
 
 dependsOn: # List of dependencies. The only mandatory list is the proprietary one
   open: # List of open dependencies. Optional
