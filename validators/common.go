@@ -115,7 +115,7 @@ func bcp47_keys(fl validator.FieldLevel) bool {
 	}
 
 	for _, k := range fl.Field().MapKeys() {
-		if err := validate.Var(k.String(), "bcp47_language_tag"); err != nil {
+		if err := validate.Var(k.String(), "bcp47_strict_language_tag"); err != nil {
 			return false
 		}
 	}
