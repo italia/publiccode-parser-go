@@ -1,5 +1,6 @@
 <!-- markdownlint-disable MD033 -->
 <!-- MD033/no-inline-html -->
+
 # publiccode.yml parser for Go
 
 [![Join the #publiccode channel](https://img.shields.io/badge/Slack%20channel-%23publiccode-blue.svg?logo=slack)](https://developersitalia.slack.com/messages/CAM3F785T)
@@ -63,6 +64,18 @@ publiccode.yml:12:5: warning: description.en.genericName: This key is DEPRECATED
 Run `publiccode-parser --help` for the available command line flags.
 
 The tool returns 0 in case of successful validation, 1 otherwise.
+
+### Generic Git Repository Support
+
+For Git repositories not hosted on supported platforms (GitHub, GitLab and Bitbucket),
+use the `--allow-local-git-clone` flag to validate file references:
+
+```shell
+# Validates files by cloning the repository locally
+$ publiccode-parser --allow-local-git-clone publiccode.yml
+```
+
+This feature uses Git sparse-checkout to minimize bandwidth usage and automatically cleans up temporary files after validation. Requires `git` to be installed.
 
 ## With Docker
 
