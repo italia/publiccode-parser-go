@@ -1,4 +1,4 @@
-package publiccode
+package git
 
 import (
 	"fmt"
@@ -11,29 +11,29 @@ import (
 )
 
 // Provides functionality for cloning and checking files in Git repositories.
-type gitHelper struct {
+type GitHelper struct {
 	// Base directory for all temporary Git clones
 	tempDir string
 	// Maps repository URLs to their local clone paths
-	clonedRepos map[string]string
+	ClonedRepos map[string]string
 }
 
-func newGitHelper() (*gitHelper, error) {
+func NewGitHelper() (*GitHelper, error) {
 	tempDir, err := os.MkdirTemp("", "publiccode-git-")
 	if err != nil {
 		return nil, fmt.Errorf("failed to create temp directory: %w", err)
 	}
 
-	return &gitHelper{
+	return &GitHelper{
 		tempDir:     tempDir,
-		clonedRepos: make(map[string]string),
+		ClonedRepos: make(map[string]string),
 	}, nil
 }
 
 // Performs a sparse clone of a Git repository.
-func (g *gitHelper) cloneRepo(repoURL string) (string, error) {
+func (g *GitHelper) CloneRepo(repoURL string) (string, error) {
 	// Check if already cloned
-	if clonePath, ok := g.clonedRepos[repoURL]; ok {
+	if clonePath, ok := g.ClonedRepos[repoURL]; ok {
 		return clonePath, nil
 	}
 
@@ -71,13 +71,13 @@ func (g *gitHelper) cloneRepo(repoURL string) (string, error) {
 		return "", fmt.Errorf("git sparse-checkout init failed: %w\nOutput: %s", err, output)
 	}
 
-	g.clonedRepos[repoURL] = clonePath
+	g.ClonedRepos[repoURL] = clonePath
 
 	return clonePath, nil
 }
 
 // Checks out a specific file from the cloned repository.
-func (g *gitHelper) checkoutFile(repoPath string, filePath string) error {
+func (g *GitHelper) CheckoutFile(repoPath string, filePath string) error {
 	// First, add the file to sparse-checkout
 	dir := filepath.Dir(filePath)
 	if dir != "." && dir != "" {
@@ -111,15 +111,15 @@ func (g *gitHelper) checkoutFile(repoPath string, filePath string) error {
 }
 
 // Checks if a file exists in a Git repository by attempting to check it out.
-func (g *gitHelper) fileExistsInRepo(repoURL string, filePath string) (bool, string, error) {
+func (g *GitHelper) FileExistsInRepo(repoURL string, filePath string) (bool, string, error) {
 	// Clone the repository if not already cloned
-	clonePath, err := g.cloneRepo(repoURL)
+	clonePath, err := g.CloneRepo(repoURL)
 	if err != nil {
 		return false, "", err
 	}
 
 	// Try to checkout the file
-	err = g.checkoutFile(clonePath, filePath)
+	err = g.CheckoutFile(clonePath, filePath)
 	if err != nil {
 		// File doesn't exist in the repository
 		return false, "", err
@@ -136,7 +136,7 @@ func (g *gitHelper) fileExistsInRepo(repoURL string, filePath string) (bool, str
 }
 
 // Removes all temporary directories and cloned repositories.
-func (g *gitHelper) cleanup() error {
+func (g *GitHelper) Cleanup() error {
 	if g.tempDir != "" {
 		return os.RemoveAll(g.tempDir)
 	}
@@ -147,7 +147,7 @@ func (g *gitHelper) cleanup() error {
 // Checks if an URL is a generic Git repository URL.
 // Returns false for supported hosting platforms (GitHub, GitLab, Bitbucket)
 // which have web interfaces and should not use local Git cloning.
-func isGitURL(u *url.URL) bool {
+func IsGitURL(u *url.URL) bool {
 	if u == nil {
 		return false
 	}
@@ -177,7 +177,7 @@ func isGitURL(u *url.URL) bool {
 }
 
 // Extracts the base repository URL in a generic Git repository.
-func getRepoURL(u *url.URL) string {
+func GetRepoURL(u *url.URL) string {
 	repoURL := *u
 
 	// For generic Git repos, remove the file path if present
@@ -192,7 +192,7 @@ func getRepoURL(u *url.URL) string {
 }
 
 // Extracts the file path from a generic Git repository URL.
-func extractFilePathFromURL(u *url.URL) (string, error) {
+func ExtractFilePathFromURL(u *url.URL) (string, error) {
 	urlPath := u.Path
 
 	var filePath string
@@ -211,68 +211,4 @@ func extractFilePathFromURL(u *url.URL) (string, error) {
 	filePath = path.Clean(filePath)
 
 	return filePath, nil
-}
-
-// Checks if a file exists in a Git repository.
-func (p *Parser) checkFileInGitRepo(u *url.URL) (bool, string, error) {
-	if !p.allowLocalGitClone {
-		return false, "", fmt.Errorf("local Git clone not allowed")
-	}
-
-	// Extract repository URL and file path
-	repoURL := getRepoURL(u)
-
-	filePath, err := extractFilePathFromURL(u)
-	if err != nil {
-		return false, "", fmt.Errorf("failed to extract file path from URL %s: %w", u.String(), err)
-	}
-
-	if p.gitRepoCache == nil {
-		p.gitRepoCache = make(map[string]string)
-	}
-
-	if cachedPath, ok := p.gitRepoCache[repoURL]; ok {
-		// Check if file exists in cached repo
-		localPath := filepath.Join(cachedPath, filePath)
-		if _, err := os.Stat(localPath); err == nil {
-			return true, localPath, nil
-		}
-	}
-
-	// Create a temporary Git helper
-	helper, err := newGitHelper()
-	if err != nil {
-		return false, "", fmt.Errorf("failed to create Git helper: %w", err)
-	}
-	// Don't cleanup the temp directory, will be managed by the Parser
-
-	// Check if file exists in repository
-	exists, localPath, err := helper.fileExistsInRepo(repoURL, filePath)
-	if err != nil {
-		// Clean up on error
-		if cleanupErr := helper.cleanup(); cleanupErr != nil {
-			fmt.Fprintf(os.Stderr, "failed to cleanup Git helper: %v\n", cleanupErr)
-		}
-
-		return false, "", fmt.Errorf("failed to check file in repo %s: %w", repoURL, err)
-	}
-
-	if exists {
-		// Cache the cloned repo path for future use
-		// The path will be cleaned up when Parser.Cleanup() is called
-		if len(helper.clonedRepos) > 0 {
-			for _, clonePath := range helper.clonedRepos {
-				p.gitRepoCache[repoURL] = clonePath
-
-				break
-			}
-		}
-	} else {
-		// If file doesn't exist, clean up immediately
-		if cleanupErr := helper.cleanup(); cleanupErr != nil {
-			fmt.Fprintf(os.Stderr, "failed to cleanup Git helper: %v\n", cleanupErr)
-		}
-	}
-
-	return exists, localPath, nil
 }

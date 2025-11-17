@@ -19,6 +19,7 @@ import (
 	"github.com/dyatlov/go-oembed/oembed"
 	httpclient "github.com/italia/httpclient-lib-go"
 	"github.com/italia/publiccode-parser-go/v5/data"
+	"github.com/italia/publiccode-parser-go/v5/internal/git"
 	netutil "github.com/italia/publiccode-parser-go/v5/internal"
 )
 
@@ -106,7 +107,7 @@ func toCodeHostingURL(file string, baseURL *url.URL, allowGitClone bool) (url.UR
 		}
 
 		// Check if it's a Git repository URL that we can clone
-		if allowGitClone && isGitURL(uri) {
+		if allowGitClone && git.IsGitURL(uri) {
 			return *uri, true
 		}
 
@@ -120,7 +121,7 @@ func toCodeHostingURL(file string, baseURL *url.URL, allowGitClone bool) (url.UR
 	u.Path = path.Join(u.Path, file)
 
 	// Check if the base URL itself it's a Git repository
-	if allowGitClone && isGitURL(&u) {
+	if allowGitClone && git.IsGitURL(&u) {
 		return u, true
 	}
 

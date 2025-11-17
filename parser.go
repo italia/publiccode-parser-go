@@ -21,6 +21,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	en_translations "github.com/go-playground/validator/v10/translations/en"
 	urlutil "github.com/italia/publiccode-parser-go/v5/internal"
+	"github.com/italia/publiccode-parser-go/v5/internal/git"
 	publiccodeValidator "github.com/italia/publiccode-parser-go/v5/validators"
 	"gopkg.in/yaml.v3"
 )
@@ -402,6 +403,70 @@ func (p *Parser) Parse(uri string) (PublicCode, error) {
 	}
 
 	return p.ParseStream(stream)
+}
+
+// Checks if a file exists in a Git repository.
+func (p *Parser) checkFileInGitRepo(u *url.URL) (bool, string, error) {
+	if !p.allowLocalGitClone {
+		return false, "", fmt.Errorf("local Git clone not allowed")
+	}
+
+	// Extract repository URL and file path
+	repoURL := git.GetRepoURL(u)
+
+	filePath, err := git.ExtractFilePathFromURL(u)
+	if err != nil {
+		return false, "", fmt.Errorf("failed to extract file path from URL %s: %w", u.String(), err)
+	}
+
+	if p.gitRepoCache == nil {
+		p.gitRepoCache = make(map[string]string)
+	}
+
+	if cachedPath, ok := p.gitRepoCache[repoURL]; ok {
+		// Check if file exists in cached repo
+		localPath := filepath.Join(cachedPath, filePath)
+		if _, err := os.Stat(localPath); err == nil {
+			return true, localPath, nil
+		}
+	}
+
+	// Create a temporary Git helper
+	helper, err := git.NewGitHelper()
+	if err != nil {
+		return false, "", fmt.Errorf("failed to create Git helper: %w", err)
+	}
+	// Don't cleanup the temp directory, will be managed by the Parser
+
+	// Check if file exists in repository
+	exists, localPath, err := helper.FileExistsInRepo(repoURL, filePath)
+	if err != nil {
+		// Clean up on error
+		if cleanupErr := helper.Cleanup(); cleanupErr != nil {
+			fmt.Fprintf(os.Stderr, "failed to cleanup Git helper: %v\n", cleanupErr)
+		}
+
+		return false, "", fmt.Errorf("failed to check file in repo %s: %w", repoURL, err)
+	}
+
+	if exists {
+		// Cache the cloned repo path for future use
+		// The path will be cleaned up when Parser.Cleanup() is called
+		if len(helper.ClonedRepos) > 0 {
+			for _, clonePath := range helper.ClonedRepos {
+				p.gitRepoCache[repoURL] = clonePath
+
+				break
+			}
+		}
+	} else {
+		// If file doesn't exist, clean up immediately
+		if cleanupErr := helper.Cleanup(); cleanupErr != nil {
+			fmt.Fprintf(os.Stderr, "failed to cleanup Git helper: %v\n", cleanupErr)
+		}
+	}
+
+	return exists, localPath, nil
 }
 
 // Ensure the returned value implements PublicCode as a struct, not as a pointer
