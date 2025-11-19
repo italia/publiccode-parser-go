@@ -47,12 +47,18 @@ type ParserConfig struct {
 	// The URL used as base of relative files in publiccode.yml (eg. logo)
 	// It can be a local file with the 'file' scheme.
 	BaseURL string
+
+	// AllowLocalGitClone enables cloning Git repositories locally to check
+	// file existence for repositories not belonging to supported hosting providers
+	// (GitHub, GitLab and Bitbucket).
+	AllowLocalGitClone bool
 }
 
 // Parser is a helper class for parsing publiccode.yml files.
 type Parser struct {
 	disableNetwork        bool
 	disableExternalChecks bool
+	allowLocalGitClone    bool
 	domain                Domain
 	branch                string
 	baseURL               *url.URL
@@ -64,6 +70,10 @@ type Parser struct {
 	// XXX: It's an hack and it requires to fix the design mistake in the public API.
 	// This makes Parse{,Stream}() not thread safe.
 	currentBaseURL *url.URL
+
+	// Holds temporarily cloned Git repositories
+	// for file existence checks during parsing session.
+	gitRepoCache map[string]string
 }
 
 // Domain is a single code hosting service.
@@ -84,8 +94,10 @@ func NewParser(config ParserConfig) (*Parser, error) {
 	parser := Parser{
 		disableNetwork:        config.DisableNetwork,
 		disableExternalChecks: config.DisableExternalChecks,
+		allowLocalGitClone:    config.AllowLocalGitClone,
 		domain:                config.Domain,
 		branch:                config.Branch,
+		gitRepoCache:          make(map[string]string),
 	}
 
 	if config.BaseURL != "" {
@@ -100,6 +112,38 @@ func NewParser(config ParserConfig) (*Parser, error) {
 
 func NewDefaultParser() (*Parser, error) {
 	return NewParser(ParserConfig{})
+}
+
+// Cleanup removes any temporary Git repositories cloned during parsing.
+func (p *Parser) Cleanup() error {
+	if p.gitRepoCache == nil {
+		return nil
+	}
+
+	tempDirs := make(map[string]bool)
+
+	// Collect all temp directories to clean up
+	for _, repoPath := range p.gitRepoCache {
+		if repoPath != "" {
+			// Get the parent temp directory
+			parent := filepath.Dir(repoPath)
+			if strings.Contains(parent, "publiccode-git-") {
+				tempDirs[parent] = true
+			}
+		}
+	}
+
+	// Clean up all unique temp directories
+	for tempDir := range tempDirs {
+		if err := os.RemoveAll(tempDir); err != nil {
+			fmt.Fprintf(os.Stderr, "failed to remove temp Git directory %s: %v\n", tempDir, err)
+		}
+	}
+
+	// Clear the cache
+	p.gitRepoCache = make(map[string]string)
+
+	return nil
 }
 
 // ParseStream reads the data and tries to parse it. Returns an error if fails.
