@@ -1,7 +1,7 @@
 module github.com/italia/publiccode-parser-go/v5
 
 require (
-	github.com/alranel/go-vcsurl/v2 v2.0.2
+	github.com/alranel/go-vcsurl/v2 v2.0.3
 	github.com/dyatlov/go-oembed v0.0.0-20191103150536-a57c85b3b37c
 	github.com/github/go-spdx/v2 v2.3.3
 	github.com/go-playground/locales v0.14.1
