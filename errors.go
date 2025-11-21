@@ -44,8 +44,12 @@ func (e ValidationError) MarshalJSON() ([]byte, error) {
 	})
 }
 
-func newValidationError(key string, description string, args ...interface{}) ValidationError {
-	return ValidationError{Key: key, Description: fmt.Sprintf(description, args...)}
+func newValidationError(key string, description string) ValidationError {
+	return ValidationError{Key: key, Description: description}
+}
+
+func newValidationErrorf(key string, description string, args ...any) ValidationError {
+	return newValidationError(key, fmt.Sprintf(description, args...))
 }
 
 type ValidationWarning ValidationError
