@@ -54,7 +54,7 @@ func validateFieldsV0(publiccode PublicCode, parser Parser, network bool) error 
 		} else if !parser.disableExternalChecks {
 			validLogo, err := parser.validLogo(toCodeHostingURL(*publiccodev0.Logo, parser.currentBaseURL), network)
 			if !validLogo {
-				vr = append(vr, newValidationError("logo", err.Error()))
+				vr = append(vr, newValidationError("logo", "%s", err.Error()))
 			}
 		}
 	}
@@ -67,7 +67,7 @@ func validateFieldsV0(publiccode PublicCode, parser Parser, network bool) error 
 		} else if !parser.disableExternalChecks {
 			validLogo, err := parser.validLogo(toCodeHostingURL(*publiccodev0.MonochromeLogo, parser.currentBaseURL), network)
 			if !validLogo {
-				vr = append(vr, newValidationError("monochromeLogo", err.Error()))
+				vr = append(vr, newValidationError("monochromeLogo", "%s", err.Error()))
 			}
 		}
 	}
