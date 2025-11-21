@@ -106,7 +106,7 @@ func NewDefaultParser() (*Parser, error) {
 func (p *Parser) ParseStream(in io.Reader) (PublicCode, error) { //nolint:maintidx
 	b, err := io.ReadAll(in)
 	if err != nil {
-		return nil, ValidationResults{newValidationError("", fmt.Sprintf("Can't read the stream: %v", err))}
+		return nil, ValidationResults{newValidationErrorf("", "Can't read the stream: %v", err)}
 	}
 
 	if !utf8.Valid(b) {
@@ -146,11 +146,10 @@ func (p *Parser) ParseStream(in io.Reader) (PublicCode, error) { //nolint:mainti
 
 	if !slices.Contains(SupportedVersions, version.Value) {
 		return nil, ValidationResults{
-			newValidationError("publiccodeYmlVersion", fmt.Sprintf(
+			newValidationErrorf("publiccodeYmlVersion",
 				"unsupported version: '%s'. Supported versions: %s",
 				version.Value,
-				strings.Join(SupportedVersions, ", "),
-			)),
+				strings.Join(SupportedVersions, ", ")),
 		}
 	}
 
@@ -280,7 +279,7 @@ func (p *Parser) ParseStream(in io.Reader) (PublicCode, error) { //nolint:mainti
 	if p.currentBaseURL == nil {
 		cwd, err := os.Getwd()
 		if err != nil {
-			ve = append(ve, newValidationError("", fmt.Sprintf("no baseURL set and failed to get working directory: %s", err)))
+			ve = append(ve, newValidationErrorf("", "no baseURL set and failed to get working directory: %s", err))
 
 			return asPublicCode(publiccode), ve
 		}
