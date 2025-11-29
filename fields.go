@@ -20,8 +20,10 @@ func validateFieldsV0(publiccode PublicCode, parser Parser, network bool) error 
 
 	var vr ValidationResults
 
-	if publiccodev0.URL != nil && network {
-		if reachable, err := parser.isReachable(*(*url.URL)(publiccodev0.URL), network); !reachable {
+	checksNetwork := network && !parser.disableExternalChecks
+
+	if checksNetwork && publiccodev0.URL != nil {
+		if reachable, err := parser.isReachable(*(*url.URL)(publiccodev0.URL)); !reachable {
 			vr = append(vr, newValidationErrorf("url", "'%s' not reachable: %s", publiccodev0.URL, err.Error()))
 		}
 
@@ -30,8 +32,8 @@ func validateFieldsV0(publiccode PublicCode, parser Parser, network bool) error 
 		}
 	}
 
-	if publiccodev0.LandingURL != nil {
-		if reachable, err := parser.isReachable(*(*url.URL)(publiccodev0.LandingURL), network); !reachable {
+	if checksNetwork && publiccodev0.LandingURL != nil {
+		if reachable, err := parser.isReachable(*(*url.URL)(publiccodev0.LandingURL)); !reachable {
 			vr = append(vr, newValidationErrorf(
 				"landingURL",
 				"'%s' not reachable: %s", publiccodev0.LandingURL, err.Error(),
@@ -39,8 +41,8 @@ func validateFieldsV0(publiccode PublicCode, parser Parser, network bool) error 
 		}
 	}
 
-	if publiccodev0.Roadmap != nil {
-		if reachable, err := parser.isReachable(*(*url.URL)(publiccodev0.Roadmap), network); !reachable {
+	if checksNetwork && publiccodev0.Roadmap != nil {
+		if reachable, err := parser.isReachable(*(*url.URL)(publiccodev0.Roadmap)); !reachable {
 			vr = append(vr, newValidationErrorf(
 				"roadmap",
 				"'%s' not reachable: %s", publiccodev0.Roadmap, err.Error(),
@@ -52,9 +54,12 @@ func validateFieldsV0(publiccode PublicCode, parser Parser, network bool) error 
 		if _, err := isRelativePathOrURL(*publiccodev0.Logo, "logo"); err != nil {
 			vr = append(vr, err)
 		} else if !parser.disableExternalChecks {
-			validLogo, err := parser.validLogo(toCodeHostingURL(*publiccodev0.Logo, parser.currentBaseURL), network)
-			if !validLogo {
-				vr = append(vr, newValidationError("logo", err.Error()))
+			u := toAbsoluteURL(*publiccodev0.Logo, parser.currentBaseURL, network)
+			if u != nil {
+				validLogo, err := parser.validLogo(*u, network)
+				if !validLogo {
+					vr = append(vr, newValidationError("logo", err.Error()))
+				}
 			}
 		}
 	}
@@ -65,9 +70,12 @@ func validateFieldsV0(publiccode PublicCode, parser Parser, network bool) error 
 		if _, err := isRelativePathOrURL(*publiccodev0.MonochromeLogo, "monochromeLogo"); err != nil {
 			vr = append(vr, err)
 		} else if !parser.disableExternalChecks {
-			validLogo, err := parser.validLogo(toCodeHostingURL(*publiccodev0.MonochromeLogo, parser.currentBaseURL), network)
-			if !validLogo {
-				vr = append(vr, newValidationError("monochromeLogo", err.Error()))
+			u := toAbsoluteURL(*publiccodev0.MonochromeLogo, parser.currentBaseURL, network)
+			if u != nil {
+				validLogo, err := parser.validLogo(*u, network)
+				if !validLogo {
+					vr = append(vr, newValidationError("monochromeLogo", err.Error()))
+				}
 			}
 		}
 	}
@@ -109,11 +117,12 @@ func validateFieldsV0(publiccode PublicCode, parser Parser, network bool) error 
 		if _, err := isRelativePathOrURL(*publiccodev0.Legal.AuthorsFile, "legal.authorsFile"); err != nil {
 			vr = append(vr, err)
 		} else if !parser.disableExternalChecks {
-			exists, err := parser.fileExists(toCodeHostingURL(*publiccodev0.Legal.AuthorsFile, parser.currentBaseURL), network)
-			if !exists {
-				u := toCodeHostingURL(*publiccodev0.Legal.AuthorsFile, parser.currentBaseURL)
-
-				vr = append(vr, newValidationErrorf("legal.authorsFile", "'%s' does not exist: %s", urlutil.DisplayURL(&u), err.Error()))
+			u := toAbsoluteURL(*publiccodev0.Legal.AuthorsFile, parser.currentBaseURL, network)
+			if u != nil {
+				exists, err := parser.fileExists(*u, network)
+				if !exists {
+					vr = append(vr, newValidationErrorf("legal.authorsFile", "'%s' does not exist: %s", urlutil.DisplayURL(u), err.Error()))
+				}
 			}
 		}
 	}
@@ -142,8 +151,8 @@ func validateFieldsV0(publiccode PublicCode, parser Parser, network bool) error 
 			})
 		}
 
-		if !parser.disableExternalChecks && network && desc.Documentation != nil {
-			if reachable, err := parser.isReachable(*(*url.URL)(desc.Documentation), network); !reachable {
+		if checksNetwork && desc.Documentation != nil {
+			if reachable, err := parser.isReachable(*(*url.URL)(desc.Documentation)); !reachable {
 				vr = append(vr, newValidationErrorf(
 					fmt.Sprintf("description.%s.documentation", lang),
 					"'%s' not reachable: %s", desc.Documentation, err.Error(),
@@ -151,8 +160,8 @@ func validateFieldsV0(publiccode PublicCode, parser Parser, network bool) error 
 			}
 		}
 
-		if !parser.disableExternalChecks && network && desc.APIDocumentation != nil {
-			if reachable, err := parser.isReachable(*(*url.URL)(desc.APIDocumentation), network); !reachable {
+		if checksNetwork && desc.APIDocumentation != nil {
+			if reachable, err := parser.isReachable(*(*url.URL)(desc.APIDocumentation)); !reachable {
 				vr = append(vr, newValidationErrorf(
 					fmt.Sprintf("description.%s.apiDocumentation", lang),
 					"'%s' not reachable: %s", desc.APIDocumentation, err.Error(),
@@ -165,12 +174,15 @@ func validateFieldsV0(publiccode PublicCode, parser Parser, network bool) error 
 			if _, err := isRelativePathOrURL(v, keyName); err != nil {
 				vr = append(vr, err)
 			} else if !parser.disableExternalChecks {
-				isImage, err := parser.isImageFile(toCodeHostingURL(v, parser.currentBaseURL), network)
-				if !isImage {
-					vr = append(vr, newValidationErrorf(
-						keyName,
-						"'%s' is not an image: %s", v, err.Error(),
-					))
+				u := toAbsoluteURL(v, parser.currentBaseURL, network)
+				if u != nil {
+					isImage, err := parser.isImageFile(*u, network)
+					if !isImage {
+						vr = append(vr, newValidationErrorf(
+							keyName,
+							"'%s' is not an image: %s", v, err.Error(),
+						))
+					}
 				}
 			}
 		}

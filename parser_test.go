@@ -890,15 +890,6 @@ func TestUrlMissingWithoutPath(t *testing.T) {
 	}
 }
 
-func TestIsReachable(t *testing.T) {
-	parser, _ := NewParser(ParserConfig{DisableNetwork: true})
-
-	u, _ := url.Parse("https://google.com/404")
-	if reachable, _ := parser.isReachable(*u, false); !reachable {
-		t.Errorf("isReachable() returned false with DisableNetwork enabled")
-	}
-}
-
 // Test that the exported YAML passes validation again, and that re-exporting it
 // matches the first export (lossless roundtrip).
 func TestExport(t *testing.T) {

@@ -68,10 +68,10 @@ func getHeaderFromDomain(domain Domain, url string) map[string]string {
 
 // isReachable checks whether the URL resource is reachable.
 // An URL resource is reachable if it returns HTTP 200.
-func (p *Parser) isReachable(u url.URL, network bool) (bool, error) {
-	// Don't check if the network checks are disabled or if we are running in WASM
-	// because we'd most likely fail due to CORS errors.
-	if !network || runtime.GOARCH == "wasm" {
+func (p *Parser) isReachable(u url.URL) (bool, error) {
+	// Don't check if we are running in WASM because we'd most likely
+	// fail due to CORS errors.
+	if runtime.GOARCH == "wasm" {
 		return true, nil
 	}
 
@@ -91,19 +91,24 @@ func (p *Parser) isReachable(u url.URL, network bool) (bool, error) {
 	return true, nil
 }
 
-// toURL turns the passed string into an URL, trying to resolve
+// toAbsoluteURL turns the passed string into an URL, trying to resolve
 // code hosting URLs to their raw URL.
 //
 // It supports relative paths and turns them into remote URLs or file:// URLs
 // depending on the value of baseURL
-func toCodeHostingURL(file string, baseURL *url.URL) url.URL {
+func toAbsoluteURL(file string, baseURL *url.URL, network bool) *url.URL {
 	// Check if file is an absolute URL
 	if uri, err := url.ParseRequestURI(file); err == nil {
-		if raw := vcsurl.GetRawFile(uri); raw != nil {
-			return *raw
+		if !network {
+			return nil
 		}
 
-		return *uri
+		// this uses the network to detect the git branch
+		if raw := vcsurl.GetRawFile(uri); raw != nil {
+			return raw
+		}
+
+		return uri
 	}
 
 	// We always pass the computed base URL here, with a fallback to the cwd,
@@ -112,7 +117,7 @@ func toCodeHostingURL(file string, baseURL *url.URL) url.URL {
 	u := *baseURL
 	u.Path = path.Join(u.Path, file)
 
-	return u
+	return &u
 }
 
 // fileExists returns true if the file resource exists.
@@ -134,7 +139,7 @@ func (p *Parser) fileExists(u url.URL, network bool) (bool, error) {
 	}
 
 	if network {
-		reachable, err := p.isReachable(u, network)
+		reachable, err := p.isReachable(u)
 
 		return reachable, err
 	}
