@@ -4,16 +4,19 @@ import (
 	"fmt"
 	"net/url"
 	"os"
-	"os/exec"
 	"path"
 	"path/filepath"
 	"strings"
+
+	"github.com/go-git/go-git/v5"
 )
 
 // Provides functionality for cloning and checking files in Git repositories.
 type GitHelper struct {
 	// Base directory for all temporary Git clones
 	tempDir string
+	// Maps repository URLs to their go-git objects
+	repos map[string]*git.Repository
 	// Maps repository URLs to their local clone paths
 	ClonedRepos map[string]string
 }
@@ -26,6 +29,7 @@ func NewGitHelper() (*GitHelper, error) {
 
 	return &GitHelper{
 		tempDir:     tempDir,
+		repos:       make(map[string]*git.Repository),
 		ClonedRepos: make(map[string]string),
 	}, nil
 }
@@ -50,27 +54,18 @@ func (g *GitHelper) CloneRepo(repoURL string) (string, error) {
 
 	clonePath := filepath.Join(g.tempDir, repoName)
 
-	// Perform sparse clone
-	args := []string{"clone", "--filter=blob:none", "--no-checkout"}
-	args = append(args, repoURL, clonePath)
-	cmd := exec.Command("git", args...)
-
-	output, err := cmd.CombinedOutput()
-	if err != nil {
-		return "", fmt.Errorf("git clone failed: %w\nOutput: %s", err, output)
-	}
-
-	// Initialize sparse checkout
-	cmd = exec.Command("git", "sparse-checkout", "init", "--cone")
-	cmd.Dir = clonePath
-
-	output, err = cmd.CombinedOutput()
+	repo, err := git.PlainClone(clonePath, false, &git.CloneOptions{
+		URL:        repoURL,
+		Depth:      1,
+		NoCheckout: true,
+	})
 	if err != nil {
 		os.RemoveAll(clonePath)
 
-		return "", fmt.Errorf("git sparse-checkout init failed: %w\nOutput: %s", err, output)
+		return "", fmt.Errorf("git clone failed: %w", err)
 	}
 
+	g.repos[repoURL] = repo
 	g.ClonedRepos[repoURL] = clonePath
 
 	return clonePath, nil
@@ -78,33 +73,42 @@ func (g *GitHelper) CloneRepo(repoURL string) (string, error) {
 
 // Checks out a specific file from the cloned repository.
 func (g *GitHelper) CheckoutFile(repoPath string, filePath string) error {
-	// First, add the file to sparse-checkout
-	dir := filepath.Dir(filePath)
-	if dir != "." && dir != "" {
-		cmd := exec.Command("git", "sparse-checkout", "add", dir)
-		cmd.Dir = repoPath
+	// Find the repository for this path
+	var repo *git.Repository
+	for repoURL, path := range g.ClonedRepos {
+		if path == repoPath {
+			repo = g.repos[repoURL]
 
-		_, err := cmd.CombinedOutput()
-		if err != nil {
-			// Try to add the specific file if directory fails
-			cmd = exec.Command("git", "sparse-checkout", "add", filePath)
-			cmd.Dir = repoPath
-
-			output, err := cmd.CombinedOutput()
-			if err != nil {
-				return fmt.Errorf("git sparse-checkout add failed: %w\nOutput: %s", err, output)
-			}
+			break
 		}
 	}
 
-	// Checkout the file
-	cmd := exec.Command("git", "checkout", "HEAD", "--", filePath)
-	cmd.Dir = repoPath
+	if repo == nil {
+		return fmt.Errorf("repository not found for path: %s", repoPath)
+	}
 
-	output, err := cmd.CombinedOutput()
+	w, err := repo.Worktree()
 	if err != nil {
-		// File might not exist in the repository
-		return fmt.Errorf("git checkout failed: %w\nOutput: %s", err, output)
+		return fmt.Errorf("git worktree failed: %w", err)
+	}
+
+	// Use sparse checkout
+	dir := filepath.Dir(filePath)
+	if dir == "." {
+		dir = filePath
+	}
+
+	err = w.Checkout(&git.CheckoutOptions{
+		SparseCheckoutDirectories: []string{dir},
+	})
+	if err != nil {
+		return fmt.Errorf("git sparse-checkout failed: %w", err)
+	}
+
+	// Check whether the file exists
+	fullPath := filepath.Join(repoPath, filePath)
+	if _, err := os.Stat(fullPath); err != nil {
+		return fmt.Errorf("git checkout failed: file not found: %s", filePath)
 	}
 
 	return nil
