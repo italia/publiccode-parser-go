@@ -240,7 +240,6 @@ func (p *Parser) validLogo(u url.URL, network bool, isGitRepo bool) (bool, error
 		if err != nil {
 			return false, err
 		}
-		defer f.Close()
 
 		image, _, err := image.DecodeConfig(f)
 		if err != nil {
