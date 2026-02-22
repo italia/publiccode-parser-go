@@ -188,7 +188,7 @@ func validateFieldsV0(publiccode PublicCode, parser Parser, network bool) error 
 		}
 
 		for i, v := range desc.Videos {
-			_, err := parser.isOEmbedURL((*url.URL)(v))
+			err := parser.checkOEmbedURL((*url.URL)(v))
 			if err != nil {
 				vr = append(vr, newValidationErrorf(
 					fmt.Sprintf("description.%s.videos[%d]", lang, i),
