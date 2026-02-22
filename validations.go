@@ -228,17 +228,22 @@ func (p *Parser) validLogo(u url.URL, network bool) (bool, error) {
 	return true, nil
 }
 
-// isOembedURL returns whether the link is from a valid oEmbed provider.
+// checkOEmbedURL returns whether the link is from a valid oEmbed provider.
 // Reference: https://oembed.com/providers.json
-func (p *Parser) isOEmbedURL(url *url.URL) (bool, error) {
+func (p *Parser) checkOEmbedURL(url *url.URL) error {
 	b := data.OembedProviders
 	oe := oembed.NewOembed()
-	_ = oe.ParseProviders(bytes.NewReader(b))
 
 	link := url.String()
-	if item := oe.FindItem(link); item == nil {
-		return false, fmt.Errorf("invalid oEmbed link: %s", link)
+
+	err := oe.ParseProviders(bytes.NewReader(b))
+	if err != nil {
+		return fmt.Errorf("failed to check oEmbed link '%s': %w", link, err)
 	}
 
-	return true, nil
+	if item := oe.FindItem(link); item == nil {
+		return fmt.Errorf("invalid oEmbed link: %s", link)
+	}
+
+	return nil
 }
