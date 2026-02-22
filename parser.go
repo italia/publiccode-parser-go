@@ -183,17 +183,13 @@ func (p *Parser) ParseStream(in io.Reader) (PublicCode, error) { //nolint:mainti
 
 		decodeResults = decode(b, v0, node)
 		publiccode = v0
-	}
+	} else {
+		v1 := &PublicCodeV1{}
+		validateFields = validateFieldsV1
 
-	// When publiccode.yml v1.x is released, the code will look
-	// like this:
-	// } else {
-	// 	v1 := PublicCodeV1{}
-	// 	validateFields = validateFieldsV1
-	//
-	// 	decodeResults = decode(b, &v1, node)
-	// 	publiccode = v1
-	// }
+		decodeResults = decode(b, v1, node)
+		publiccode = v1
+	}
 
 	if decodeResults != nil {
 		ve = append(ve, decodeResults...)

@@ -12,8 +12,8 @@ import (
 
 type validateFn func(publiccode PublicCode, parser Parser, network bool) error
 
-// validateFields validates publiccode with additional rules not validatable
-// with a simple YAML schema.
+// validateFieldsV0 validates publiccode.yml with additional rules not validatable
+// with go-playground/validator
 // It returns any error encountered as ValidationResults.
 func validateFieldsV0(publiccode PublicCode, parser Parser, network bool) error { //nolint:maintidx
 	publiccodev0 := publiccode.(*PublicCodeV0)
@@ -235,6 +235,148 @@ func validateFieldsV0(publiccode PublicCode, parser Parser, network bool) error 
 					),
 					0, 0,
 				})
+			}
+		}
+	}
+
+	if len(vr) == 0 {
+		return nil
+	}
+
+	return vr
+}
+
+// validateFieldsV1 validates publiccode.yml with additional rules not validatable
+// with go-playground/validator
+// It returns any error encountered as ValidationResults.
+func validateFieldsV1(publiccode PublicCode, parser Parser, network bool) error {
+	publiccodev1 := publiccode.(*PublicCodeV1)
+
+	var vr ValidationResults
+
+	checksNetwork := network && !parser.disableExternalChecks
+
+	if checksNetwork && publiccodev1.URL != nil {
+		if reachable, err := parser.isReachable(*(*url.URL)(publiccodev1.URL)); !reachable {
+			vr = append(vr, newValidationErrorf("url", "'%s' not reachable: %s", publiccodev1.URL, err.Error()))
+		}
+
+		if !vcsurl.IsRepo((*url.URL)(publiccodev1.URL)) {
+			vr = append(vr, newValidationError("url", "is not a valid code repository"))
+		}
+	}
+
+	if checksNetwork && publiccodev1.LandingURL != nil {
+		if reachable, err := parser.isReachable(*(*url.URL)(publiccodev1.LandingURL)); !reachable {
+			vr = append(vr, newValidationErrorf(
+				"landingURL",
+				"'%s' not reachable: %s", publiccodev1.LandingURL, err.Error(),
+			))
+		}
+	}
+
+	if checksNetwork && publiccodev1.Roadmap != nil {
+		if reachable, err := parser.isReachable(*(*url.URL)(publiccodev1.Roadmap)); !reachable {
+			vr = append(vr, newValidationErrorf(
+				"roadmap",
+				"'%s' not reachable: %s", publiccodev1.Roadmap, err.Error(),
+			))
+		}
+	}
+
+	if publiccodev1.Logo != nil && *publiccodev1.Logo != "" {
+		if _, err := isRelativePathOrURL(*publiccodev1.Logo, "logo"); err != nil {
+			vr = append(vr, err)
+		} else if !parser.disableExternalChecks {
+			u := toAbsoluteURL(*publiccodev1.Logo, parser.currentBaseURL, network)
+			if u != nil {
+				validLogo, err := parser.validLogo(*u, network)
+				if !validLogo {
+					vr = append(vr, newValidationError("logo", err.Error()))
+				}
+			}
+		}
+	}
+
+	if publiccodev1.IntendedAudience != nil {
+		// This is not ideal, but we need to revalidate the countries
+		// here, because otherwise we could get a warning and the advice
+		// to use uppercase on an invalid country.
+		validate := publiccodeValidator.New()
+
+		if publiccodev1.IntendedAudience.Countries != nil {
+			for i, c := range *publiccodev1.IntendedAudience.Countries {
+				if validate.Var(c, "iso3166_1_alpha2_lower_or_upper") == nil && c == strings.ToLower(c) {
+					vr = append(vr, ValidationWarning{
+						fmt.Sprintf("intendedAudience.countries[%d]", i),
+						fmt.Sprintf("Lowercase country codes are DEPRECATED. Use uppercase instead ('%s')", strings.ToUpper(c)),
+						0, 0,
+					})
+				}
+			}
+		}
+
+		if publiccodev1.IntendedAudience.UnsupportedCountries != nil {
+			for i, c := range *publiccodev1.IntendedAudience.UnsupportedCountries {
+				if validate.Var(c, "iso3166_1_alpha2_lower_or_upper") == nil && c == strings.ToLower(c) {
+					vr = append(vr, ValidationWarning{
+						fmt.Sprintf("intendedAudience.unsupportedCountries[%d]", i),
+						fmt.Sprintf("Lowercase country codes are DEPRECATED. Use uppercase instead ('%s')", strings.ToUpper(c)),
+						0, 0,
+					})
+				}
+			}
+		}
+	}
+
+	for lang, desc := range publiccodev1.Description {
+		if publiccodev1.Description == nil {
+			publiccodev1.Description = make(map[string]DescV1)
+		}
+
+		if checksNetwork && desc.Documentation != nil {
+			if reachable, err := parser.isReachable(*(*url.URL)(desc.Documentation)); !reachable {
+				vr = append(vr, newValidationErrorf(
+					fmt.Sprintf("description.%s.documentation", lang),
+					"'%s' not reachable: %s", desc.Documentation, err.Error(),
+				))
+			}
+		}
+
+		if checksNetwork && desc.APIDocumentation != nil {
+			if reachable, err := parser.isReachable(*(*url.URL)(desc.APIDocumentation)); !reachable {
+				vr = append(vr, newValidationErrorf(
+					fmt.Sprintf("description.%s.apiDocumentation", lang),
+					"'%s' not reachable: %s", desc.APIDocumentation, err.Error(),
+				))
+			}
+		}
+
+		for i, v := range desc.Screenshots {
+			keyName := fmt.Sprintf("description.%s.screenshots[%d]", lang, i)
+			if _, err := isRelativePathOrURL(v, keyName); err != nil {
+				vr = append(vr, err)
+			} else if !parser.disableExternalChecks {
+				u := toAbsoluteURL(v, parser.currentBaseURL, network)
+				if u != nil {
+					isImage, err := parser.isImageFile(*u, network)
+					if !isImage {
+						vr = append(vr, newValidationErrorf(
+							keyName,
+							"'%s' is not an image: %s", v, err.Error(),
+						))
+					}
+				}
+			}
+		}
+
+		for i, v := range desc.Videos {
+			err := parser.checkOEmbedURL((*url.URL)(v))
+			if err != nil {
+				vr = append(vr, newValidationErrorf(
+					fmt.Sprintf("description.%s.videos[%d]", lang, i),
+					"'%s' is not a valid video URL supporting oEmbed: %s", v, err.Error(),
+				))
 			}
 		}
 	}
