@@ -4,9 +4,7 @@ version: 2
 
 before:
   hooks:
-    # You may remove this if you don't use go modules.
     - go mod download
-    # you may remove this if you don't need go generate
     - go generate ./...
 builds:
 -
@@ -45,8 +43,9 @@ changelog:
   sort: asc
   filters:
     exclude:
-    - '^docs:'
-    - '^test:'
+      - '^chore'
+      - '^test'
+      - '^Merge'
 dockers:
   -
     use: buildx
