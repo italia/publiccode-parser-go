@@ -140,10 +140,6 @@ func validateFieldsV0(publiccode PublicCode, parser Parser, network bool) error 
 	}
 
 	for lang, desc := range publiccodev0.Description {
-		if publiccodev0.Description == nil {
-			publiccodev0.Description = make(map[string]DescV0)
-		}
-
 		if len(desc.GenericName) > 0 {
 			vr = append(vr, ValidationWarning{
 				fmt.Sprintf("description.%s.genericName", lang),
@@ -330,10 +326,6 @@ func validateFieldsV1(publiccode PublicCode, parser Parser, network bool) error 
 	}
 
 	for lang, desc := range publiccodev1.Description {
-		if publiccodev1.Description == nil {
-			publiccodev1.Description = make(map[string]DescV1)
-		}
-
 		if checksNetwork && desc.Documentation != nil {
 			if reachable, err := parser.isReachable(*(*url.URL)(desc.Documentation)); !reachable {
 				vr = append(vr, newValidationErrorf(
