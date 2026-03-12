@@ -98,6 +98,7 @@ func NewParser(config ParserConfig) (*Parser, error) {
 	return &parser, nil
 }
 
+// NewDefaultParser initializes and returns a new Parser object with default settings.
 func NewDefaultParser() (*Parser, error) {
 	return NewParser(ParserConfig{})
 }
