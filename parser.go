@@ -104,8 +104,60 @@ func NewDefaultParser() (*Parser, error) {
 }
 
 // ParseStream reads the data and tries to parse it. Returns an error if fails.
-func (p *Parser) ParseStream(in io.Reader) (PublicCode, error) { //nolint:maintidx
-	b, err := io.ReadAll(in)
+func (p *Parser) ParseStream(in io.Reader) (PublicCode, error) {
+	b, err := readAndValidateUTF8(in)
+	if err != nil {
+		return nil, err
+	}
+
+	node, err := decodeYAMLNode(b)
+	if err != nil {
+		return nil, err
+	}
+
+	version, ve, err := validateVersion(node)
+	if err != nil {
+		return nil, err
+	}
+
+	publiccode, validateFields, decodeResults := initPublicCode(version.Value, b, node)
+	ve = append(ve, decodeResults...)
+	ve = append(ve, runStructValidation(publiccode, node)...)
+
+	baseURLErrs, earlyReturn := p.resolveBaseURL(publiccode, node)
+	ve = append(ve, baseURLErrs...)
+
+	if earlyReturn {
+		return asPublicCode(publiccode), ve
+	}
+
+	if err = validateFields(publiccode, *p, !p.disableNetwork); err != nil {
+		for _, e := range err.(ValidationResults) {
+			switch e := e.(type) {
+			case ValidationError:
+				e.Line, e.Column = getPositionInFile(e.Key, node)
+				ve = append(ve, e)
+			case ValidationWarning:
+				e.Line, e.Column = getPositionInFile(e.Key, node)
+				ve = append(ve, e)
+			}
+		}
+	}
+
+	if v0, ok := publiccode.(*PublicCodeV0); ok {
+		applyV0Migrations(v0)
+	}
+
+	if len(ve) == 0 {
+		return asPublicCode(publiccode), nil
+	}
+
+	return asPublicCode(publiccode), ve
+}
+
+// readAndValidateUTF8 reads from r and returns an error if the content is not valid UTF-8.
+func readAndValidateUTF8(r io.Reader) ([]byte, error) {
+	b, err := io.ReadAll(r)
 	if err != nil {
 		return nil, ValidationResults{newValidationErrorf("", "Can't read the stream: %v", err)}
 	}
@@ -114,30 +166,40 @@ func (p *Parser) ParseStream(in io.Reader) (PublicCode, error) { //nolint:mainti
 		return nil, ValidationResults{newValidationError("", "Invalid UTF-8")}
 	}
 
-	// First, decode the YAML into yaml.Node so we can access line and column
-	// numbers.
+	return b, nil
+}
+
+// decodeYAMLNode decodes b into a yaml.Node so line/column info is available.
+func decodeYAMLNode(b []byte) (yaml.Node, error) {
 	var node yaml.Node
 
 	d := yaml.NewDecoder(bytes.NewReader(b))
 	d.KnownFields(true)
-	err = d.Decode(&node)
 
-	if err == nil && len(node.Content) > 0 {
-		node = *node.Content[0]
-	} else {
-		// YAML is malformed
-		return nil, ValidationResults{toValidationError(err.Error(), nil)}
+	if err := d.Decode(&node); err != nil || len(node.Content) == 0 {
+		msg := "empty YAML document"
+		if err != nil {
+			msg = err.Error()
+		}
+
+		return yaml.Node{}, ValidationResults{toValidationError(msg, nil)}
 	}
 
+	return *node.Content[0], nil
+}
+
+// validateVersion checks publiccodeYmlVersion is present, a string, supported,
+// and returns any deprecation warnings.
+func validateVersion(node yaml.Node) (*yaml.Node, ValidationResults, error) {
 	_, version := getNodes("publiccodeYmlVersion", &node)
 	if version == nil {
-		return nil, ValidationResults{newValidationError("publiccodeYmlVersion", "publiccodeYmlVersion is a required field")}
+		return nil, nil, ValidationResults{newValidationError("publiccodeYmlVersion", "publiccodeYmlVersion is a required field")}
 	}
 
 	if version.ShortTag() != "!!str" {
 		line, column := getPositionInFile("publiccodeYmlVersion", node)
 
-		return nil, ValidationResults{ValidationError{
+		return nil, nil, ValidationResults{ValidationError{
 			Key:         "publiccodeYmlVersion",
 			Description: "wrong type for this field",
 			Line:        line,
@@ -146,7 +208,7 @@ func (p *Parser) ParseStream(in io.Reader) (PublicCode, error) { //nolint:mainti
 	}
 
 	if !slices.Contains(SupportedVersions, version.Value) {
-		return nil, ValidationResults{
+		return nil, nil, ValidationResults{
 			newValidationErrorf("publiccodeYmlVersion",
 				"unsupported version: '%s'. Supported versions: %s",
 				version.Value,
@@ -156,7 +218,7 @@ func (p *Parser) ParseStream(in io.Reader) (PublicCode, error) { //nolint:mainti
 
 	var ve ValidationResults
 
-	if slices.Contains(SupportedVersions, version.Value) && version.Value != "0" && !strings.HasPrefix(version.Value, "0.5") {
+	if version.Value != "0" && !strings.HasPrefix(version.Value, "0.5") {
 		latestVersion := SupportedVersions[len(SupportedVersions)-1]
 		line, column := getPositionInFile("publiccodeYmlVersion", node)
 
@@ -172,30 +234,26 @@ func (p *Parser) ParseStream(in io.Reader) (PublicCode, error) { //nolint:mainti
 		})
 	}
 
-	var publiccode PublicCode
+	return version, ve, nil
+}
 
-	var validateFields validateFn
-
-	var decodeResults ValidationResults
-
-	if version.Value[0] == '0' {
+// initPublicCode creates the versioned struct, decodes b into it, and returns
+// the appropriate field-validation function.
+func initPublicCode(versionValue string, b []byte, node yaml.Node) (PublicCode, validateFn, ValidationResults) {
+	if versionValue[0] == '0' {
 		v0 := &PublicCodeV0{}
-		validateFields = validateFieldsV0
 
-		decodeResults = decode(b, v0, node)
-		publiccode = v0
-	} else {
-		v1 := &PublicCodeV1{}
-		validateFields = validateFieldsV1
-
-		decodeResults = decode(b, v1, node)
-		publiccode = v1
+		return v0, validateFieldsV0, decode(b, v0, node)
 	}
 
-	if decodeResults != nil {
-		ve = append(ve, decodeResults...)
-	}
+	v1 := &PublicCodeV1{}
 
+	return v1, validateFieldsV1, decode(b, v1, node)
+}
+
+// runStructValidation runs go-playground/validator on publiccode and maps errors
+// back to their YAML positions.
+func runStructValidation(publiccode PublicCode, node yaml.Node) ValidationResults {
 	validate := publiccodeValidator.New()
 
 	en := en.New()
@@ -205,34 +263,39 @@ func (p *Parser) ParseStream(in io.Reader) (PublicCode, error) { //nolint:mainti
 	_ = en_translations.RegisterDefaultTranslations(validate, trans)
 	_ = publiccodeValidator.RegisterLocalErrorMessages(validate, trans)
 
-	err = validate.Struct(publiccode)
-	if err != nil {
-		for _, err := range err.(validator.ValidationErrors) {
-			var sb strings.Builder
-
-			sb.WriteString(err.Translate(trans))
-
-			// TODO: find a cleaner way
-			key := strings.Replace(
-				err.Namespace(),
-				fmt.Sprintf("PublicCodeV%d.", publiccode.Version()),
-				"",
-				1,
-			)
-			m := regexp.MustCompile(`\[([[:alpha:]]+)\]`)
-			key = m.ReplaceAllString(key, ".$1")
-
-			line, column := getPositionInFile(key, node)
-
-			ve = append(ve, ValidationError{
-				Key:         key,
-				Description: sb.String(),
-				Line:        line,
-				Column:      column,
-			})
-		}
+	err := validate.Struct(publiccode)
+	if err == nil {
+		return nil
 	}
 
+	var ve ValidationResults
+
+	for _, e := range err.(validator.ValidationErrors) {
+		// TODO: find a cleaner way
+		key := strings.Replace(
+			e.Namespace(),
+			fmt.Sprintf("PublicCodeV%d.", publiccode.Version()),
+			"",
+			1,
+		)
+		key = regexp.MustCompile(`\[([[:alpha:]]+)\]`).ReplaceAllString(key, ".$1")
+
+		line, column := getPositionInFile(key, node)
+
+		ve = append(ve, ValidationError{
+			Key:         key,
+			Description: e.Translate(trans),
+			Line:        line,
+			Column:      column,
+		})
+	}
+
+	return ve
+}
+
+// resolveBaseURL sets p.currentBaseURL and returns any errors encountered.
+// If earlyReturn is true the caller should stop processing and return immediately.
+func (p *Parser) resolveBaseURL(publiccode PublicCode, node yaml.Node) (ValidationResults, bool) {
 	p.currentBaseURL = nil
 
 	// baseURL was not set by the user (with ParserConfig{BaseURL: "..."})),
@@ -241,13 +304,11 @@ func (p *Parser) ParseStream(in io.Reader) (PublicCode, error) { //nolint:mainti
 		// If we parsed from an actual local or remote file, use its dir
 		if p.fileURL != nil {
 			u := *p.fileURL
-
 			p.currentBaseURL = &u
 			p.currentBaseURL.Path = path.Dir(p.fileURL.Path)
 		}
 	} else {
 		u := *p.baseURL
-
 		p.currentBaseURL = &u
 	}
 
@@ -257,16 +318,14 @@ func (p *Parser) ParseStream(in io.Reader) (PublicCode, error) { //nolint:mainti
 		if err != nil {
 			line, column := getPositionInFile("url", node)
 
-			ve = append(ve, ValidationError{
+			// Return early because proceeding with no base URL would result in a lot
+			// of duplicate errors stemming from its absence.
+			return ValidationResults{ValidationError{
 				Key:         "url",
 				Description: fmt.Sprintf("failed to get raw URL for code repository at %s: %s", publiccode.Url(), err),
 				Line:        line,
 				Column:      column,
-			})
-
-			// Return early because proceeding with no base URL would result in a lot
-			// of duplicate errors stemming from its absence.
-			return asPublicCode(publiccode), ve
+			}}, true
 		}
 
 		p.currentBaseURL = rawRoot
@@ -276,52 +335,33 @@ func (p *Parser) ParseStream(in io.Reader) (PublicCode, error) { //nolint:mainti
 	if p.currentBaseURL == nil {
 		cwd, err := os.Getwd()
 		if err != nil {
-			ve = append(ve, newValidationErrorf("", "no baseURL set and failed to get working directory: %s", err))
-
-			return asPublicCode(publiccode), ve
+			return ValidationResults{newValidationErrorf("", "no baseURL set and failed to get working directory: %s", err)}, true
 		}
 
 		p.currentBaseURL = &url.URL{Scheme: "file", Path: cwd}
 	}
 
-	if err = validateFields(publiccode, *p, !p.disableNetwork); err != nil {
-		for _, err := range err.(ValidationResults) {
-			switch err := err.(type) {
-			case ValidationError:
-				err.Line, err.Column = getPositionInFile(err.Key, node)
-				ve = append(ve, err)
-			case ValidationWarning:
-				err.Line, err.Column = getPositionInFile(err.Key, node)
-				ve = append(ve, err)
-			}
-		}
+	return nil, false
+}
+
+// applyV0Migrations copies deprecated v0 fields to their canonical replacements.
+func applyV0Migrations(v0 *PublicCodeV0) {
+	// Auto-copy the deprecated field into the new one, so we can guarantee
+	// to the user that `IT` is always the field to check
+	if v0.It != nil && v0.IT == nil {
+		v0.IT = v0.It
 	}
 
-	// v0: Copy data from deprecated fields to the canonical ones, where possible
-	if v0, ok := publiccode.(*PublicCodeV0); ok {
-		// Auto-copy the deprecated field into the new one, so we can guarantee
-		// to the user that `IT` is always the field to check
-		if v0.It != nil && v0.IT == nil {
-			v0.IT = v0.It
-		}
+	it := v0.IT
 
-		it := v0.IT
-
-		// Auto-copy the deprecated field into the new one, so we can guarantee
-		// to the user that `organisation` is always the field to check
-		if it != nil && it.Riuso.CodiceIPA != "" && v0.Organisation == nil {
-			v0.Organisation = &OrganisationV0{}
-
-			v0.Organisation.URI = "urn:x-italian-pa:" + it.Riuso.CodiceIPA
-			v0.Organisation.Name = v0.Legal.RepoOwner
+	// Auto-copy the deprecated field into the new one, so we can guarantee
+	// to the user that `organisation` is always the field to check
+	if it != nil && it.Riuso.CodiceIPA != "" && v0.Organisation == nil {
+		v0.Organisation = &OrganisationV0{
+			URI:  "urn:x-italian-pa:" + it.Riuso.CodiceIPA,
+			Name: v0.Legal.RepoOwner,
 		}
 	}
-
-	if len(ve) == 0 {
-		return asPublicCode(publiccode), nil
-	}
-
-	return asPublicCode(publiccode), ve
 }
 
 func (p *Parser) Parse(uri string) (PublicCode, error) {
