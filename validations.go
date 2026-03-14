@@ -102,7 +102,7 @@ func toAbsoluteURL(file string, baseURL *url.URL, network bool) *url.URL {
 	}
 
 	// We always pass the computed base URL here, with a fallback to the cwd,
-	// so baseURL won't be nil. I'd be a programming mistake in case it is, so
+	// so baseURL won't be nil. It'd be a programming mistake in case it is, so
 	// it'll be good to crash here.
 	u := *baseURL
 	u.Path = path.Join(u.Path, file)

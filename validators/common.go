@@ -53,7 +53,7 @@ func isHTTPURL(fl validator.FieldLevel) bool {
 	}
 
 	//nolint:forbidigo // If we hit this, it's a programming error caught at runtime, it's good to panic.
-	panic(fmt.Sprintf("Bad field type for %T. Must be implement fmt.Stringer", fl.Field().Interface()))
+	panic(fmt.Sprintf("Bad field type for %T. Must implement fmt.Stringer", fl.Field().Interface()))
 }
 
 // go-playground/validator doesn't support `url` validations on non
@@ -68,7 +68,7 @@ func isURL(fl validator.FieldLevel) bool {
 	}
 
 	//nolint:forbidigo // If we hit this, it's a programming error caught at runtime, it's good to panic.
-	panic(fmt.Sprintf("Bad field type for %T. Must be implement fmt.Stringer", fl.Field().Interface()))
+	panic(fmt.Sprintf("Bad field type for %T. Must implement fmt.Stringer", fl.Field().Interface()))
 }
 
 func isOrganisationURI(fl validator.FieldLevel) bool {
