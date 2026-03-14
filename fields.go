@@ -10,12 +10,12 @@ import (
 	publiccodeValidator "github.com/italia/publiccode-parser-go/v5/validators"
 )
 
-type validateFn func(publiccode PublicCode, parser Parser, network bool) error
+type validateFn func(publiccode PublicCode, parser *Parser, network bool, baseURL *url.URL) error
 
 // validateFieldsV0 validates publiccode.yml with additional rules not validatable
 // with go-playground/validator
 // It returns any error encountered as ValidationResults.
-func validateFieldsV0(publiccode PublicCode, parser Parser, network bool) error { //nolint:maintidx
+func validateFieldsV0(publiccode PublicCode, parser *Parser, network bool, baseURL *url.URL) error { //nolint:maintidx
 	publiccodev0 := publiccode.(*PublicCodeV0)
 
 	var vr ValidationResults
@@ -54,7 +54,7 @@ func validateFieldsV0(publiccode PublicCode, parser Parser, network bool) error 
 		if _, err := isRelativePathOrURL(*publiccodev0.Logo, "logo"); err != nil {
 			vr = append(vr, err)
 		} else if !parser.disableExternalChecks {
-			u := toAbsoluteURL(*publiccodev0.Logo, parser.currentBaseURL, network)
+			u := toAbsoluteURL(*publiccodev0.Logo, baseURL, network)
 			if u != nil {
 				validLogo, err := parser.validLogo(*u, network)
 				if !validLogo {
@@ -70,7 +70,7 @@ func validateFieldsV0(publiccode PublicCode, parser Parser, network bool) error 
 		if _, err := isRelativePathOrURL(*publiccodev0.MonochromeLogo, "monochromeLogo"); err != nil {
 			vr = append(vr, err)
 		} else if !parser.disableExternalChecks {
-			u := toAbsoluteURL(*publiccodev0.MonochromeLogo, parser.currentBaseURL, network)
+			u := toAbsoluteURL(*publiccodev0.MonochromeLogo, baseURL, network)
 			if u != nil {
 				validLogo, err := parser.validLogo(*u, network)
 				if !validLogo {
@@ -117,7 +117,7 @@ func validateFieldsV0(publiccode PublicCode, parser Parser, network bool) error 
 		if _, err := isRelativePathOrURL(*publiccodev0.Legal.AuthorsFile, "legal.authorsFile"); err != nil {
 			vr = append(vr, err)
 		} else if !parser.disableExternalChecks {
-			u := toAbsoluteURL(*publiccodev0.Legal.AuthorsFile, parser.currentBaseURL, network)
+			u := toAbsoluteURL(*publiccodev0.Legal.AuthorsFile, baseURL, network)
 			if u != nil {
 				exists, err := parser.fileExists(*u, network)
 				if !exists {
@@ -170,7 +170,7 @@ func validateFieldsV0(publiccode PublicCode, parser Parser, network bool) error 
 			if _, err := isRelativePathOrURL(v, keyName); err != nil {
 				vr = append(vr, err)
 			} else if !parser.disableExternalChecks {
-				u := toAbsoluteURL(v, parser.currentBaseURL, network)
+				u := toAbsoluteURL(v, baseURL, network)
 				if u != nil {
 					isImage, err := parser.isImageFile(*u, network)
 					if !isImage {
@@ -245,7 +245,7 @@ func validateFieldsV0(publiccode PublicCode, parser Parser, network bool) error 
 // validateFieldsV1 validates publiccode.yml with additional rules not validatable
 // with go-playground/validator
 // It returns any error encountered as ValidationResults.
-func validateFieldsV1(publiccode PublicCode, parser Parser, network bool) error {
+func validateFieldsV1(publiccode PublicCode, parser *Parser, network bool, baseURL *url.URL) error {
 	publiccodev1 := publiccode.(*PublicCodeV1)
 
 	var vr ValidationResults
@@ -284,7 +284,7 @@ func validateFieldsV1(publiccode PublicCode, parser Parser, network bool) error 
 		if _, err := isRelativePathOrURL(*publiccodev1.Logo, "logo"); err != nil {
 			vr = append(vr, err)
 		} else if !parser.disableExternalChecks {
-			u := toAbsoluteURL(*publiccodev1.Logo, parser.currentBaseURL, network)
+			u := toAbsoluteURL(*publiccodev1.Logo, baseURL, network)
 			if u != nil {
 				validLogo, err := parser.validLogo(*u, network)
 				if !validLogo {
@@ -349,7 +349,7 @@ func validateFieldsV1(publiccode PublicCode, parser Parser, network bool) error 
 			if _, err := isRelativePathOrURL(v, keyName); err != nil {
 				vr = append(vr, err)
 			} else if !parser.disableExternalChecks {
-				u := toAbsoluteURL(v, parser.currentBaseURL, network)
+				u := toAbsoluteURL(v, baseURL, network)
 				if u != nil {
 					isImage, err := parser.isImageFile(*u, network)
 					if !isImage {

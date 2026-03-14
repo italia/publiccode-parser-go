@@ -56,14 +56,6 @@ type Parser struct {
 	domain                Domain
 	branch                string
 	baseURL               *url.URL
-	fileURL               *url.URL
-
-	// This is the baseURL we'll try to compute and use between
-	// Parse{,Stream)() calls.
-	//
-	// XXX: It's an hack and it requires to fix the design mistake in the public API.
-	// This makes Parse{,Stream}() not thread safe.
-	currentBaseURL *url.URL
 }
 
 // Domain is a single code hosting service.
@@ -104,7 +96,38 @@ func NewDefaultParser() (*Parser, error) {
 }
 
 // ParseStream reads the data and tries to parse it. Returns an error if fails.
-func (p *Parser) ParseStream(in io.Reader) (PublicCode, error) { //nolint:maintidx
+func (p *Parser) ParseStream(in io.Reader) (PublicCode, error) {
+	return p.parseStream(in, nil)
+}
+
+func (p *Parser) Parse(uri string) (PublicCode, error) {
+	var stream io.Reader
+
+	fileURL, err := toURL(uri)
+	if err != nil {
+		return nil, fmt.Errorf("invalid URL '%s': %w", uri, err)
+	}
+
+	if fileURL.Scheme == "file" {
+		stream, err = os.Open(fileURL.Path)
+		if err != nil {
+			return nil, fmt.Errorf("can't open file '%s': %w", fileURL.Path, err)
+		}
+	} else {
+		resp, err := http.Get(uri)
+		if err != nil {
+			return nil, fmt.Errorf("can't GET '%s': %w", uri, err)
+		}
+
+		defer func() { _ = resp.Body.Close() }()
+
+		stream = resp.Body
+	}
+
+	return p.parseStream(stream, fileURL)
+}
+
+func (p *Parser) parseStream(in io.Reader, fileURL *url.URL) (PublicCode, error) { //nolint:maintidx
 	b, err := io.ReadAll(in)
 	if err != nil {
 		return nil, ValidationResults{newValidationErrorf("", "Can't read the stream: %v", err)}
@@ -233,26 +256,27 @@ func (p *Parser) ParseStream(in io.Reader) (PublicCode, error) { //nolint:mainti
 		}
 	}
 
-	p.currentBaseURL = nil
+	// Compute the base URL for this call without mutating p (goroutine-safety).
+	var currentBaseURL *url.URL
 
 	// baseURL was not set by the user (with ParserConfig{BaseURL: "..."})),
 	// We need a base URL to perform external checks on relative files (eg. logo).
 	if p.baseURL == nil {
 		// If we parsed from an actual local or remote file, use its dir
-		if p.fileURL != nil {
-			u := *p.fileURL
+		if fileURL != nil {
+			u := *fileURL
 
-			p.currentBaseURL = &u
-			p.currentBaseURL.Path = path.Dir(p.fileURL.Path)
+			currentBaseURL = &u
+			currentBaseURL.Path = path.Dir(fileURL.Path)
 		}
 	} else {
 		u := *p.baseURL
 
-		p.currentBaseURL = &u
+		currentBaseURL = &u
 	}
 
 	// Still no base URL: we parsed from a stream, try to use the publiccode.yml's `url` field
-	if p.currentBaseURL == nil && !p.disableNetwork && publiccode.Url() != nil {
+	if currentBaseURL == nil && !p.disableNetwork && publiccode.Url() != nil {
 		rawRoot, err := vcsurl.GetRawRoot((*url.URL)(publiccode.Url()), p.branch)
 		if err != nil {
 			line, column := getPositionInFile("url", node)
@@ -269,11 +293,11 @@ func (p *Parser) ParseStream(in io.Reader) (PublicCode, error) { //nolint:mainti
 			return asPublicCode(publiccode), ve
 		}
 
-		p.currentBaseURL = rawRoot
+		currentBaseURL = rawRoot
 	}
 
 	// Still no base URL: DisableNetwork is true, use the current working directory as a fallback
-	if p.currentBaseURL == nil {
+	if currentBaseURL == nil {
 		cwd, err := os.Getwd()
 		if err != nil {
 			ve = append(ve, newValidationErrorf("", "no baseURL set and failed to get working directory: %s", err))
@@ -281,10 +305,10 @@ func (p *Parser) ParseStream(in io.Reader) (PublicCode, error) { //nolint:mainti
 			return asPublicCode(publiccode), ve
 		}
 
-		p.currentBaseURL = &url.URL{Scheme: "file", Path: cwd}
+		currentBaseURL = &url.URL{Scheme: "file", Path: cwd}
 	}
 
-	if err = validateFields(publiccode, *p, !p.disableNetwork); err != nil {
+	if err = validateFields(publiccode, p, !p.disableNetwork, currentBaseURL); err != nil {
 		for _, err := range err.(ValidationResults) {
 			switch err := err.(type) {
 			case ValidationError:
@@ -322,38 +346,6 @@ func (p *Parser) ParseStream(in io.Reader) (PublicCode, error) { //nolint:mainti
 	}
 
 	return asPublicCode(publiccode), ve
-}
-
-func (p *Parser) Parse(uri string) (PublicCode, error) {
-	var stream io.Reader
-
-	url, err := toURL(uri)
-	if err != nil {
-		return nil, fmt.Errorf("invalid URL '%s': %w", uri, err)
-	}
-
-	p.fileURL = url
-
-	if url.Scheme == "file" {
-		stream, err = os.Open(url.Path)
-		if err != nil {
-			return nil, fmt.Errorf("can't open file '%s': %w", url.Path, err)
-		}
-	} else {
-		resp, err := http.Get(uri)
-		if err != nil {
-			return nil, fmt.Errorf("can't GET '%s': %w", uri, err)
-		}
-
-		defer func() {
-			_ = resp.Body.Close()
-			p.fileURL = nil
-		}()
-
-		stream = resp.Body
-	}
-
-	return p.ParseStream(stream)
 }
 
 // Ensure the returned value implements PublicCode as a struct, not as a pointer
