@@ -27,7 +27,7 @@ func init() {
 // Parse the YAML file passed as argument, using the current directory
 // as base path.
 //
-// Return nil if the parsing succeded or an error if it failed.
+// Return nil if the parsing succeeded or an error if it failed.
 func parse(file string) error {
 	var p *Parser
 	var err error
