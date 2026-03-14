@@ -25,6 +25,23 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+// Build Validator and Translator once at package init.
+var (
+	sharedValidate *validator.Validate
+	sharedTrans    ut.Translator
+)
+
+func init() {
+	sharedValidate = publiccodeValidator.New()
+
+	enLocale := en.New()
+	uni := ut.New(enLocale, enLocale)
+
+	sharedTrans, _ = uni.GetTranslator("en")
+	_ = en_translations.RegisterDefaultTranslations(sharedValidate, sharedTrans)
+	_ = publiccodeValidator.RegisterLocalErrorMessages(sharedValidate, sharedTrans)
+}
+
 type ParserConfig struct {
 	// DisableNetwork disables all network tests (eg. URL existence). This
 	// results in much faster parsing.
@@ -219,22 +236,9 @@ func (p *Parser) parseStream(in io.Reader, fileURL *url.URL) (PublicCode, error)
 		ve = append(ve, decodeResults...)
 	}
 
-	validate := publiccodeValidator.New()
-
-	en := en.New()
-	uni := ut.New(en, en)
-
-	trans, _ := uni.GetTranslator("en")
-	_ = en_translations.RegisterDefaultTranslations(validate, trans)
-	_ = publiccodeValidator.RegisterLocalErrorMessages(validate, trans)
-
-	err = validate.Struct(publiccode)
+	err = sharedValidate.Struct(publiccode)
 	if err != nil {
 		for _, err := range err.(validator.ValidationErrors) {
-			var sb strings.Builder
-
-			sb.WriteString(err.Translate(trans))
-
 			// TODO: find a cleaner way
 			key := strings.Replace(
 				err.Namespace(),
@@ -249,7 +253,7 @@ func (p *Parser) parseStream(in io.Reader, fileURL *url.URL) (PublicCode, error)
 
 			ve = append(ve, ValidationError{
 				Key:         key,
-				Description: sb.String(),
+				Description: err.Translate(sharedTrans),
 				Line:        line,
 				Column:      column,
 			})
