@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"fmt"
 	"net/url"
+	"reflect"
+	"sync"
 	"testing"
 )
 
@@ -42,6 +44,72 @@ func TestExport(t *testing.T) {
 
 	if !bytes.Equal(yaml1, yaml2) {
 		t.Errorf("Exported YAML files do not match; roundtrip is not lossless")
+	}
+}
+
+// TestParseConcurrent verifies that multiple goroutines can call Parse on the same
+// Parser instance simultaneously without data races, and that each call uses the
+// correct baseURL for its file.
+//
+// Run with "go test -race"
+func TestParseConcurrent(t *testing.T) {
+	const goroutines = 40
+
+	parser, err := NewParser(ParserConfig{DisableNetwork: true})
+	if err != nil {
+		t.Fatalf("can't create parser: %v", err)
+	}
+	// Has a logo and screenshots that only exist under no-network/assets/img/
+	fileA := "testdata/v0/valid/no-network/valid.yml"
+
+	// lives in the parent directory and has no screenshots
+	fileB := "testdata/v0/valid/categories_empty.yml"
+
+	_, errA := parser.Parse(fileA)
+	_, errB := parser.Parse(fileB)
+
+	var wg sync.WaitGroup
+
+	type result struct {
+		file string
+		err  error
+	}
+
+	results := make([]result, goroutines)
+
+	for i := range goroutines {
+		wg.Add(1)
+
+		go func(i int) {
+			defer wg.Done()
+
+			file := fileA
+			if i%2 == 1 {
+				file = fileB
+			}
+
+			_, results[i].err = parser.Parse(file)
+			results[i].file = file
+		}(i)
+	}
+
+	wg.Wait()
+
+	for i, r := range results {
+		var expected error
+
+		// If base URLs leaked between goroutines, a fileA goroutine
+		// receiving fileB's baseURL would fail to locate the screenshots
+		// and return spurious validation errors.
+		if r.file == fileA {
+			expected = errA
+		} else {
+			expected = errB
+		}
+
+		if !reflect.DeepEqual(r.err, expected) {
+			t.Errorf("goroutine %d (%s): got %v, want %v", i, r.file, r.err, expected)
+		}
 	}
 }
 
