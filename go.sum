@@ -21,6 +21,8 @@ github.com/go-playground/validator/v10 v10.18.0 h1:BvolUXjp4zuvkZ5YN5t7ebzbhlUtP
 github.com/go-playground/validator/v10 v10.18.0/go.mod h1:dbuPbCMFw/DrkbEynArYaCwl3amGuJotoKCe95atGMM=
 github.com/italia/httpclient-lib-go v0.0.2 h1:4bJLywTVd7qHPdKxJXvvhlXp436JTC4KA6dLhIl5a6c=
 github.com/italia/httpclient-lib-go v0.0.2/go.mod h1:b0/D3ULsBw8X+zEl7j/kSZmiMlUdj+agppneOvSq6eA=
+github.com/italia/httpclient-lib-go v0.0.3-0.20260316100201-5dd490bc4896 h1:7JV5L0I++QbIMdVjU467tUW+dQnX6hdmhMLZAjrehjQ=
+github.com/italia/httpclient-lib-go v0.0.3-0.20260316100201-5dd490bc4896/go.mod h1:b0/D3ULsBw8X+zEl7j/kSZmiMlUdj+agppneOvSq6eA=
 github.com/kr/pretty v0.1.0 h1:L/CwN0zerZDmRFUapSPitk6f+Q3+0za1rQkzVuMiMFI=
 github.com/kr/pretty v0.1.0/go.mod h1:dAy3ld7l9f0ibDNOQOHHMYYIIbhfbHSm3C4ZsoJORNo=
 github.com/kr/pty v1.1.1/go.mod h1:pFQYn66WHrOpPYNljwOMqo10TkYh1fy3cYio2l3bCsQ=

@@ -7,7 +7,7 @@ require (
 	github.com/go-playground/locales v0.14.1
 	github.com/go-playground/universal-translator v0.18.1
 	github.com/go-playground/validator/v10 v10.18.0
-	github.com/italia/httpclient-lib-go v0.0.2
+	github.com/italia/httpclient-lib-go v0.0.3-0.20260316100201-5dd490bc4896
 	github.com/rivo/uniseg v0.4.2
 	gopkg.in/yaml.v3 v3.0.1
 )

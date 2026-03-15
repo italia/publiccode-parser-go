@@ -17,7 +17,6 @@ import (
 
 	"github.com/alranel/go-vcsurl/v2"
 	"github.com/dyatlov/go-oembed/oembed"
-	httpclient "github.com/italia/httpclient-lib-go"
 	"github.com/italia/publiccode-parser-go/v5/data"
 	netutil "github.com/italia/publiccode-parser-go/v5/internal"
 )
@@ -69,7 +68,7 @@ func (p *Parser) isReachable(u url.URL) (bool, error) {
 		return false, fmt.Errorf("missing URL scheme")
 	}
 
-	r, err := httpclient.GetURL(u.String(), getHeaderFromDomain(p.domain, u.String()))
+	r, err := p.httpclient.GetURL(u.String(), getHeaderFromDomain(p.domain, u.String()))
 	if err != nil {
 		return false, fmt.Errorf("HTTP GET failed for %s: %v", u.String(), err)
 	}
@@ -174,7 +173,7 @@ func (p *Parser) validLogo(u url.URL, network bool) (bool, error) {
 			return true, nil
 		}
 
-		localPath, err = netutil.DownloadTmpFile(&u, getHeaderFromDomain(p.domain, u.String()))
+		localPath, err = netutil.DownloadTmpFile(p.httpclient, &u, getHeaderFromDomain(p.domain, u.String()))
 		if err != nil {
 			return false, err
 		}
