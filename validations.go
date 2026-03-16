@@ -25,6 +25,15 @@ func init() {
 	image.RegisterFormat("png", "png", png.Decode, png.DecodeConfig)
 }
 
+var oembedInstance *oembed.Oembed
+
+func init() {
+	oembedInstance = oembed.NewOembed()
+	if err := oembedInstance.ParseProviders(bytes.NewReader(data.OembedProviders)); err != nil {
+		panic("failed to parse oEmbed providers: " + err.Error()) //nolint:forbidigo // embedded at compile time, a failure here is a programming error
+	}
+}
+
 // Despite the spec requires at least 1000px, we temporarily release this constraint to 120px.
 const minLogoWidth = 120
 
@@ -224,17 +233,9 @@ func (p *Parser) validLogo(u url.URL, network bool) (bool, error) {
 // checkOEmbedURL returns whether the link is from a valid oEmbed provider.
 // Reference: https://oembed.com/providers.json
 func (p *Parser) checkOEmbedURL(url *url.URL) error {
-	b := data.OembedProviders
-	oe := oembed.NewOembed()
-
 	link := url.String()
 
-	err := oe.ParseProviders(bytes.NewReader(b))
-	if err != nil {
-		return fmt.Errorf("failed to check oEmbed link '%s': %w", link, err)
-	}
-
-	if item := oe.FindItem(link); item == nil {
+	if item := oembedInstance.FindItem(link); item == nil {
 		return fmt.Errorf("invalid oEmbed link: %s", link)
 	}
 
