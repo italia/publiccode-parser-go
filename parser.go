@@ -13,6 +13,7 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+	"time"
 	"unicode/utf8"
 
 	"github.com/alranel/go-vcsurl/v2"
@@ -20,6 +21,7 @@ import (
 	ut "github.com/go-playground/universal-translator"
 	"github.com/go-playground/validator/v10"
 	en_translations "github.com/go-playground/validator/v10/translations/en"
+	httpclient "github.com/italia/httpclient-lib-go"
 	urlutil "github.com/italia/publiccode-parser-go/v5/internal"
 	publiccodeValidator "github.com/italia/publiccode-parser-go/v5/validators"
 	"gopkg.in/yaml.v3"
@@ -64,7 +66,13 @@ type ParserConfig struct {
 	// The URL used as base of relative files in publiccode.yml (eg. logo)
 	// It can be a local file with the 'file' scheme.
 	BaseURL string
+
+	// Timeout is the maximum duration for each HTTP request during external checks.
+	// Defaults to 30s if zero.
+	Timeout time.Duration
 }
+
+const defaultHTTPTimeout = 30 * time.Second
 
 // Parser is a helper class for parsing publiccode.yml files.
 type Parser struct {
@@ -73,6 +81,8 @@ type Parser struct {
 	domain                Domain
 	branch                string
 	baseURL               *url.URL
+	client                *http.Client
+	httpclient            *httpclient.Client
 }
 
 // Domain is a single code hosting service.
@@ -90,11 +100,19 @@ func NewParser(config ParserConfig) (*Parser, error) {
 		config.DisableNetwork = true
 	}
 
+	timeout := config.Timeout
+	if timeout == 0 {
+		timeout = defaultHTTPTimeout
+	}
+
+	httpClient := &http.Client{Timeout: timeout}
 	parser := Parser{
 		disableNetwork:        config.DisableNetwork,
 		disableExternalChecks: config.DisableExternalChecks,
 		domain:                config.Domain,
 		branch:                config.Branch,
+		client:                httpClient,
+		httpclient:            httpclient.NewClient(httpClient),
 	}
 
 	if config.BaseURL != "" {
@@ -131,7 +149,7 @@ func (p *Parser) Parse(uri string) (PublicCode, error) {
 			return nil, fmt.Errorf("can't open file '%s': %w", fileURL.Path, err)
 		}
 	} else {
-		resp, err := http.Get(uri)
+		resp, err := p.client.Get(uri)
 		if err != nil {
 			return nil, fmt.Errorf("can't GET '%s': %w", uri, err)
 		}

@@ -3,10 +3,15 @@ package publiccode
 import (
 	"bytes"
 	"fmt"
+	"net/http"
+	"net/http/httptest"
 	"net/url"
+	"os"
 	"reflect"
+	"strings"
 	"sync"
 	"testing"
+	"time"
 )
 
 // Test that the exported YAML passes validation again, and that re-exporting it
@@ -110,6 +115,90 @@ func TestParseConcurrent(t *testing.T) {
 		if !reflect.DeepEqual(r.err, expected) {
 			t.Errorf("goroutine %d (%s): got %v, want %v", i, r.file, r.err, expected)
 		}
+	}
+}
+
+// TestDefaultTimeout checks that the default HTTP timeout is set when
+// ParserConfig.Timeout is zero.
+func TestDefaultTimeout(t *testing.T) {
+	p, err := NewParser(ParserConfig{})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if p.client.Timeout != defaultHTTPTimeout {
+		t.Errorf("expected default timeout %v, got %v", defaultHTTPTimeout, p.client.Timeout)
+	}
+}
+
+// TestParseTimeout checks that Parse() fails when the server exceeds the
+// configured timeout while fetching the publiccode.yml itself.
+func TestParseTimeout(t *testing.T) {
+	fixture, err := os.ReadFile("testdata/v0/valid/valid.yml")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		time.Sleep(50 * time.Millisecond)
+		w.Header().Set("Content-Type", "text/yaml")
+		w.Write(fixture) //nolint:errcheck
+	}))
+	defer srv.Close()
+
+	p, err := NewParser(ParserConfig{Timeout: 1 * time.Millisecond})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	_, err = p.Parse(srv.URL + "/publiccode.yml")
+	if err == nil {
+		t.Fatal("expected timeout error, got nil")
+	}
+
+	if !strings.Contains(err.Error(), "deadline exceeded") && !strings.Contains(err.Error(), "timeout") {
+		t.Errorf("expected timeout error, got: %v", err)
+	}
+}
+
+// TestValidationTimeout checks that external validation checks (logo) fail when
+// the server exceeds the configured timeout.
+func TestValidationTimeout(t *testing.T) {
+	slow := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		time.Sleep(50 * time.Millisecond)
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer slow.Close()
+
+	// Read logo_with_url.yml and redirect its logo to the slow server.
+	fixture, err := os.ReadFile("testdata/v0/valid/logo_with_url.yml")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	yml := bytes.ReplaceAll(fixture,
+		[]byte("https://raw.githubusercontent.com/italia/publiccode-parser-go/refs/heads/main/testdata/v0/valid/assets/img/logo.png"),
+		[]byte(slow.URL+"/logo.png"),
+	)
+
+	fast := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/yaml")
+		w.Write(yml) //nolint:errcheck
+	}))
+	defer fast.Close()
+
+	p, err := NewParser(ParserConfig{Timeout: 1 * time.Millisecond})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	_, err = p.Parse(fast.URL + "/publiccode.yml")
+	if err == nil {
+		t.Fatal("expected timeout error, got nil")
+	}
+
+	if !strings.Contains(err.Error(), "deadline exceeded") && !strings.Contains(err.Error(), "timeout") {
+		t.Errorf("expected timeout error, got: %v", err)
 	}
 }
 
