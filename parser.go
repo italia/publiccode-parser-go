@@ -463,7 +463,7 @@ func toValidationError(errorText string, node *yaml.Node) ValidationError {
 
 	line := 0
 	if len(matches) > 1 {
-		line, _ = strconv.Atoi(matches[2])
+		line, _ = strconv.Atoi(matches[2]) // regex guarantees digits
 		errorText = strings.ReplaceAll(errorText, matches[1], "")
 	}
 
