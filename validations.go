@@ -52,7 +52,10 @@ func isHostInDomain(domain Domain, u string) bool {
 		return false
 	}
 
-	urlP, _ := url.Parse(u)
+	urlP, err := url.Parse(u)
+	if err != nil {
+		return false
+	}
 
 	return slices.Contains(domain.UseTokenFor, urlP.Host)
 }
