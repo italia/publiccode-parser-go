@@ -21,6 +21,10 @@ import (
 	netutil "github.com/italia/publiccode-parser-go/v5/internal"
 )
 
+func init() {
+	image.RegisterFormat("png", "png", png.Decode, png.DecodeConfig)
+}
+
 // Despite the spec requires at least 1000px, we temporarily release this constraint to 120px.
 const minLogoWidth = 120
 
@@ -197,8 +201,6 @@ func (p *Parser) validLogo(u url.URL, network bool) (bool, error) {
 	}
 
 	if ext == ".png" {
-		image.RegisterFormat("png", "png", png.Decode, png.DecodeConfig)
-
 		f, err := os.Open(localPath)
 		if err != nil {
 			return false, err
