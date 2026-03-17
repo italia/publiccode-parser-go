@@ -204,6 +204,8 @@ func (p *Parser) validLogo(u url.URL, network bool) (bool, error) {
 			return false, err
 		}
 
+		defer f.Close()
+
 		image, _, err := image.DecodeConfig(f)
 		if err != nil {
 			return false, err

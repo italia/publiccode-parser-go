@@ -136,7 +136,7 @@ func (p *Parser) ParseStream(in io.Reader) (PublicCode, error) {
 }
 
 func (p *Parser) Parse(uri string) (PublicCode, error) {
-	var stream io.Reader
+	var stream io.ReadCloser
 
 	fileURL, err := toURL(uri)
 	if err != nil {
@@ -149,15 +149,15 @@ func (p *Parser) Parse(uri string) (PublicCode, error) {
 			return nil, fmt.Errorf("can't open file '%s': %w", fileURL.Path, err)
 		}
 	} else {
-		resp, err := p.client.Get(uri)
+		resp, err := p.client.Get(uri) //nolint:bodyclose // closed via defer stream.Close() below bodyclose won't realize it :(
 		if err != nil {
 			return nil, fmt.Errorf("can't GET '%s': %w", uri, err)
 		}
 
-		defer func() { _ = resp.Body.Close() }()
-
 		stream = resp.Body
 	}
+
+	defer stream.Close()
 
 	return p.parseStream(stream, fileURL)
 }
