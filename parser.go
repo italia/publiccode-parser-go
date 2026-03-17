@@ -44,6 +44,12 @@ func init() {
 	_ = publiccodeValidator.RegisterLocalErrorMessages(sharedValidate, sharedTrans)
 }
 
+var (
+	reMapKey          = regexp.MustCompile(`\[([[:alpha:]]+)\]`)
+	reYAMLLineNum     = regexp.MustCompile(`(line ([0-9]+): )`)
+	reCannotUnmarshal = regexp.MustCompile(`^cannot unmarshal`)
+)
+
 type ParserConfig struct {
 	// DisableNetwork disables all network tests (eg. URL existence). This
 	// results in much faster parsing.
@@ -264,8 +270,7 @@ func (p *Parser) parseStream(in io.Reader, fileURL *url.URL) (PublicCode, error)
 				"",
 				1,
 			)
-			m := regexp.MustCompile(`\[([[:alpha:]]+)\]`)
-			key = m.ReplaceAllString(key, ".$1")
+			key = reMapKey.ReplaceAllString(key, ".$1")
 
 			line, column := getPositionInFile(key, node)
 
@@ -454,8 +459,7 @@ func getKeyAtLine(parentNode yaml.Node, line int, path string) string {
 }
 
 func toValidationError(errorText string, node *yaml.Node) ValidationError {
-	r := regexp.MustCompile(`(line ([0-9]+): )`)
-	matches := r.FindStringSubmatch(errorText)
+	matches := reYAMLLineNum.FindStringSubmatch(errorText)
 
 	line := 0
 	if len(matches) > 1 {
@@ -464,8 +468,7 @@ func toValidationError(errorText string, node *yaml.Node) ValidationError {
 	}
 
 	// Transform unmarshalling errors messages to a user friendlier message
-	r = regexp.MustCompile("^cannot unmarshal")
-	if r.MatchString(errorText) {
+	if reCannotUnmarshal.MatchString(errorText) {
 		errorText = "wrong type for this field"
 	}
 
