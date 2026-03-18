@@ -1,8 +1,8 @@
 package publiccode
 
 import (
-	"bytes"
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"image"
 	"image/png"
@@ -11,12 +11,12 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"regexp"
 	"runtime"
 	"slices"
 	"strings"
 
 	"github.com/alranel/go-vcsurl/v2"
-	"github.com/dyatlov/go-oembed/oembed"
 	"github.com/italia/publiccode-parser-go/v5/data"
 	netutil "github.com/italia/publiccode-parser-go/v5/internal"
 )
@@ -25,12 +25,19 @@ func init() {
 	image.RegisterFormat("png", "png", png.Decode, png.DecodeConfig)
 }
 
-var oembedInstance *oembed.Oembed
+var oembedSchemes []*regexp.Regexp
 
 func init() {
-	oembedInstance = oembed.NewOembed()
-	if err := oembedInstance.ParseProviders(bytes.NewReader(data.OembedProviders)); err != nil {
-		panic("failed to parse oEmbed providers: " + err.Error()) //nolint:forbidigo // embedded at compile time, a failure here is a programming error
+	var schemes []string
+
+	if err := json.Unmarshal(data.OembedSchemes, &schemes); err != nil {
+		panic("failed to parse oEmbed schemes: " + err.Error()) //nolint:forbidigo // embedded at compile time, a failure here is a programming error
+	}
+
+	for _, scheme := range schemes {
+		pattern := "^" + regexp.QuoteMeta(scheme) + "$"
+		pattern = strings.ReplaceAll(pattern, `\*`, `.*`)
+		oembedSchemes = append(oembedSchemes, regexp.MustCompile(pattern))
 	}
 }
 
@@ -233,12 +240,22 @@ func (p *Parser) validLogo(u url.URL, network bool) (bool, error) {
 	return true, nil
 }
 
+func matchesOembedScheme(link string) bool {
+	for _, re := range oembedSchemes {
+		if re.MatchString(link) {
+			return true
+		}
+	}
+
+	return false
+}
+
 // checkOEmbedURL returns whether the link is from a valid oEmbed provider.
 // Reference: https://oembed.com/providers.json
 func (p *Parser) checkOEmbedURL(url *url.URL) error {
 	link := url.String()
 
-	if item := oembedInstance.FindItem(link); item == nil {
+	if !matchesOembedScheme(link) {
 		return fmt.Errorf("invalid oEmbed link: %s", link)
 	}
 

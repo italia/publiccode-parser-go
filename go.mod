@@ -2,7 +2,6 @@ module github.com/italia/publiccode-parser-go/v5
 
 require (
 	github.com/alranel/go-vcsurl/v2 v2.0.3
-	github.com/dyatlov/go-oembed v0.0.0-20191103150536-a57c85b3b37c
 	github.com/github/go-spdx/v2 v2.3.3
 	github.com/go-playground/locales v0.14.1
 	github.com/go-playground/universal-translator v0.18.1
@@ -13,7 +12,6 @@ require (
 )
 
 require (
-	github.com/Jeffail/gabs v1.4.0 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.3 // indirect
 	github.com/leodido/go-urn v1.4.0 // indirect
 	github.com/sirupsen/logrus v1.9.1 // indirect
