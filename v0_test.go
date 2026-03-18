@@ -655,13 +655,7 @@ func TestValidWithWarningsTestcasesV0(t *testing.T) {
 // Test publiccode.yml remote files for key errors.
 func TestDecodeValueErrorsRemote(t *testing.T) {
 	testRemoteFiles := []testType{
-		// NOTE: The remote file still uses 3-letter language codes (ita, fra, deu) which are
-		// rejected by the strict BCP47 validator. Once the remote fixture is updated to use
-		// 2-letter codes (it, fr, de) the ValidationErrors below can be removed.
 		{"https://raw.githubusercontent.com/italia/publiccode-parser-go/refs/heads/main/testdata/v0/valid_with_warnings/valid_with_lowercase_countries.yml", ValidationResults{
-			ValidationError{"localisation.availableLanguages[1]", "availableLanguages[1] must be a valid BCP 47 language", 94, 3},
-			ValidationError{"localisation.availableLanguages[2]", "availableLanguages[2] must be a valid BCP 47 language", 94, 3},
-			ValidationError{"localisation.availableLanguages[3]", "availableLanguages[3] must be a valid BCP 47 language", 94, 3},
 			ValidationWarning{"intendedAudience.countries[0]", "Lowercase country codes are DEPRECATED. Use uppercase instead ('IT')", 30, 3},
 			ValidationWarning{"intendedAudience.countries[1]", "Lowercase country codes are DEPRECATED. Use uppercase instead ('DE')", 30, 3},
 			ValidationWarning{"intendedAudience.unsupportedCountries[0]", "Lowercase country codes are DEPRECATED. Use uppercase instead ('US')", 30, 3},
