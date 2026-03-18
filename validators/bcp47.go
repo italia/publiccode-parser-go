@@ -13,6 +13,8 @@ import (
 // isBCP47StrictLanguageTag validates a BCP 47 language tag according to
 // https://www.rfc-editor.org/rfc/bcp/bcp47.txt, rejecting POSIX-style tags
 // (e.g. en_GB) and Unicode extensions unlike the built-in bcp47_language_tag.
+//
+// From https://github.com/go-playground/validator/pull/1489/.
 func isBCP47StrictLanguageTag(fl validator.FieldLevel) bool {
 	field := fl.Field()
 
