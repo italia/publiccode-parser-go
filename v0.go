@@ -61,8 +61,8 @@ type PublicCodeV0 struct {
 	} `yaml:"maintenance" json:"maintenance"`
 
 	Localisation struct {
-		LocalisationReady  *bool    `json:"localisationReady"  validate:"required"                              yaml:"localisationReady"`
-		AvailableLanguages []string `json:"availableLanguages" validate:"required,gt=0,dive,bcp47_language_tag" yaml:"availableLanguages"`
+		LocalisationReady  *bool    `json:"localisationReady"  validate:"required"                                     yaml:"localisationReady"`
+		AvailableLanguages []string `json:"availableLanguages" validate:"required,gt=0,dive,bcp47_strict_language_tag" yaml:"availableLanguages"`
 	} `yaml:"localisation" json:"localisation"`
 
 	DependsOn *struct {

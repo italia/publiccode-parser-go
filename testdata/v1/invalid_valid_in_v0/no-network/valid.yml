@@ -203,9 +203,9 @@ localisation:
   localisationReady: true
   availableLanguages:
     - en
-    - ita
-    - fra
-    - deu
+    - it
+    - fr
+    - de
     - sl-IT-nedis
 
 dependsOn:

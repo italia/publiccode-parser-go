@@ -112,15 +112,13 @@ func isOrganisationURI(fl validator.FieldLevel) bool {
 
 // Custom validator to work around https://github.com/go-playground/validator/issues/1260
 func bcp47_keys(fl validator.FieldLevel) bool {
-	validate := sharedValidator
-
 	if fl.Field().Kind() != reflect.Map {
 		//nolint:forbidigo // If we hit this, it's a programming error caught at runtime, it's good to panic.
 		panic(fmt.Sprintf("Bad field type for %T. Must be a map", fl.Field().Interface()))
 	}
 
 	for _, k := range fl.Field().MapKeys() {
-		if err := validate.Var(k.String(), "bcp47_language_tag"); err != nil {
+		if !isValidBCP47StrictLanguageTag(k.String()) {
 			return false
 		}
 	}
