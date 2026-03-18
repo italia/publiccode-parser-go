@@ -25,6 +25,7 @@ func New() *validator.Validate {
 
 	_ = validate.RegisterValidation("is_italian_ipa_code", isItalianIpaCode)
 
+	_ = validate.RegisterValidation("bcp47_strict_language_tag", isBCP47StrictLanguageTag)
 	_ = validate.RegisterValidation("bcp47_keys", bcp47_keys)
 
 	validate.RegisterAlias("date", "datetime=2006-01-02")
@@ -207,7 +208,8 @@ func RegisterLocalErrorMessages(v *validator.Validate, trans ut.Translator) erro
 			translation: "{0} must be a valid ISO 3166-1 alpha-2 two-letter country code",
 		},
 		{
-			tag:         "bcp47_language_tag",
+			tag:         "bcp47_strict_language_tag",
+			override:    true,
 			translation: "{0} must be a valid BCP 47 language",
 		},
 		{
