@@ -143,7 +143,7 @@ func isValidBCP47StrictLanguageTag(s string) bool {
 	}
 
 	if variant != "" {
-		for _, v := range strings.Split(variant, "-") {
+		for v := range strings.SplitSeq(variant, "-") {
 			lowerVariant := strings.ToLower(v)
 
 			_, err := language.ParseVariant(lowerVariant)

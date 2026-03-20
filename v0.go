@@ -141,7 +141,7 @@ type ITSectionV0 struct {
 
 	Riuso struct {
 		CodiceIPA string `json:"codiceIPA,omitempty" validate:"omitempty,is_italian_ipa_code" yaml:"codiceIPA,omitempty"`
-	} `yaml:"riuso,omitempty" json:"riuso,omitempty"`
+	} `yaml:"riuso,omitempty" json:"riuso,omitzero"`
 
 	Piattaforme struct {
 		SPID   bool `json:"spid"   yaml:"spid"`
