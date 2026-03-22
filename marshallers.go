@@ -47,14 +47,14 @@ func (a *UrlOrUrlArray) UnmarshalYAML(unmarshal func(any) error) error {
 
 	err := unmarshal(&multi)
 	if err != nil {
-		var single *URL
+		var single URL
 
 		err := unmarshal(&single)
 		if err != nil {
 			return err
 		}
 
-		*a = []*URL{single}
+		*a = []*URL{&single}
 	} else {
 		*a = multi
 	}
