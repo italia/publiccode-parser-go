@@ -59,6 +59,28 @@ func TestInvalidTestcasesV0_NoNetwork(t *testing.T) {
 			ValidationWarning{"monochromeLogo", "This key is DEPRECATED and will be removed in the future. Use 'logo' instead", 18, 1},
 			ValidationError{"monochromeLogo", "image: unknown format", 18, 1},
 		},
+
+		// YAML 1.1 boolean aliases must be rejected
+		"localisation_localisationReady_yaml11_yes.yml": ValidationResults{
+			ValidationError{"localisation.localisationReady", "wrong type for this field", 51, 1},
+			ValidationError{"localisation.localisationReady", "localisationReady is a required field", 51, 3},
+			ValidationError{"localisation.availableLanguages", "availableLanguages is a required field", 52, 3},
+		},
+		"localisation_localisationReady_yaml11_no.yml": ValidationResults{
+			ValidationError{"localisation.localisationReady", "wrong type for this field", 51, 1},
+			ValidationError{"localisation.localisationReady", "localisationReady is a required field", 51, 3},
+			ValidationError{"localisation.availableLanguages", "availableLanguages is a required field", 52, 3},
+		},
+		"localisation_localisationReady_yaml11_on.yml": ValidationResults{
+			ValidationError{"localisation.localisationReady", "wrong type for this field", 51, 1},
+			ValidationError{"localisation.localisationReady", "localisationReady is a required field", 51, 3},
+			ValidationError{"localisation.availableLanguages", "availableLanguages is a required field", 52, 3},
+		},
+		"localisation_localisationReady_yaml11_off.yml": ValidationResults{
+			ValidationError{"localisation.localisationReady", "wrong type for this field", 51, 1},
+			ValidationError{"localisation.localisationReady", "localisationReady is a required field", 51, 3},
+			ValidationError{"localisation.availableLanguages", "availableLanguages is a required field", 52, 3},
+		},
 	}
 
 	dir := "testdata/v0/invalid/no-network/"
