@@ -285,13 +285,7 @@ func (p *Parser) parseStream(in io.Reader, fileURL *url.URL) (PublicCode, error)
 	err = sharedValidate.Struct(publiccode)
 	if err != nil {
 		for _, err := range err.(validator.ValidationErrors) {
-			// TODO: find a cleaner way
-			key := strings.Replace(
-				err.Namespace(),
-				fmt.Sprintf("PublicCodeV%d.", publiccode.Version()),
-				"",
-				1,
-			)
+			key := strings.SplitN(err.Namespace(), ".", 2)[1]
 			key = reMapKey.ReplaceAllString(key, ".$1")
 
 			line, column := getPositionInFile(key, file)
@@ -441,9 +435,10 @@ func findKeyPos(node ast.Node, parts []string) (int, int) {
 	part := parts[0]
 
 	arrayIdx := -1
+	stringKey := ""
 	basePart := part
 
-	// Check for array index suffix like "foo[0]"
+	// Parse array index "foo[0]" or string map key "foo[en-US]".
 	if idx := strings.LastIndex(part, "["); idx >= 0 && strings.HasSuffix(part, "]") {
 		idxStr := part[idx+1 : len(part)-1]
 		n := 0
@@ -462,6 +457,9 @@ func findKeyPos(node ast.Node, parts []string) (int, int) {
 		if valid {
 			arrayIdx = n
 			basePart = part[:idx]
+		} else if len(idxStr) > 0 {
+			stringKey = idxStr
+			basePart = part[:idx]
 		}
 	}
 
@@ -475,7 +473,7 @@ func findKeyPos(node ast.Node, parts []string) (int, int) {
 			}
 
 			if arrayIdx >= 0 {
-				// Navigate into the sequence at this index
+				// Navigate into the sequence at this index.
 				seq, ok := mv.Value.(*ast.SequenceNode)
 				if !ok || arrayIdx >= len(seq.Values) {
 					// Value is not a sequence or index out of bounds:
@@ -501,6 +499,12 @@ func findKeyPos(node ast.Node, parts []string) (int, int) {
 				return findKeyPos(elem, parts[1:])
 			}
 
+			if stringKey != "" {
+				// Non-numeric bracket key (eg. "description[en-US]"): navigate
+				// into the value treating the bracket content as the next key.
+				return findKeyPos(mv.Value, append([]string{stringKey}, parts[1:]...))
+			}
+
 			if len(parts) == 1 {
 				tok := mv.Key.GetToken()
 
@@ -511,11 +515,6 @@ func findKeyPos(node ast.Node, parts []string) (int, int) {
 		}
 
 		// Key not found.
-		// Keys with non numeric bracket content (eg. "description[en-US]") are
-		// not navigable by this traversal
-		if strings.ContainsRune(part, '[') && arrayIdx == -1 {
-			return 0, 0
-		}
 		// For flow mappings ({...}) return the '{' token (e.g. "legal: {}" when
 		// "legal.license" is missing).
 		if n.IsFlowStyle {
