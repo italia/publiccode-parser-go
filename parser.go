@@ -466,7 +466,12 @@ func findKeyPos(node ast.Node, parts []string) (int, int) {
 	switch n := node.(type) {
 	case *ast.MappingNode:
 		for _, mv := range n.Values {
-			keyVal := mv.Key.GetToken().Value
+			tok := mv.Key.GetToken()
+			if tok == nil {
+				continue
+			}
+
+			keyVal := tok.Value
 
 			if keyVal != basePart {
 				continue
@@ -560,6 +565,9 @@ func findKeyAtLine(node ast.Node, targetLine int, prefix string) string {
 		}
 	case *ast.MappingValueNode:
 		keyTok := n.Key.GetToken()
+		if keyTok == nil {
+			return ""
+		}
 
 		var fullKey string
 
@@ -569,7 +577,7 @@ func findKeyAtLine(node ast.Node, targetLine int, prefix string) string {
 			fullKey = prefix + "." + keyTok.Value
 		}
 
-		if keyTok.Position.Line == targetLine {
+		if keyTok.Position == nil || keyTok.Position.Line == targetLine {
 			return fullKey
 		}
 
@@ -580,7 +588,7 @@ func findKeyAtLine(node ast.Node, targetLine int, prefix string) string {
 		for i, entry := range n.Values {
 			seqKey := fmt.Sprintf("%s[%d]", prefix, i)
 
-			if entry.GetToken().Position.Line == targetLine {
+			if tok := entry.GetToken(); tok != nil && tok.Position != nil && tok.Position.Line == targetLine {
 				return seqKey
 			}
 
