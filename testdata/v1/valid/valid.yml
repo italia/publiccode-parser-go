@@ -1,0 +1,31 @@
+publiccodeYmlVersion: "1"
+
+name: TestSoftware
+url: "https://github.com/italia/developers.italia.it.git"
+
+platforms:
+  - web
+
+developmentStatus: stable
+
+softwareType: "standalone/web"
+
+description:
+  en:
+    shortDescription: "A test software for v1 parsing."
+    longDescription: >
+      This is a long description for the test software used to verify
+      that the v1 parser works correctly. It needs to be at least 150
+      characters long to pass validation checks in the publiccode.yml
+      parser implementation. This is enough text now.
+
+legal:
+  license: MIT
+
+maintenance:
+  type: none
+
+localisation:
+  localisationReady: true
+  availableLanguages:
+    - en
