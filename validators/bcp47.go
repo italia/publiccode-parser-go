@@ -10,6 +10,33 @@ import (
 	"golang.org/x/text/language"
 )
 
+// languageTagRe is the compiled BCP 47 language tag regex, built once at
+// package init to avoid recompiling on every validation call.
+var languageTagRe = regexp.MustCompile(strings.Join([]string{
+	// group 1:
+	`^(`,
+	// irregular
+	`EN-GB-OED|I-AMI|I-BNN|I-DEFAULT|I-ENOCHIAN|I-HAK|I-KLINGON|I-LUX|I-MINGO|I-NAVAJO|I-PWN|I-TAO|I-TAY|I-TSU|`,
+	`SGN-BE-FR|SGN-BE-NL|SGN-CH-DE|`,
+	// regular
+	`ART-LOJBAN|CEL-GAULISH|NO-BOK|NO-NYN|ZH-GUOYU|ZH-HAKKA|ZH-MIN|ZH-MIN-NAN|ZH-XIANG|`,
+	// privateuse
+	`X-[A-Z0-9]{1,8}`,
+	`)$`,
+
+	`|`,
+
+	// langtag
+	`^`,
+	`((?:[A-Z]{2,3}(?:-[A-Z]{3}){0,3})|[A-Z]{4}|[A-Z]{5,8})`, // group 2: language
+	`(?:-([A-Z]{4}))?`,          // group 3: script
+	`(?:-([A-Z]{2}|[0-9]{3}))?`, // group 4: region
+	`(?:-((?:[A-Z0-9]{5,8}|[0-9][A-Z0-9]{3})(?:-(?:[A-Z0-9]{5,8}|[0-9][A-Z0-9]{3}))*))?`, // group 5: variant
+	`(?:-((?:[A-WYZ0-9](?:-[A-Z0-9]{2,8})+)(?:-(?:[A-WYZ0-9](?:-[A-Z0-9]{2,8})+))*))?`,   // group 6: extension
+	`(?:-X(?:-[A-Z0-9]{1,8})+)?`,
+	`$`,
+}, ""))
+
 // isBCP47StrictLanguageTag validates a BCP 47 language tag according to
 // https://www.rfc-editor.org/rfc/bcp/bcp47.txt, rejecting POSIX-style tags
 // (e.g. en_GB) and Unicode extensions unlike the built-in bcp47_language_tag.
@@ -27,31 +54,6 @@ func isBCP47StrictLanguageTag(fl validator.FieldLevel) bool {
 }
 
 func isValidBCP47StrictLanguageTag(s string) bool {
-	languageTagRe := regexp.MustCompile(strings.Join([]string{
-		// group 1:
-		`^(`,
-		// irregular
-		`EN-GB-OED|I-AMI|I-BNN|I-DEFAULT|I-ENOCHIAN|I-HAK|I-KLINGON|I-LUX|I-MINGO|I-NAVAJO|I-PWN|I-TAO|I-TAY|I-TSU|`,
-		`SGN-BE-FR|SGN-BE-NL|SGN-CH-DE|`,
-		// regular
-		`ART-LOJBAN|CEL-GAULISH|NO-BOK|NO-NYN|ZH-GUOYU|ZH-HAKKA|ZH-MIN|ZH-MIN-NAN|ZH-XIANG|`,
-		// privateuse
-		`X-[A-Z0-9]{1,8}`,
-		`)$`,
-
-		`|`,
-
-		// langtag
-		`^`,
-		`((?:[A-Z]{2,3}(?:-[A-Z]{3}){0,3})|[A-Z]{4}|[A-Z]{5,8})`, // group 2: language
-		`(?:-([A-Z]{4}))?`,          // group 3: script
-		`(?:-([A-Z]{2}|[0-9]{3}))?`, // group 4: region
-		`(?:-((?:[A-Z0-9]{5,8}|[0-9][A-Z0-9]{3})(?:-(?:[A-Z0-9]{5,8}|[0-9][A-Z0-9]{3}))*))?`, // group 5: variant
-		`(?:-((?:[A-WYZ0-9](?:-[A-Z0-9]{2,8})+)(?:-(?:[A-WYZ0-9](?:-[A-Z0-9]{2,8})+))*))?`,   // group 6: extension
-		`(?:-X(?:-[A-Z0-9]{1,8})+)?`,
-		`$`,
-	}, ""))
-
 	languageTag := strings.ToUpper(s)
 
 	m := languageTagRe.FindStringSubmatch(languageTag)
