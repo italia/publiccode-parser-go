@@ -117,9 +117,12 @@ func isValidBCP47StrictLanguageTag(s string) bool {
 			return false
 		}
 	case n == 4:
-		return false
+		// 4-alpha primary subtags are reserved for future use per RFC 5646 §2.1;
+		// accept them syntactically even though none are currently assigned.
 	default:
-		return false
+		// 5-8 alpha: registered language subtag per RFC 5646 §2.1.
+		// golang.org/x/text/language does not cover these, so syntactic
+		// validation by the regex above is sufficient.
 	}
 
 	if script != "" {
