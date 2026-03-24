@@ -545,7 +545,7 @@ func TestInvalidTestcasesV0(t *testing.T) {
 			ValidationError{"It", "unknown field \"It\"", 107, 1},
 		},
 		"description_en_gb_invalid_bcp47.yml": ValidationResults{
-			ValidationError{"description", "description must be a valid BCP 47 language", 21, 1},
+			ValidationError{"description", "description must be a valid BCP 47 language", 18, 1},
 		},
 		"localisation_availableLanguages_invalid_bcp47.yml": ValidationResults{
 			ValidationError{"localisation.availableLanguages[0]", "availableLanguages[0] must be a valid BCP 47 language", 54, 8},
