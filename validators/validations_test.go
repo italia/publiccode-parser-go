@@ -23,6 +23,7 @@ func TestIsOrganisationURI(t *testing.T) {
 		{"urn:foobar:baz", true},
 		{"urn:x-italian-pa:no_such_ipa_code", false},
 		{"urn:x-italian-pa:pcm", true},
+		{"urn:X-Italian-PA:pcm", true},
 	}
 
 	for _, tt := range tests {

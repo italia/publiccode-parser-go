@@ -93,8 +93,8 @@ func isOrganisationURI(fl validator.FieldLevel) bool {
 			return false
 		}
 
-		if strings.HasPrefix(u.Opaque, "x-italian-pa:") {
-			ipa := strings.ReplaceAll(u.Opaque, "x-italian-pa:", "")
+		if strings.HasPrefix(strings.ToLower(u.Opaque), "x-italian-pa:") {
+			ipa := u.Opaque[len("x-italian-pa:"):]
 			err := validate.Var(ipa, "is_italian_ipa_code")
 
 			return err == nil
