@@ -23,6 +23,8 @@ linters:
   disable:
     # Not useful
     - depguard
+    # Banning TODO/FIXME outright removes useful context from the codebase
+    - godox
     # Not terribly useful and ends up in too much boilerplate
     - exhaustruct
     # https://github.com/italia/developers-italia-api/issues/190)
@@ -39,7 +41,6 @@ linters:
     # TODO: fix and enable these
     - cyclop
     - err113
-    - errname
     - errorlint
     - forcetypeassert
     - funlen
@@ -48,9 +49,7 @@ linters:
     - gocognit
     - goconst
     - godot
-    - godox
     - gosec
-    - ireturn
     - lll
     - nestif
     - perfsprint
@@ -61,9 +60,16 @@ linters:
     - wrapcheck
     - gocritic
     - gocyclo
-    - noctx
 
   settings:
+    ireturn:
+      allow:
+        - anon
+        - error
+        - empty
+        - stdlib
+        # PublicCode is the primary return type of the public API
+        - github.com/italia/publiccode-parser-go/v5.PublicCode
     wrapcheck:
       ignore-sigs:
         # No point in wrapping these

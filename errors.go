@@ -52,6 +52,7 @@ func newValidationErrorf(key string, description string, args ...any) Validation
 	return newValidationError(key, fmt.Sprintf(description, args...))
 }
 
+//nolint:errname // ValidationWarning is intentionally named as a warning, not an error, even though it implements error.
 type ValidationWarning ValidationError
 
 func (e ValidationWarning) Error() string {
@@ -76,7 +77,7 @@ func (e ValidationWarning) MarshalJSON() ([]byte, error) {
 	})
 }
 
-type ValidationResults []error
+type ValidationResults []error //nolint:errname // intentionally named as a collection, not an error type
 
 func (vr ValidationResults) Error() string {
 	s := make([]string, 0, len(vr))

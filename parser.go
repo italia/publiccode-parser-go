@@ -2,6 +2,7 @@ package publiccode
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"fmt"
 	"io"
@@ -153,7 +154,12 @@ func (p *Parser) Parse(uri string) (PublicCode, error) {
 			return nil, fmt.Errorf("can't open file '%s': %w", fileURL.Path, err)
 		}
 	} else {
-		resp, err := p.client.Get(uri) //nolint:bodyclose // closed via defer stream.Close() below bodyclose won't realize it :(
+		req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, uri, nil)
+		if err != nil {
+			return nil, fmt.Errorf("can't build GET request for '%s': %w", uri, err)
+		}
+
+		resp, err := p.client.Do(req) //nolint:bodyclose // closed via defer stream.Close() below; bodyclose won't realize it :(
 		if err != nil {
 			return nil, fmt.Errorf("can't GET '%s': %w", uri, err)
 		}
