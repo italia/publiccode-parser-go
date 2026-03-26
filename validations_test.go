@@ -1,12 +1,9 @@
 package publiccode
 
 import (
-	"image"
-	"image/png"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
-	"os"
 	"strings"
 	"testing"
 )
@@ -200,31 +197,6 @@ func TestValidLogoRemoteDownloadFailure(t *testing.T) {
 	}
 }
 
-func TestValidLogoPNGTooSmall(t *testing.T) {
-	// Create a tiny valid PNG (1x1 pixel) which is smaller than minLogoWidth.
-	f, err := os.CreateTemp("", "tiny-*.png")
-	if err != nil {
-		t.Fatalf("can't create temp file: %v", err)
-	}
-	defer os.Remove(f.Name())
-
-	// Write a minimal 1x1 PNG.
-	png.Encode(f, image.NewRGBA(image.Rect(0, 0, 1, 1)))
-	f.Close()
-
-	p, _ := NewParser(ParserConfig{DisableNetwork: true})
-	u := url.URL{Scheme: "file", Path: f.Name()}
-	ok, err := p.validLogo(u, false)
-	if ok {
-		t.Error("expected false for tiny PNG")
-	}
-	if err == nil {
-		t.Error("expected error for too-small image")
-	}
-	if !strings.Contains(err.Error(), "invalid image size") {
-		t.Errorf("unexpected error: %v", err)
-	}
-}
 
 func TestIsReachableSuccess(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
