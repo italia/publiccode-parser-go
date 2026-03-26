@@ -64,7 +64,11 @@ func validateFieldsV0(publiccode PublicCode, parser *Parser, network bool, baseU
 	}
 
 	if publiccodev0.MonochromeLogo != nil && *publiccodev0.MonochromeLogo != "" {
-		vr = append(vr, ValidationWarning{"monochromeLogo", "This key is DEPRECATED and will be removed in the future. Use 'logo' instead", 0, 0})
+		vr = append(vr, ValidationWarning{
+			"monochromeLogo",
+			"This key is DEPRECATED and will be removed in the future. Use 'logo' instead",
+			0, 0,
+		})
 
 		if _, err := isRelativePathOrURL(*publiccodev0.MonochromeLogo, "monochromeLogo"); err != nil {
 			vr = append(vr, err)
@@ -109,7 +113,11 @@ func validateFieldsV0(publiccode PublicCode, parser *Parser, network bool, baseU
 	}
 
 	if publiccodev0.Legal.AuthorsFile != nil {
-		vr = append(vr, ValidationWarning{"legal.authorsFile", "This key is DEPRECATED and will be removed in the future. It's safe to drop it", 0, 0})
+		vr = append(vr, ValidationWarning{
+			"legal.authorsFile",
+			"This key is DEPRECATED and will be removed in the future. It's safe to drop it",
+			0, 0,
+		})
 
 		if _, err := isRelativePathOrURL(*publiccodev0.Legal.AuthorsFile, "legal.authorsFile"); err != nil {
 			vr = append(vr, err)
@@ -118,22 +126,36 @@ func validateFieldsV0(publiccode PublicCode, parser *Parser, network bool, baseU
 			if u != nil {
 				exists, err := parser.fileExists(*u, network)
 				if !exists {
-					vr = append(vr, newValidationErrorf("legal.authorsFile", "'%s' does not exist: %s", urlutil.DisplayURL(u), err.Error()))
+					vr = append(vr, newValidationErrorf(
+						"legal.authorsFile", "'%s' does not exist: %s", urlutil.DisplayURL(u), err.Error(),
+					))
 				}
 			}
 		}
 	}
 
 	if publiccodev0.Legal.RepoOwner != nil {
-		vr = append(vr, ValidationWarning{"legal.repoOwner", "This key is DEPRECATED and will be removed in the future. Use 'organisation.name' instead", 0, 0})
+		vr = append(vr, ValidationWarning{
+			"legal.repoOwner",
+			"This key is DEPRECATED and will be removed in the future. Use 'organisation.name' instead",
+			0, 0,
+		})
 	}
 
 	if publiccodev0.InputTypes != nil {
-		vr = append(vr, ValidationWarning{"inputTypes", "This key is DEPRECATED and will be removed in the future. It's safe to drop it", 0, 0})
+		vr = append(vr, ValidationWarning{
+			"inputTypes",
+			"This key is DEPRECATED and will be removed in the future. It's safe to drop it",
+			0, 0,
+		})
 	}
 
 	if publiccodev0.OutputTypes != nil {
-		vr = append(vr, ValidationWarning{"outputTypes", "This key is DEPRECATED and will be removed in the future. It's safe to drop it", 0, 0})
+		vr = append(vr, ValidationWarning{
+			"outputTypes",
+			"This key is DEPRECATED and will be removed in the future. It's safe to drop it",
+			0, 0,
+		})
 	}
 
 	for lang, desc := range publiccodev0.Description {
@@ -221,7 +243,8 @@ func validateFieldsV0(publiccode PublicCode, parser *Parser, network bool, baseU
 				vr = append(vr, ValidationWarning{
 					"IT.riuso.codiceIPA",
 					fmt.Sprintf(
-						"This key is DEPRECATED and will be removed in the future. Use 'organisation.uri' and set it to 'urn:x-italian-pa:%s' instead",
+						"This key is DEPRECATED and will be removed in the future. "+
+							"Use 'organisation.uri' and set it to 'urn:x-italian-pa:%s' instead",
 						it.Riuso.CodiceIPA,
 					),
 					0, 0,

@@ -14,7 +14,7 @@ import (
 )
 
 // Reference: https://github.com/jshttp/media-typer/
-var reMIMEType = regexp.MustCompile(`^ *([A-Za-z0-9][A-Za-z0-9!#$&^_-]{0,126})/([A-Za-z0-9][A-Za-z0-9!#$&^_.+-]{0,126}) *$`)
+var reMIMEType = regexp.MustCompile(`^ *([A-Za-z0-9][A-Za-z0-9!#$&^_-]{0,126})/([A-Za-z0-9][A-Za-z0-9!#$&^_.+-]{0,126}) *$`) //nolint:lll // RFC 2045 regex
 
 var sharedValidator = validator.New(validator.WithRequiredStructEnabled())
 

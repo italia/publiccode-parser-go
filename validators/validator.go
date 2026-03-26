@@ -151,15 +151,15 @@ func RegisterLocalErrorMessages(v *validator.Validate, trans ut.Translator) erro
 			customRegisFunc: func(ut ut.Translator) error {
 				err := ut.Add("organisation_uri", "{0} is not a valid URI", false)
 				if err != nil {
-					return err
+					return fmt.Errorf("registering translation: %w", err)
 				}
 
 				err = ut.Add(
 					"organisation_uri_invalid_italian_pa",
-					"{0} must be a valid Italian Public Administration Code (iPA) with format 'urn:x-italian-pa:[codiceIPA]' (see https://www.indicepa.gov.it/public-services/opendata-read-service.php?dstype=FS&filename=amministrazioni.txt)",
+					"{0} must be a valid Italian Public Administration Code (iPA) with format 'urn:x-italian-pa:[codiceIPA]' (see https://www.indicepa.gov.it/public-services/opendata-read-service.php?dstype=FS&filename=amministrazioni.txt)", //nolint:lll // long URL in message
 					false)
 				if err != nil {
-					return err
+					return fmt.Errorf("registering translation: %w", err)
 				}
 
 				return nil
@@ -193,15 +193,15 @@ func RegisterLocalErrorMessages(v *validator.Validate, trans ut.Translator) erro
 		},
 		{
 			tag:         "is_category_v0",
-			translation: "{0} must be a valid category (see https://github.com/publiccodeyml/publiccode.yml/blob/main/docs/standard/categories-list.rst)",
+			translation: "{0} must be a valid category (see https://github.com/publiccodeyml/publiccode.yml/blob/main/docs/standard/categories-list.rst)", //nolint:lll // long URL in message
 		},
 		{
 			tag:         "is_scope_v0",
-			translation: "{0} must be a valid scope (see https://github.com/publiccodeyml/publiccode.yml/blob/main/docs/standard/scope-list.rst)",
+			translation: "{0} must be a valid scope (see https://github.com/publiccodeyml/publiccode.yml/blob/main/docs/standard/scope-list.rst)", //nolint:lll // long URL in message
 		},
 		{
 			tag:         "is_italian_ipa_code",
-			translation: "{0} must be a valid Italian Public Administration Code (iPA) (see https://www.indicepa.gov.it/public-services/opendata-read-service.php?dstype=FS&filename=amministrazioni.txt)",
+			translation: "{0} must be a valid Italian Public Administration Code (iPA) (see https://www.indicepa.gov.it/public-services/opendata-read-service.php?dstype=FS&filename=amministrazioni.txt)", //nolint:lll // long URL in message
 		},
 		{
 			tag:         "iso3166_1_alpha2_lower_or_upper",
@@ -230,11 +230,11 @@ func RegisterLocalErrorMessages(v *validator.Validate, trans ut.Translator) erro
 		}
 
 		if err != nil {
-			return err
+			return fmt.Errorf("registering translation for %q: %w", t.tag, err)
 		}
 	}
 
-	return err
+	return nil
 }
 
 func registrationFunc(tag string, translation string, override bool) validator.RegisterTranslationsFunc {

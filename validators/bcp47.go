@@ -238,9 +238,9 @@ var ianaVariants = map[string][]string{
 	"gallo":    {"fr"},
 	"gascon":   {"oc"},
 	"gherd":    {"lld"},
-	"grclass":  {"oc", "oc-aranes", "oc-auvern", "oc-cisaup", "oc-creiss", "oc-gascon", "oc-lemosin", "oc-lengadoc", "oc-nicard", "oc-provenc", "oc-vivaraup"},
+	"grclass":  {"oc", "oc-aranes", "oc-auvern", "oc-cisaup", "oc-creiss", "oc-gascon", "oc-lemosin", "oc-lengadoc", "oc-nicard", "oc-provenc", "oc-vivaraup"}, //nolint:lll // long data literal
 	"grital":   {"oc", "oc-cisaup", "oc-nicard", "oc-provenc"},
-	"grmistr":  {"oc", "oc-aranes", "oc-auvern", "oc-cisaup", "oc-creiss", "oc-gascon", "oc-lemosin", "oc-lengadoc", "oc-nicard", "oc-provenc", "oc-vivaraup"},
+	"grmistr":  {"oc", "oc-aranes", "oc-auvern", "oc-cisaup", "oc-creiss", "oc-gascon", "oc-lemosin", "oc-lengadoc", "oc-nicard", "oc-provenc", "oc-vivaraup"}, //nolint:lll // long data literal
 	"hanoi":    {"vi"},
 	"hepburn":  {"ja-Latn"},
 	"heploc":   {"ja-Latn-hepburn"},
