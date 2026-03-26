@@ -219,13 +219,14 @@ func RegisterLocalErrorMessages(v *validator.Validate, trans ut.Translator) erro
 	}
 
 	for _, t := range translations {
-		if t.customTransFunc != nil && t.customRegisFunc != nil {
+		switch {
+		case t.customTransFunc != nil && t.customRegisFunc != nil:
 			err = v.RegisterTranslation(t.tag, trans, t.customRegisFunc, t.customTransFunc)
-		} else if t.customTransFunc != nil && t.customRegisFunc == nil {
+		case t.customTransFunc != nil:
 			err = v.RegisterTranslation(t.tag, trans, registrationFunc(t.tag, t.translation, t.override), t.customTransFunc)
-		} else if t.customTransFunc == nil && t.customRegisFunc != nil {
+		case t.customRegisFunc != nil:
 			err = v.RegisterTranslation(t.tag, trans, t.customRegisFunc, translateFunc)
-		} else {
+		default:
 			err = v.RegisterTranslation(t.tag, trans, registrationFunc(t.tag, t.translation, t.override), translateFunc)
 		}
 
@@ -251,7 +252,7 @@ func registrationFunc(tag string, translation string, override bool) validator.R
 func translateFunc(ut ut.Translator, fe validator.FieldError) string {
 	t, err := ut.T(fe.Tag(), fe.Field())
 	if err != nil {
-		return fe.(error).Error()
+		return fe.Error()
 	}
 
 	return t

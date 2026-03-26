@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"flag"
 	"fmt"
 	"os"
@@ -129,17 +130,17 @@ func hasValidationErrors(results error) bool {
 		return false
 	}
 
-	switch e := results.(type) {
-	case publiccode.ValidationResults:
-		for _, res := range e {
-			switch res.(type) {
-			case publiccode.ValidationError:
+	var vr publiccode.ValidationResults
+	if errors.As(results, &vr) {
+		for _, res := range vr {
+			var ve publiccode.ValidationError
+			if errors.As(res, &ve) {
 				return true
 			}
 		}
-	case error:
-		return true
+
+		return false
 	}
 
-	return false
+	return true
 }

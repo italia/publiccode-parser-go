@@ -40,8 +40,6 @@ linters:
 
     # TODO: fix and enable these
     - cyclop
-    - errorlint
-    - forcetypeassert
     - funlen
     - gochecknoglobals
     - gochecknoinits
@@ -51,7 +49,6 @@ linters:
     - revive
     - tagliatelle
     - varnamelen
-    - gocritic
     - gocyclo
 
   settings:

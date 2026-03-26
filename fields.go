@@ -15,7 +15,10 @@ type validateFn func(publiccode PublicCode, parser *Parser, network bool, baseUR
 // with go-playground/validator
 // It returns any error encountered as ValidationResults.
 func validateFieldsV0(publiccode PublicCode, parser *Parser, network bool, baseURL *url.URL) error { //nolint:maintidx
-	publiccodev0 := publiccode.(*PublicCodeV0)
+	publiccodev0, ok := publiccode.(*PublicCodeV0)
+	if !ok {
+		return fmt.Errorf("internal: expected *PublicCodeV0, got %T", publiccode) //nolint:err113 // dynamic type name
+	}
 
 	var vr ValidationResults
 
@@ -264,7 +267,10 @@ func validateFieldsV0(publiccode PublicCode, parser *Parser, network bool, baseU
 // with go-playground/validator
 // It returns any error encountered as ValidationResults.
 func validateFieldsV1(publiccode PublicCode, parser *Parser, network bool, baseURL *url.URL) error {
-	publiccodev1 := publiccode.(*PublicCodeV1)
+	publiccodev1, ok := publiccode.(*PublicCodeV1)
+	if !ok {
+		return fmt.Errorf("internal: expected *PublicCodeV1, got %T", publiccode) //nolint:err113 // dynamic type name
+	}
 
 	var vr ValidationResults
 

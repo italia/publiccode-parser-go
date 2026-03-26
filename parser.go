@@ -290,18 +290,21 @@ func (p *Parser) parseStream(in io.Reader, fileURL *url.URL) (PublicCode, error)
 
 	err = sharedValidate.Struct(publiccode)
 	if err != nil {
-		for _, err := range err.(validator.ValidationErrors) {
-			key := strings.SplitN(err.Namespace(), ".", 2)[1]
-			key = reMapKey.ReplaceAllString(key, ".$1")
+		var validationErrs validator.ValidationErrors
+		if errors.As(err, &validationErrs) {
+			for _, err := range validationErrs {
+				key := strings.SplitN(err.Namespace(), ".", 2)[1]
+				key = reMapKey.ReplaceAllString(key, ".$1")
 
-			line, column := getPositionInFile(key, file)
+				line, column := getPositionInFile(key, file)
 
-			ve = append(ve, ValidationError{
-				Key:         key,
-				Description: err.Translate(sharedTrans),
-				Line:        line,
-				Column:      column,
-			})
+				ve = append(ve, ValidationError{
+					Key:         key,
+					Description: err.Translate(sharedTrans),
+					Line:        line,
+					Column:      column,
+				})
+			}
 		}
 	}
 
@@ -358,14 +361,21 @@ func (p *Parser) parseStream(in io.Reader, fileURL *url.URL) (PublicCode, error)
 	}
 
 	if err = validateFields(publiccode, p, !p.disableNetwork, currentBaseURL); err != nil {
-		for _, err := range err.(ValidationResults) {
-			switch err := err.(type) {
-			case ValidationError:
-				err.Line, err.Column = getPositionInFile(err.Key, file)
-				ve = append(ve, err)
-			case ValidationWarning:
-				err.Line, err.Column = getPositionInFile(err.Key, file)
-				ve = append(ve, err)
+		var vr ValidationResults
+		if errors.As(err, &vr) {
+			for _, result := range vr {
+				var valErr ValidationError
+
+				var valWarn ValidationWarning
+
+				switch {
+				case errors.As(result, &valErr):
+					valErr.Line, valErr.Column = getPositionInFile(valErr.Key, file)
+					ve = append(ve, valErr)
+				case errors.As(result, &valWarn):
+					valWarn.Line, valWarn.Column = getPositionInFile(valWarn.Key, file)
+					ve = append(ve, valWarn)
+				}
 			}
 		}
 	}
