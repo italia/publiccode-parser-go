@@ -44,9 +44,6 @@ func init() {
 	}
 }
 
-// Despite the spec requires at least 1000px, we temporarily release this constraint to 120px.
-const minLogoWidth = 120
-
 func getBasicAuth(domain Domain) string {
 	if len(domain.BasicAuth) > 0 {
 		auth := domain.BasicAuth[rand.Intn(len(domain.BasicAuth))] //nolint:gosec,lll // G404: not security-sensitive, picks from pre-configured list
@@ -230,13 +227,8 @@ func (p *Parser) validLogo(u url.URL, network bool) (bool, error) {
 
 		defer f.Close()
 
-		image, _, err := image.DecodeConfig(f)
-		if err != nil {
+		if _, _, err := image.DecodeConfig(f); err != nil {
 			return false, fmt.Errorf("%w", err)
-		}
-
-		if image.Width < minLogoWidth {
-			return false, fmt.Errorf("invalid image size of %d (min %dpx of width): %s", image.Width, minLogoWidth, netutil.DisplayURL(&u)) //nolint:err113,lll // dynamic message with image dimensions
 		}
 	}
 
