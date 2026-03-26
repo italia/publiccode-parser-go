@@ -17,7 +17,7 @@ func downloadFile(client *httpclient.Client, filepath string, url *url.URL, head
 	// Create the file.
 	out, err := os.Create(filepath)
 	if err != nil {
-		return err
+		return fmt.Errorf("creating file: %w", err)
 	}
 
 	defer func() {
@@ -27,15 +27,17 @@ func downloadFile(client *httpclient.Client, filepath string, url *url.URL, head
 	// Get the data from the url.
 	resp, err := client.GetURL(url.String(), headers)
 	if err != nil {
-		return err
+		return fmt.Errorf("downloading %s: %w", url, err)
 	}
 
 	reader := bytes.NewReader(resp.Body)
 
 	// Write the body to file.
-	_, err = io.Copy(out, reader)
+	if _, err = io.Copy(out, reader); err != nil {
+		return fmt.Errorf("writing file: %w", err)
+	}
 
-	return err
+	return nil
 }
 
 // DownloadTmpFile downloads the passed URL to a temporary directory.

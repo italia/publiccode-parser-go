@@ -36,10 +36,25 @@ func main() {
 
 		flag.PrintDefaults()
 	}
-	localBasePathPtr := flag.String("path", "", "Use this local directory as base path when checking for files existence instead of using the `url` key in publiccode.yml")
-	disableNetworkPtr := flag.Bool("no-network", false, "Disables checks that require network connections (URL existence and oEmbed). This makes validation much faster.")
-	disableExternalChecksPtr := flag.Bool("no-external-checks", false, "Disables ALL checks that reference external resources such as remote URLs or local file existence. Implies --no-network")
-	timeoutPtr := flag.Duration("timeout", 0, "Timeout for each HTTP request during external checks (e.g. 10s, 1m). Defaults to 30s if not set. No effect with --no-network or --no-external-checks.")
+	localBasePathPtr := flag.String(
+		"path", "",
+		"Use this local directory as base path when checking for files existence "+
+			"instead of using the `url` key in publiccode.yml",
+	)
+	disableNetworkPtr := flag.Bool(
+		"no-network", false,
+		"Disables checks that require network connections (URL existence and oEmbed). This makes validation much faster.",
+	)
+	disableExternalChecksPtr := flag.Bool(
+		"no-external-checks", false,
+		"Disables ALL checks that reference external resources such as remote URLs or local file existence. "+
+			"Implies --no-network",
+	)
+	timeoutPtr := flag.Duration(
+		"timeout", 0,
+		"Timeout for each HTTP request during external checks (e.g. 10s, 1m). "+
+			"Defaults to 30s if not set. No effect with --no-network or --no-external-checks.",
+	)
 	jsonOutputPtr := flag.Bool("json", false, "Output the validation errors as a JSON list.")
 	helpPtr := flag.Bool("help", false, "Display command line usage.")
 	versionPtr := flag.Bool("version", false, "Display current software version.")

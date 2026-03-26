@@ -2,10 +2,11 @@ package publiccode
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/url"
 )
 
-type URL url.URL
+type URL url.URL //nolint:recvcheck // String must use value receiver to implement fmt.Stringer on URL
 
 // UnmarshalYAML implements the yaml.Unmarshaler interface for URLs.
 func (u *URL) UnmarshalYAML(unmarshal func(any) error) error {
@@ -16,7 +17,7 @@ func (u *URL) UnmarshalYAML(unmarshal func(any) error) error {
 
 	urlp, err := url.Parse(s)
 	if err != nil {
-		return err
+		return fmt.Errorf("parsing URL %q: %w", s, err)
 	}
 
 	*u = (URL)(*urlp)

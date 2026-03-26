@@ -25,7 +25,7 @@ type ValidationError struct {
 func (e ValidationError) Error() string {
 	key := ""
 	if e.Key != "" {
-		key = fmt.Sprintf("%s: ", e.Key)
+		key = e.Key + ": "
 	}
 
 	return fmt.Sprintf("publiccode.yml:%d:%d: error: %s%s", e.Line, e.Column, key, e.Description)
@@ -52,13 +52,13 @@ func newValidationErrorf(key string, description string, args ...any) Validation
 	return newValidationError(key, fmt.Sprintf(description, args...))
 }
 
-//nolint:errname // ValidationWarning is intentionally named as a warning, not an error, even though it implements error.
+//nolint:errname,lll // ValidationWarning is intentionally named as a warning, not an error, even though it implements error.
 type ValidationWarning ValidationError
 
 func (e ValidationWarning) Error() string {
 	key := ""
 	if e.Key != "" {
-		key = fmt.Sprintf("%s: ", e.Key)
+		key = e.Key + ": "
 	}
 
 	return fmt.Sprintf("publiccode.yml:%d:%d: warning: %s%s", e.Line, e.Column, key, e.Description)

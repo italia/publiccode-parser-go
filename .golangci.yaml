@@ -40,7 +40,6 @@ linters:
 
     # TODO: fix and enable these
     - cyclop
-    - err113
     - errorlint
     - forcetypeassert
     - funlen
@@ -48,16 +47,10 @@ linters:
     - gochecknoinits
     - gocognit
     - goconst
-    - godot
-    - gosec
-    - lll
     - nestif
-    - perfsprint
-    - recvcheck
     - revive
     - tagliatelle
     - varnamelen
-    - wrapcheck
     - gocritic
     - gocyclo
 
@@ -70,6 +63,8 @@ linters:
         - stdlib
         # PublicCode is the primary return type of the public API
         - github.com/italia/publiccode-parser-go/v5.PublicCode
+    lll:
+      line-length: 120
     wrapcheck:
       ignore-sigs:
         # No point in wrapping these
@@ -123,6 +118,9 @@ linters:
       - path: publiccode-parser/
         linters:
           - forbidigo
+      # Struct field tag lines can't be shortened without readability loss.
+      - linters: [lll]
+        source: '`[^`]+`\s*$'
 
 formatters:
   enable:

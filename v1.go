@@ -1,11 +1,13 @@
 package publiccode
 
 import (
+	"fmt"
+
 	yaml "github.com/goccy/go-yaml"
 	urlutil "github.com/italia/publiccode-parser-go/v5/internal"
 )
 
-// PublicCodeV1 defines how a publiccode.yml v1.x is structured
+// PublicCodeV1 defines how a publiccode.yml v1.x is structured.
 type PublicCodeV1 struct {
 	PubliccodeYamlVersion string `json:"publiccodeYmlVersion" validate:"required,oneof=1" yaml:"publiccodeYmlVersion"`
 
@@ -115,7 +117,12 @@ func (p PublicCodeV1) Version() uint {
 }
 
 func (p PublicCodeV1) ToYAML() ([]byte, error) {
-	return yaml.Marshal(p)
+	b, err := yaml.Marshal(p)
+	if err != nil {
+		return nil, fmt.Errorf("marshaling to YAML: %w", err)
+	}
+
+	return b, nil
 }
 
 func (p PublicCodeV1) Url() *URL {

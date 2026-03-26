@@ -159,7 +159,7 @@ func (p *Parser) Parse(uri string) (PublicCode, error) {
 			return nil, fmt.Errorf("can't build GET request for '%s': %w", uri, err)
 		}
 
-		resp, err := p.client.Do(req) //nolint:bodyclose // closed via defer stream.Close() below; bodyclose won't realize it :(
+		resp, err := p.client.Do(req) //nolint:bodyclose,lll // bodyclose: closed via defer stream.Close() below; bodyclose won't realize it :(
 		if err != nil {
 			return nil, fmt.Errorf("can't GET '%s': %w", uri, err)
 		}
@@ -397,7 +397,7 @@ func (p *Parser) parseStream(in io.Reader, fileURL *url.URL) (PublicCode, error)
 	return asPublicCode(publiccode), ve
 }
 
-// Ensure the returned value implements PublicCode as a struct, not as a pointer
+// Ensure the returned value implements PublicCode as a struct, not as a pointer.
 func asPublicCode(pc PublicCode) PublicCode {
 	switch v := pc.(type) {
 	case *PublicCodeV0:
@@ -665,6 +665,6 @@ func toURL(file string) (*url.URL, error) {
 	if path, err := filepath.Abs(file); err == nil {
 		return &url.URL{Scheme: "file", Path: path}, nil
 	} else {
-		return nil, err
+		return nil, fmt.Errorf("getting absolute path for %q: %w", file, err)
 	}
 }

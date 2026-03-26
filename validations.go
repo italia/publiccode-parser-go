@@ -3,6 +3,7 @@ package publiccode
 import (
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"image"
 	"image/png"
@@ -25,13 +26,15 @@ func init() {
 	image.RegisterFormat("png", "png", png.Decode, png.DecodeConfig)
 }
 
+var errMissingURLScheme = errors.New("missing URL scheme")
+
 var oembedSchemes []*regexp.Regexp
 
 func init() {
 	var schemes []string
 
 	if err := json.Unmarshal(data.OembedSchemes, &schemes); err != nil {
-		panic("failed to parse oEmbed schemes: " + err.Error()) //nolint:forbidigo // embedded at compile time, a failure here is a programming error
+		panic("failed to parse oEmbed schemes: " + err.Error()) //nolint:forbidigo,lll // embedded at compile time, a failure here is a programming error
 	}
 
 	for _, scheme := range schemes {
@@ -46,7 +49,7 @@ const minLogoWidth = 120
 
 func getBasicAuth(domain Domain) string {
 	if len(domain.BasicAuth) > 0 {
-		auth := domain.BasicAuth[rand.Intn(len(domain.BasicAuth))]
+		auth := domain.BasicAuth[rand.Intn(len(domain.BasicAuth))] //nolint:gosec,lll // G404: not security-sensitive, picks from pre-configured list
 
 		return "Basic " + base64.StdEncoding.EncodeToString([]byte(auth))
 	}
@@ -88,16 +91,16 @@ func (p *Parser) isReachable(u url.URL) (bool, error) {
 	}
 
 	if u.Scheme == "" {
-		return false, fmt.Errorf("missing URL scheme")
+		return false, errMissingURLScheme
 	}
 
 	r, err := p.httpclient.GetURL(u.String(), getHeaderFromDomain(p.domain, u.String()))
 	if err != nil {
-		return false, fmt.Errorf("HTTP GET failed for %s: %v", u.String(), err)
+		return false, fmt.Errorf("HTTP GET failed for %s: %w", u.String(), err)
 	}
 
 	if r.Status.Code != 200 {
-		return false, fmt.Errorf("HTTP GET returned %d for %s; 200 was expected", r.Status.Code, u.String())
+		return false, fmt.Errorf("HTTP GET returned %d for %s; 200 was expected", r.Status.Code, u.String()) //nolint:err113,lll // dynamic message with response context
 	}
 
 	return true, nil
@@ -107,7 +110,7 @@ func (p *Parser) isReachable(u url.URL) (bool, error) {
 // code hosting URLs to their raw URL.
 //
 // It supports relative paths and turns them into remote URLs or file:// URLs
-// depending on the value of baseURL
+// depending on the value of baseURL.
 func toAbsoluteURL(file string, baseURL *url.URL, network bool) *url.URL {
 	// Check if file is an absolute URL
 	if uri, err := url.ParseRequestURI(file); err == nil {
@@ -142,9 +145,9 @@ func (p *Parser) fileExists(u url.URL, network bool) (bool, error) {
 	// If we have an absolute local path, perform validation on it, otherwise do it
 	// on the remote URL if any. If none are available, validation is skipped.
 	if u.Scheme == "file" {
-		_, err := os.Stat(u.Path)
+		_, err := os.Stat(u.Path) //nolint:gosec // G703: path is from a validated file:// URL
 		if err != nil {
-			err = fmt.Errorf("no such file: %s", netutil.DisplayURL(&u))
+			err = fmt.Errorf("no such file: %s", netutil.DisplayURL(&u)) //nolint:err113 // dynamic message with path context
 		}
 
 		return err == nil, err
@@ -160,13 +163,13 @@ func (p *Parser) fileExists(u url.URL, network bool) (bool, error) {
 }
 
 // isImageFile check whether the string is a valid image. It also checks if the file exists.
-// It returns true if it is an image or false if it's not and an error, if any
+// It returns true if it is an image or false if it's not and an error, if any.
 func (p *Parser) isImageFile(u url.URL, network bool) (bool, error) {
 	validExt := []string{".jpg", ".png"}
 	ext := strings.ToLower(filepath.Ext(u.Path))
 
 	if !slices.Contains(validExt, ext) {
-		return false, fmt.Errorf("invalid file extension for: %s", netutil.DisplayURL(&u))
+		return false, fmt.Errorf("invalid file extension for: %s", netutil.DisplayURL(&u)) //nolint:err113,lll // dynamic message with path context
 	}
 
 	return p.fileExists(u, network)
@@ -180,7 +183,7 @@ func (p *Parser) validLogo(u url.URL, network bool) (bool, error) {
 
 	// Check for valid extension.
 	if !slices.Contains(validExt, ext) {
-		return false, fmt.Errorf("invalid file extension for: %s", netutil.DisplayURL(&u))
+		return false, fmt.Errorf("invalid file extension for: %s", netutil.DisplayURL(&u)) //nolint:err113,lll // dynamic message with path context
 	}
 
 	if exists, err := p.fileExists(u, network); !exists {
@@ -198,7 +201,7 @@ func (p *Parser) validLogo(u url.URL, network bool) (bool, error) {
 
 		localPath, err = netutil.DownloadTmpFile(p.httpclient, &u, getHeaderFromDomain(p.domain, u.String()))
 		if err != nil {
-			return false, err
+			return false, fmt.Errorf("downloading %s: %w", u.String(), err)
 		}
 
 		defer func() {
@@ -206,12 +209,12 @@ func (p *Parser) validLogo(u url.URL, network bool) (bool, error) {
 				return
 			}
 
-			if err := os.Remove(localPath); err != nil {
+			if err := os.Remove(localPath); err != nil { //nolint:gosec // G703: path from validated download
 				fmt.Fprintf(os.Stderr, "failed to remove %s: %v\n", localPath, err)
 			}
 
 			dir := path.Dir(localPath)
-			if err = os.Remove(dir); err != nil {
+			if err = os.Remove(dir); err != nil { //nolint:gosec // G703: path from validated download
 				fmt.Fprintf(os.Stderr, "failed to remove %s: %v\n", dir, err)
 			}
 		}()
@@ -220,20 +223,20 @@ func (p *Parser) validLogo(u url.URL, network bool) (bool, error) {
 	}
 
 	if ext == ".png" {
-		f, err := os.Open(localPath)
+		f, err := os.Open(localPath) //nolint:gosec // G703: path from validated download
 		if err != nil {
-			return false, err
+			return false, fmt.Errorf("opening %s: %w", localPath, err)
 		}
 
 		defer f.Close()
 
 		image, _, err := image.DecodeConfig(f)
 		if err != nil {
-			return false, err
+			return false, fmt.Errorf("%w", err)
 		}
 
 		if image.Width < minLogoWidth {
-			return false, fmt.Errorf("invalid image size of %d (min %dpx of width): %s", image.Width, minLogoWidth, netutil.DisplayURL(&u))
+			return false, fmt.Errorf("invalid image size of %d (min %dpx of width): %s", image.Width, minLogoWidth, netutil.DisplayURL(&u)) //nolint:err113,lll // dynamic message with image dimensions
 		}
 	}
 
@@ -256,7 +259,7 @@ func (p *Parser) checkOEmbedURL(url *url.URL) error {
 	link := url.String()
 
 	if !matchesOembedScheme(link) {
-		return fmt.Errorf("invalid oEmbed link: %s", link)
+		return fmt.Errorf("invalid oEmbed link: %s", link) //nolint:err113 // dynamic message with URL context
 	}
 
 	return nil
