@@ -8,9 +8,7 @@ import (
 	"os"
 	"runtime/debug"
 
-	"github.com/alranel/go-vcsurl/v2"
 	publiccode "github.com/italia/publiccode-parser-go/v5"
-	urlutil "github.com/italia/publiccode-parser-go/v5/internal"
 )
 
 var (
@@ -75,14 +73,6 @@ func main() {
 	}
 
 	publiccodeFile := flag.Args()[0]
-
-	if ok, url := urlutil.IsValidURL(publiccodeFile); ok {
-		// supplied argument looks like an URL
-		if vcsurl.GetRawFile(url) == nil {
-			fmt.Fprintf(os.Stderr, "Code hosting provider not supported for %s\n", url)
-			os.Exit(1)
-		}
-	}
 
 	config := publiccode.ParserConfig{BaseURL: *localBasePathPtr}
 	config.DisableNetwork = *disableNetworkPtr

@@ -91,13 +91,9 @@ func (p *Parser) isReachable(u url.URL) (bool, error) {
 		return false, errMissingURLScheme
 	}
 
-	r, err := p.httpclient.GetURL(u.String(), getHeaderFromDomain(p.domain, u.String()))
+	_, err := p.httpclient.GetURL(u.String(), getHeaderFromDomain(p.domain, u.String()))
 	if err != nil {
 		return false, fmt.Errorf("HTTP GET failed for %s: %w", u.String(), err)
-	}
-
-	if r.Status.Code != 200 {
-		return false, fmt.Errorf("HTTP GET returned %d for %s; 200 was expected", r.Status.Code, u.String()) //nolint:err113,lll // dynamic message with response context
 	}
 
 	return true, nil
