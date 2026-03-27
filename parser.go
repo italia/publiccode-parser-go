@@ -111,6 +111,7 @@ func NewParser(config ParserConfig) (*Parser, error) {
 	}
 
 	httpClient := &http.Client{Timeout: timeout}
+	vcsurl.Client = httpClient
 	p := Parser{
 		disableNetwork:        config.DisableNetwork,
 		disableExternalChecks: config.DisableExternalChecks,
