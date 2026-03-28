@@ -5,7 +5,7 @@ import (
 )
 
 func TestIsOrganisationURI(t *testing.T) {
-	v := New()
+	v := New(DefaultIPACodes())
 
 	tests := []struct {
 		value  string

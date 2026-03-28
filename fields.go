@@ -92,7 +92,7 @@ func validateFieldsV0(publiccode PublicCode, parser *Parser, network bool, baseU
 		// to use uppercase on an invalid country.
 		if publiccodev0.IntendedAudience.Countries != nil {
 			for i, c := range *publiccodev0.IntendedAudience.Countries {
-				if sharedValidate.Var(c, "iso3166_1_alpha2_lower_or_upper") == nil && c == strings.ToLower(c) {
+				if parser.validate.Var(c, "iso3166_1_alpha2_lower_or_upper") == nil && c == strings.ToLower(c) {
 					vr = append(vr, ValidationWarning{
 						fmt.Sprintf("intendedAudience.countries[%d]", i),
 						fmt.Sprintf("Lowercase country codes are DEPRECATED. Use uppercase instead ('%s')", strings.ToUpper(c)),
@@ -104,7 +104,7 @@ func validateFieldsV0(publiccode PublicCode, parser *Parser, network bool, baseU
 
 		if publiccodev0.IntendedAudience.UnsupportedCountries != nil {
 			for i, c := range *publiccodev0.IntendedAudience.UnsupportedCountries {
-				if sharedValidate.Var(c, "iso3166_1_alpha2_lower_or_upper") == nil && c == strings.ToLower(c) {
+				if parser.validate.Var(c, "iso3166_1_alpha2_lower_or_upper") == nil && c == strings.ToLower(c) {
 					vr = append(vr, ValidationWarning{
 						fmt.Sprintf("intendedAudience.unsupportedCountries[%d]", i),
 						fmt.Sprintf("Lowercase country codes are DEPRECATED. Use uppercase instead ('%s')", strings.ToUpper(c)),
@@ -242,7 +242,7 @@ func validateFieldsV0(publiccode PublicCode, parser *Parser, network bool, baseU
 		}
 
 		if it.Riuso.CodiceIPA != "" {
-			if sharedValidate.Var(it.Riuso.CodiceIPA, "is_italian_ipa_code") == nil {
+			if parser.validate.Var(it.Riuso.CodiceIPA, "is_italian_ipa_code") == nil {
 				vr = append(vr, ValidationWarning{
 					"IT.riuso.codiceIPA",
 					fmt.Sprintf(
@@ -324,7 +324,7 @@ func validateFieldsV1(publiccode PublicCode, parser *Parser, network bool, baseU
 		// to use uppercase on an invalid country.
 		if publiccodev1.IntendedAudience.Countries != nil {
 			for i, c := range *publiccodev1.IntendedAudience.Countries {
-				if sharedValidate.Var(c, "iso3166_1_alpha2_lower_or_upper") == nil && c == strings.ToLower(c) {
+				if parser.validate.Var(c, "iso3166_1_alpha2_lower_or_upper") == nil && c == strings.ToLower(c) {
 					vr = append(vr, ValidationWarning{
 						fmt.Sprintf("intendedAudience.countries[%d]", i),
 						fmt.Sprintf("Lowercase country codes are DEPRECATED. Use uppercase instead ('%s')", strings.ToUpper(c)),
@@ -336,7 +336,7 @@ func validateFieldsV1(publiccode PublicCode, parser *Parser, network bool, baseU
 
 		if publiccodev1.IntendedAudience.UnsupportedCountries != nil {
 			for i, c := range *publiccodev1.IntendedAudience.UnsupportedCountries {
-				if sharedValidate.Var(c, "iso3166_1_alpha2_lower_or_upper") == nil && c == strings.ToLower(c) {
+				if parser.validate.Var(c, "iso3166_1_alpha2_lower_or_upper") == nil && c == strings.ToLower(c) {
 					vr = append(vr, ValidationWarning{
 						fmt.Sprintf("intendedAudience.unsupportedCountries[%d]", i),
 						fmt.Sprintf("Lowercase country codes are DEPRECATED. Use uppercase instead ('%s')", strings.ToUpper(c)),
