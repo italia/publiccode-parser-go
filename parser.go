@@ -1,6 +1,7 @@
 package publiccode
 
 import (
+	"bufio"
 	"bytes"
 	"context"
 	"errors"
@@ -30,21 +31,37 @@ import (
 	publiccodeValidator "github.com/italia/publiccode-parser-go/v5/validators"
 )
 
-// Build Validator and Translator once at package init.
-var (
-	sharedValidate *validator.Validate
-	sharedTrans    ut.Translator
-)
+// fetchIPACodes downloads the IPA codes list from the given URL and returns it
+// as a set. The format is expected to match the Agid export: one code per line.
+func fetchIPACodes(client *http.Client, rawURL string) (map[string]struct{}, error) {
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, rawURL, nil)
+	if err != nil {
+		return nil, fmt.Errorf("building IPA codes request for %q: %w", rawURL, err)
+	}
 
-func init() {
-	sharedValidate = publiccodeValidator.New()
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("fetching IPA codes from %q: %w", rawURL, err)
+	}
 
-	enLocale := en.New()
-	uni := ut.New(enLocale, enLocale)
+	defer resp.Body.Close()
 
-	sharedTrans, _ = uni.GetTranslator("en")
-	_ = en_translations.RegisterDefaultTranslations(sharedValidate, sharedTrans)
-	_ = publiccodeValidator.RegisterLocalErrorMessages(sharedValidate, sharedTrans)
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("fetching IPA codes from %q: unexpected HTTP status %d", rawURL, resp.StatusCode) //nolint:err113,lll // dynamic status code
+	}
+
+	codes := make(map[string]struct{}, 24000)
+	scanner := bufio.NewScanner(resp.Body)
+
+	for scanner.Scan() {
+		codes[strings.ToLower(scanner.Text())] = struct{}{}
+	}
+
+	if err := scanner.Err(); err != nil {
+		return nil, fmt.Errorf("reading IPA codes from %q: %w", rawURL, err)
+	}
+
+	return codes, nil
 }
 
 var reMapKey = regexp.MustCompile(`\[([[:alpha:]]+)\]`)
@@ -75,6 +92,15 @@ type ParserConfig struct {
 	// Timeout is the maximum duration for each HTTP request during external checks.
 	// Defaults to 30s if zero.
 	Timeout time.Duration
+
+	// IPACodesURL, if set, causes the parser to fetch a fresh list of Italian
+	// Public Administration codes from this URL at creation time, instead of
+	// using the embedded snapshot. The expected format matches the Agid export:
+	// one code per line (https://www.indicepa.gov.it).
+	//
+	// Leave empty (default) to use the embedded snapshot, which is updated
+	// periodically via the repo's automated workflow.
+	IPACodesURL string
 }
 
 const defaultHTTPTimeout = 30 * time.Second
@@ -88,6 +114,8 @@ type Parser struct {
 	baseURL               *url.URL
 	client                *http.Client
 	httpclient            *httpclient.Client
+	validate              *validator.Validate
+	trans                 ut.Translator
 }
 
 // Domain is a single code hosting service.
@@ -112,6 +140,25 @@ func NewParser(config ParserConfig) (*Parser, error) {
 
 	httpClient := &http.Client{Timeout: timeout}
 	vcsurl.Client = httpClient
+
+	ipaCodes := publiccodeValidator.DefaultIPACodes()
+
+	if config.IPACodesURL != "" {
+		var err error
+		if ipaCodes, err = fetchIPACodes(httpClient, config.IPACodesURL); err != nil {
+			return nil, err
+		}
+	}
+
+	validate := publiccodeValidator.New(ipaCodes)
+
+	enLocale := en.New()
+	uni := ut.New(enLocale, enLocale)
+
+	trans, _ := uni.GetTranslator("en")
+	_ = en_translations.RegisterDefaultTranslations(validate, trans)
+	_ = publiccodeValidator.RegisterLocalErrorMessages(validate, trans)
+
 	p := Parser{
 		disableNetwork:        config.DisableNetwork,
 		disableExternalChecks: config.DisableExternalChecks,
@@ -119,6 +166,8 @@ func NewParser(config ParserConfig) (*Parser, error) {
 		branch:                config.Branch,
 		client:                httpClient,
 		httpclient:            httpclient.NewClient(httpClient),
+		validate:              validate,
+		trans:                 trans,
 	}
 
 	if config.BaseURL != "" {
@@ -289,7 +338,7 @@ func (p *Parser) parseStream(in io.Reader, fileURL *url.URL) (PublicCode, error)
 		ve = append(ve, decodeResults...)
 	}
 
-	err = sharedValidate.Struct(publiccode)
+	err = p.validate.Struct(publiccode)
 	if err != nil {
 		var validationErrs validator.ValidationErrors
 		if errors.As(err, &validationErrs) {
@@ -301,7 +350,7 @@ func (p *Parser) parseStream(in io.Reader, fileURL *url.URL) (PublicCode, error)
 
 				ve = append(ve, ValidationError{
 					Key:         key,
-					Description: err.Translate(sharedTrans),
+					Description: err.Translate(p.trans),
 					Line:        line,
 					Column:      column,
 				})

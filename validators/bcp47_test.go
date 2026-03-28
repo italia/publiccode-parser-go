@@ -113,7 +113,7 @@ func TestIsBCP47StrictLanguageTagPanicNonString(t *testing.T) {
 		}
 	}()
 
-	v := New()
+	v := New(DefaultIPACodes())
 
 	type S struct {
 		Code int `validate:"bcp47_strict_language_tag"`
