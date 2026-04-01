@@ -8,22 +8,25 @@ import (
 	"github.com/italia/publiccode-parser-go/v5/data"
 )
 
-// ipaCodes is a set of valid IPA codes, lowercased for case-insensitive lookup.
-var ipaCodes map[string]struct{}
-
-func init() {
+// DefaultIPACodes parses the embedded IPA codes list and returns it as a set.
+func DefaultIPACodes() map[string]struct{} {
 	scanner := bufio.NewScanner(strings.NewReader(data.ItIpaCodes))
-	ipaCodes = make(map[string]struct{}, 24000)
+	codes := make(map[string]struct{}, 24000)
 
 	for scanner.Scan() {
-		ipaCodes[strings.ToLower(scanner.Text())] = struct{}{}
+		codes[strings.ToLower(scanner.Text())] = struct{}{}
 	}
+
+	return codes
 }
 
-// isCodiceIPA returns true if the field is a valid Italian Public Administration Code
-// (iPA) from https://indicepa.gov.it.
-func isItalianIpaCode(fl validator.FieldLevel) bool {
-	_, ok := ipaCodes[strings.ToLower(fl.Field().String())]
+// MakeIsItalianIpaCode returns a validator.Func that checks whether a field value
+// is a valid Italian Public Administration Code (iPA) from https://indicepa.gov.it,
+// using the provided codes set.
+func MakeIsItalianIpaCode(codes map[string]struct{}) validator.Func {
+	return func(fl validator.FieldLevel) bool {
+		_, ok := codes[strings.ToLower(fl.Field().String())]
 
-	return ok
+		return ok
+	}
 }
