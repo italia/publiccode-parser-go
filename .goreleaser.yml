@@ -35,6 +35,10 @@ archives:
       - goos: windows
         formats: [zip]
 
+sboms:
+  - artifacts: archive
+  - artifacts: source
+
 checksum:
   name_template: 'checksums.txt'
 snapshot:
