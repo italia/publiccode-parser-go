@@ -256,8 +256,9 @@ func (p *Parser) parseStream(in io.Reader, fileURL *url.URL) (PublicCode, error)
 		ve = append(ve, ValidationWarning{
 			Key: "publiccodeYmlVersion",
 			Description: fmt.Sprintf(
-				"v%s is not the latest version, use '0'. Parsing this file as v%s.",
+				"v%s is not the latest version, use '%s'. Parsing this file as v%s.",
 				version,
+				latestVersion,
 				latestVersion,
 			),
 			Line:   line,
