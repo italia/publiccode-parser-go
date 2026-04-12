@@ -25,7 +25,6 @@ func New() *validator.Validate {
 
 	_ = validate.RegisterValidation("is_italian_ipa_code", isItalianIpaCode)
 
-	_ = validate.RegisterValidation("bcp47_strict_language_tag", isBCP47StrictLanguageTag)
 	_ = validate.RegisterValidation("bcp47_keys", bcp47_keys)
 
 	validate.RegisterAlias("date", "datetime=2006-01-02")

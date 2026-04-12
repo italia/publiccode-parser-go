@@ -13,6 +13,10 @@ import (
 	"github.com/rivo/uniseg"
 )
 
+// bcp47KeyValidator is used solely by bcp47_keys to validate individual map keys
+// against the upstream bcp47_strict_language_tag built-in validator.
+var bcp47KeyValidator = validator.New(validator.WithRequiredStructEnabled())
+
 // Reference: https://github.com/jshttp/media-typer/
 var reMIMEType = regexp.MustCompile(`^ *([A-Za-z0-9][A-Za-z0-9!#$&^_-]{0,126})/([A-Za-z0-9][A-Za-z0-9!#$&^_.+-]{0,126}) *$`) //nolint:lll // RFC 2045 regex
 
@@ -118,7 +122,7 @@ func bcp47_keys(fl validator.FieldLevel) bool {
 	}
 
 	for _, k := range fl.Field().MapKeys() {
-		if !isValidBCP47StrictLanguageTag(k.String()) {
+		if bcp47KeyValidator.Var(k.String(), "bcp47_strict_language_tag") != nil {
 			return false
 		}
 	}
