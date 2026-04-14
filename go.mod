@@ -9,7 +9,7 @@ require (
 	github.com/goccy/go-yaml v1.19.2
 	github.com/italia/httpclient-lib-go v0.0.3-0.20260316100201-5dd490bc4896
 	github.com/rivo/uniseg v0.4.2
-	golang.org/x/text v0.31.0
+	golang.org/x/text v0.36.0
 )
 
 require (
