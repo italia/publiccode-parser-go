@@ -81,8 +81,6 @@ func isURL(fl validator.FieldLevel) bool {
 }
 
 func isOrganisationURI(fl validator.FieldLevel) bool {
-	validate := New()
-
 	field := fl.Field().String()
 
 	u, err := url.ParseRequestURI(field)
@@ -92,16 +90,17 @@ func isOrganisationURI(fl validator.FieldLevel) bool {
 
 	// Validate URNs as well
 	if strings.EqualFold(u.Scheme, "urn") {
-		err := validate.Var(field, "urn_rfc2141")
+		err := sharedValidator.Var(field, "urn_rfc2141")
 		if err != nil {
 			return false
 		}
 
 		if strings.HasPrefix(strings.ToLower(u.Opaque), "x-italian-pa:") {
 			ipa := u.Opaque[len("x-italian-pa:"):]
-			err := validate.Var(ipa, "is_italian_ipa_code")
 
-			return err == nil
+			_, ok := ipaCodes[strings.ToLower(ipa)]
+
+			return ok
 		}
 
 		return true

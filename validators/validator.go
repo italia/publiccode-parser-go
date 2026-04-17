@@ -155,7 +155,7 @@ func RegisterLocalErrorMessages(v *validator.Validate, trans ut.Translator) erro
 
 				err = ut.Add(
 					"organisation_uri_invalid_italian_pa",
-					"{0} must be a valid Italian Public Administration Code (iPA) with format 'urn:x-italian-pa:[codiceIPA]' (see https://www.indicepa.gov.it/public-services/opendata-read-service.php?dstype=FS&filename=amministrazioni.txt)", //nolint:lll // long URL in message
+					"{0} must be a valid Italian Public Administration Code (iPA) with format 'urn:x-italian-pa:[codiceIPA]' (see https://github.com/publiccodeyml/italian-organizations-ipa-vocabulary)", //nolint:lll // long URL in message
 					false)
 				if err != nil {
 					return fmt.Errorf("registering translation: %w", err)
@@ -200,7 +200,7 @@ func RegisterLocalErrorMessages(v *validator.Validate, trans ut.Translator) erro
 		},
 		{
 			tag:         "is_italian_ipa_code",
-			translation: "{0} must be a valid Italian Public Administration Code (iPA) (see https://www.indicepa.gov.it/public-services/opendata-read-service.php?dstype=FS&filename=amministrazioni.txt)", //nolint:lll // long URL in message
+			translation: "{0} must be a valid Italian Public Administration Code (iPA) (see https://github.com/publiccodeyml/italian-organizations-ipa-vocabulary)", //nolint:lll // long URL in message
 		},
 		{
 			tag:         "iso3166_1_alpha2_lower_or_upper",
