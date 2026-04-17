@@ -20,8 +20,8 @@ func init() {
 	}
 }
 
-// isCodiceIPA returns true if the field is a valid Italian Public Administration Code
-// (iPA) from https://indicepa.gov.it.
+// isItalianIpaCode returns true if the field is a valid Italian Public Administration Code
+// (iPA) from https://github.com/publiccodeyml/italian-organizations-ipa-vocabulary.
 func isItalianIpaCode(fl validator.FieldLevel) bool {
 	_, ok := ipaCodes[strings.ToLower(fl.Field().String())]
 

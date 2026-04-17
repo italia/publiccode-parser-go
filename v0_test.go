@@ -238,7 +238,7 @@ func TestInvalidTestcasesV0(t *testing.T) {
 			ValidationError{"organisation.uri", "uri is not a valid URI", 20, 3},
 		},
 		"organisation_uri_wrong_italian_pa2.yml": ValidationResults{
-			ValidationError{"organisation.uri", "uri must be a valid Italian Public Administration Code (iPA) with format 'urn:x-italian-pa:[codiceIPA]' (see https://www.indicepa.gov.it/public-services/opendata-read-service.php?dstype=FS&filename=amministrazioni.txt)", 19, 3},
+			ValidationError{"organisation.uri", "uri must be a valid Italian Public Administration Code (iPA) with format 'urn:x-italian-pa:[codiceIPA]' (see https://github.com/publiccodeyml/italian-organizations-ipa-vocabulary)", 19, 3},
 		},
 
 		// inputTypes
@@ -288,7 +288,7 @@ func TestInvalidTestcasesV0(t *testing.T) {
 			ValidationError{"fundedBy[0].uri", "uri is not a valid URI", 20, 5},
 		},
 		"fundedBy_uri_wrong_italian_pa2.yml": ValidationResults{
-			ValidationError{"fundedBy[0].uri", "uri must be a valid Italian Public Administration Code (iPA) with format 'urn:x-italian-pa:[codiceIPA]' (see https://www.indicepa.gov.it/public-services/opendata-read-service.php?dstype=FS&filename=amministrazioni.txt)", 19, 5},
+			ValidationError{"fundedBy[0].uri", "uri must be a valid Italian Public Administration Code (iPA) with format 'urn:x-italian-pa:[codiceIPA]' (see https://github.com/publiccodeyml/italian-organizations-ipa-vocabulary)", 19, 5},
 		},
 
 		// roadmap
@@ -535,7 +535,7 @@ func TestInvalidTestcasesV0(t *testing.T) {
 			ValidationError{"IT.countryExtensionVersion", "countryExtensionVersion must be one of the following: \"0.2\" or \"1.0\"", 12, 3},
 		},
 		"it_riuso_codiceIPA_invalid.yml": ValidationResults{
-			ValidationError{"IT.riuso.codiceIPA", "codiceIPA must be a valid Italian Public Administration Code (iPA) (see https://www.indicepa.gov.it/public-services/opendata-read-service.php?dstype=FS&filename=amministrazioni.txt)", 55, 5},
+			ValidationError{"IT.riuso.codiceIPA", "codiceIPA must be a valid Italian Public Administration Code (iPA) (see https://github.com/publiccodeyml/italian-organizations-ipa-vocabulary)", 55, 5},
 		},
 		"it_IT_duplicated.yml": ValidationResults{
 			ValidationWarning{"it", "Lowercase country codes are DEPRECATED and will be removed in the future. Use 'IT' instead", 116, 1},
