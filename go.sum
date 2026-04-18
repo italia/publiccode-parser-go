@@ -1,12 +1,12 @@
-github.com/alranel/go-vcsurl/v2 v2.1.0 h1:kP5Yij+3ViGP+YGrJaF4LGi3LLfxXRmPlz7mOq3BvDM=
-github.com/alranel/go-vcsurl/v2 v2.1.0/go.mod h1:pCJeg9/vFXM8bvHp45/Go98cRABcx5hKJgh9WZaYzqU=
+github.com/alranel/go-vcsurl/v2 v2.1.1 h1:wmRuxh1VA8pDN6psgup03H0EQ2ezFXwuFLIpBGggv3I=
+github.com/alranel/go-vcsurl/v2 v2.1.1/go.mod h1:P90onUhV9Qo/Icgfk58qbhg9mF3WcheC0I6wy/SUI3M=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/gabriel-vasile/mimetype v1.4.13 h1:46nXokslUBsAJE/wMsp5gtO500a4F3Nkz9Ufpk2AcUM=
 github.com/gabriel-vasile/mimetype v1.4.13/go.mod h1:d+9Oxyo1wTzWdyVUPMmXFvp4F9tea18J8ufA774AB3s=
-github.com/github/go-spdx/v2 v2.4.0 h1:+4IwVwJJbm3rzvrQ6P1nI9BDMcy3la4RchRy5uehV/M=
-github.com/github/go-spdx/v2 v2.4.0/go.mod h1:/5rwgS0txhGtRdUZwc02bTglzg6HK3FfuEbECKlK2Sg=
+github.com/github/go-spdx/v2 v2.6.0 h1:Y/Chr7L8oG85Ilbzl11xkUSQFUfG1kGkLP18LyInvhg=
+github.com/github/go-spdx/v2 v2.6.0/go.mod h1:Ftc45YYG1WzpzwEPKRVm9Jv8vDqOrN4gWoCkK+bHer0=
 github.com/go-playground/assert/v2 v2.2.0 h1:JvknZsQTYeFEAhQwI4qEt9cyV5ONwRHC+lYKSsYSR8s=
 github.com/go-playground/assert/v2 v2.2.0/go.mod h1:VDjEfimB/XKnb+ZQfWdccd7VUvScMdVu0Titje2rxJ4=
 github.com/go-playground/locales v0.14.1 h1:EWaQ/wswjilfKLTECiXz7Rh+3BjFhfDFKv/oXslEjJA=
