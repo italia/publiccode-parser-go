@@ -1,8 +1,8 @@
 module github.com/italia/publiccode-parser-go/v5
 
 require (
-	github.com/alranel/go-vcsurl/v2 v2.1.0
-	github.com/github/go-spdx/v2 v2.4.0
+	github.com/alranel/go-vcsurl/v2 v2.1.1
+	github.com/github/go-spdx/v2 v2.6.0
 	github.com/go-playground/locales v0.14.1
 	github.com/go-playground/universal-translator v0.18.1
 	github.com/go-playground/validator/v10 v10.30.3-0.20260409172054-b599053e6029
