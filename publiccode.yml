@@ -1,0 +1,44 @@
+publiccodeYmlVersion: "0.5"
+
+name: publiccode-parser-go
+url: "https://github.com/italia/publiccode-parser-go"
+
+platforms:
+  - linux
+  - windows
+  - mac
+
+categories:
+  - it-development
+
+developmentStatus: stable
+softwareType: library
+
+description:
+  en:
+    shortDescription: "Go library and CLI tool for parsing and validating publiccode.yml files."
+    longDescription: >
+      publiccode-parser-go is a Go library and command-line tool for parsing and
+      validating publiccode.yml files against the official standard.
+      It performs syntactic and semantic validation, and verifies the existence
+      of URLs. The library can be embedded in Go applications or used as a
+      standalone CLI validator that outputs errors in JSON or
+      errorformat-compatible format, making it easy to integrate into editors
+      and CI pipelines.
+    features:
+      - "URL existence verification"
+      - "JSON and errorformat-compatible error output"
+
+legal:
+  license: EUPL-1.2
+
+maintenance:
+  type: internal
+  contacts:
+    - name: Fabio Bonelli
+      email: "fb@fabiobonelli.it"
+
+localisation:
+  localisationReady: true
+  availableLanguages:
+    - en
