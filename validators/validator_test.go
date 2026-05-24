@@ -9,14 +9,14 @@ import (
 )
 
 func TestNewReturnsNonNil(t *testing.T) {
-	v := New()
+	v := New(DefaultIPACodes())
 	if v == nil {
 		t.Fatal("New() returned nil")
 	}
 }
 
 func TestRegisterLocalErrorMessages(t *testing.T) {
-	v := New()
+	v := New(DefaultIPACodes())
 	enLocale := en.New()
 	uni := ut.New(enLocale, enLocale)
 	trans, _ := uni.GetTranslator("en")
@@ -29,7 +29,7 @@ func TestRegisterLocalErrorMessages(t *testing.T) {
 }
 
 func TestNewTagNameFuncWithDashTag(t *testing.T) {
-	v := New()
+	v := New(DefaultIPACodes())
 
 	// A struct with yaml:"-" should have the field excluded from validation.
 	type S struct {
@@ -47,7 +47,7 @@ func TestNewTagNameFuncWithDashTag(t *testing.T) {
 func TestRegisterLocalErrorMessagesOrgURIAlreadyRegistered(t *testing.T) {
 	// Pre-register "organisation_uri" so the customRegisFunc for that tag
 	// fails on ut.Add, covering the error-return paths in RegisterLocalErrorMessages.
-	v := New()
+	v := New(DefaultIPACodes())
 	enLocale := en.New()
 	uni := ut.New(enLocale, enLocale)
 	trans, _ := uni.GetTranslator("en")
@@ -65,7 +65,7 @@ func TestRegisterLocalErrorMessagesOrgURIInvalidIPAAlreadyRegistered(t *testing.
 	// Pre-register only organisation_uri_invalid_italian_pa so the first ut.Add
 	// in customRegisFunc succeeds but the second fails, covering the second
 	// error-return path.
-	v := New()
+	v := New(DefaultIPACodes())
 	enLocale := en.New()
 	uni := ut.New(enLocale, enLocale)
 	trans, _ := uni.GetTranslator("en")
@@ -85,7 +85,7 @@ func TestTranslateFuncFallback(t *testing.T) {
 	// and triggering a validation that uses it.
 	// This is an indirect test: just ensure RegisterLocalErrorMessages succeeds
 	// and the validator can validate with translations without panicking.
-	v := New()
+	v := New(DefaultIPACodes())
 	enLocale := en.New()
 	uni := ut.New(enLocale, enLocale)
 	trans, _ := uni.GetTranslator("en")

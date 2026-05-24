@@ -9,7 +9,7 @@ import (
 )
 
 func TestBCP47KeysValidMap(t *testing.T) {
-	v := New()
+	v := New(DefaultIPACodes())
 
 	type S struct {
 		M map[string]string `validate:"bcp47_keys"`
@@ -22,7 +22,7 @@ func TestBCP47KeysValidMap(t *testing.T) {
 }
 
 func TestBCP47KeysInvalidMap(t *testing.T) {
-	v := New()
+	v := New(DefaultIPACodes())
 
 	type S struct {
 		M map[string]string `validate:"bcp47_keys"`
@@ -35,7 +35,7 @@ func TestBCP47KeysInvalidMap(t *testing.T) {
 }
 
 func TestIsHTTPURLValid(t *testing.T) {
-	v := New()
+	v := New(DefaultIPACodes())
 
 	type S struct {
 		U *testURL `validate:"omitnil,url_http_url"`
@@ -49,7 +49,7 @@ func TestIsHTTPURLValid(t *testing.T) {
 }
 
 func TestIsHTTPURLInvalid(t *testing.T) {
-	v := New()
+	v := New(DefaultIPACodes())
 
 	type S struct {
 		U *testURL `validate:"omitnil,url_http_url"`
@@ -63,7 +63,7 @@ func TestIsHTTPURLInvalid(t *testing.T) {
 }
 
 func TestIsURLValid(t *testing.T) {
-	v := New()
+	v := New(DefaultIPACodes())
 
 	type S struct {
 		U *testURL `validate:"omitnil,url_url"`
@@ -77,7 +77,7 @@ func TestIsURLValid(t *testing.T) {
 }
 
 func TestIsURLInvalid(t *testing.T) {
-	v := New()
+	v := New(DefaultIPACodes())
 
 	type S struct {
 		U *testURL `validate:"omitnil,url_url"`
@@ -139,7 +139,7 @@ func TestIsHTTPURLPanicNonStringer(t *testing.T) {
 		}
 	}()
 
-	v := New()
+	v := New(DefaultIPACodes())
 
 	type S struct {
 		U int `validate:"url_http_url"`
@@ -155,7 +155,7 @@ func TestIsURLPanicNonStringer(t *testing.T) {
 		}
 	}()
 
-	v := New()
+	v := New(DefaultIPACodes())
 
 	type S struct {
 		U int `validate:"url_url"`
@@ -171,7 +171,7 @@ func TestBCP47KeysPanicNonMap(t *testing.T) {
 		}
 	}()
 
-	v := New()
+	v := New(DefaultIPACodes())
 
 	type S struct {
 		M int `validate:"bcp47_keys"`

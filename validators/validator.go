@@ -9,7 +9,10 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
-func New() *validator.Validate {
+// New returns a configured validator.Validate instance using the provided IPA
+// codes set for Italian-specific validations. Use DefaultIPACodes() to get the
+// embedded snapshot, or supply a freshly fetched set when using IPACodesURL.
+func New(ipaCodes map[string]struct{}) *validator.Validate {
 	validate := validator.New(validator.WithRequiredStructEnabled())
 	_ = validate.RegisterValidation("is_mime_type", isMIMEType)
 	_ = validate.RegisterValidation("iso3166_1_alpha2_lower_or_upper", isIso3166Alpha2LowerOrUpper)
@@ -17,13 +20,13 @@ func New() *validator.Validate {
 	_ = validate.RegisterValidation("umin", uMin)
 	_ = validate.RegisterValidation("url_http_url", isHTTPURL)
 	_ = validate.RegisterValidation("url_url", isURL)
-	_ = validate.RegisterValidation("organisation_uri", isOrganisationURI)
+	_ = validate.RegisterValidation("organisation_uri", MakeIsOrganisationURI(ipaCodes))
 	_ = validate.RegisterValidation("is_spdx_expression", isSPDXExpression)
 
 	_ = validate.RegisterValidation("is_category_v0", isCategoryV0)
 	_ = validate.RegisterValidation("is_scope_v0", isScopeV0)
 
-	_ = validate.RegisterValidation("is_italian_ipa_code", isItalianIpaCode)
+	_ = validate.RegisterValidation("is_italian_ipa_code", MakeIsItalianIpaCode(ipaCodes))
 
 	_ = validate.RegisterValidation("bcp47_keys", bcp47_keys)
 
