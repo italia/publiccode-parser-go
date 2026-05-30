@@ -11,10 +11,13 @@ builds:
   id: publiccode-parser
   binary: publiccode-parser
   main: ./publiccode-parser/publiccode_parser.go
+  flags:
+    - -trimpath
   ldflags:
-    - -s -w -X main.version={{.Version}} -X main.date={{.Date}}
+    - -s -w -buildid= -X main.version={{.Version}} -X main.date={{.CommitDate}}
   env:
     - CGO_ENABLED=0
+    - SOURCE_DATE_EPOCH={{.CommitTimestamp}}
   goos:
     - linux
     - darwin
