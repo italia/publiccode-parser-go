@@ -18,6 +18,8 @@ description:
       that the v1 parser works correctly. It needs to be at least 150
       characters long to pass validation checks in the publiccode.yml
       parser implementation. This is enough text now.
+    features:
+      - Test feature
 
 legal:
   license: MIT
