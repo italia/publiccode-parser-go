@@ -1,6 +1,11 @@
 package validators
 
-import "github.com/go-playground/validator/v10"
+import (
+	"net/url"
+	"strings"
+
+	"github.com/go-playground/validator/v10"
+)
 
 var supportedCategoriesV0 = map[string]struct{}{
 	"accounting":                      {},
@@ -138,6 +143,18 @@ var supportedScopesV0 = map[string]struct{}{
 	"welfare":                          {},
 }
 
+var supportsAliasesV0 = map[string]struct{}{
+	"gdpr":   {},
+	"eidas":  {},
+	"nis2":   {},
+	"cra":    {},
+	"spid":   {},
+	"cie":    {},
+	"anpr":   {},
+	"pagopa": {},
+	"io":     {},
+}
+
 func isCategoryV0(fl validator.FieldLevel) bool {
 	_, ok := supportedCategoriesV0[fl.Field().String()]
 
@@ -148,4 +165,28 @@ func isScopeV0(fl validator.FieldLevel) bool {
 	_, ok := supportedScopesV0[fl.Field().String()]
 
 	return ok
+}
+
+// isSupportsID validates a supports[].id: either an alias in the form
+// alias:<name> that must exist in the alias list, or any other valid URI
+// (URL or URN).
+func isSupportsID(fl validator.FieldLevel) bool {
+	val := fl.Field().String()
+
+	if alias, ok := strings.CutPrefix(val, "alias:"); ok {
+		_, known := supportsAliasesV0[alias]
+
+		return known
+	}
+
+	u, err := url.ParseRequestURI(val)
+	if err != nil {
+		return false
+	}
+
+	if strings.EqualFold(u.Scheme, "urn") {
+		return sharedValidator.Var(val, "urn_rfc2141") == nil
+	}
+
+	return u.Scheme != "" && u.Host != ""
 }

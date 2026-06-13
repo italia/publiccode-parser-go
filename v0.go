@@ -9,7 +9,7 @@ import (
 
 // PublicCodeV0 defines how a publiccode.yml v0.x is structured.
 type PublicCodeV0 struct {
-	PubliccodeYamlVersion string `json:"publiccodeYmlVersion" validate:"required,oneof=0 0.2 0.2.0 0.2.1 0.2.2 0.3 0.3.0 0.4 0.4.0 0.5 0.5.0" yaml:"publiccodeYmlVersion"`
+	PubliccodeYamlVersion string `json:"publiccodeYmlVersion" validate:"required,oneof=0 0.2 0.2.0 0.2.1 0.2.2 0.3 0.3.0 0.4 0.4.0 0.5 0.5.0 0.7 0.7.0" yaml:"publiccodeYmlVersion"`
 
 	Name             string `json:"name"                       validate:"required"               yaml:"name"`
 	ApplicationSuite string `json:"applicationSuite,omitempty" yaml:"applicationSuite,omitempty"`
@@ -40,6 +40,8 @@ type PublicCodeV0 struct {
 	DevelopmentStatus string `json:"developmentStatus" validate:"required,oneof=concept development beta stable obsolete" yaml:"developmentStatus"`
 
 	SoftwareType string `json:"softwareType" validate:"required,oneof=standalone/mobile standalone/iot standalone/desktop standalone/web standalone/backend standalone/other addon library configurationFiles" yaml:"softwareType"`
+
+	Supports *[]SupportV0 `json:"supports,omitempty" validate:"omitempty,dive" yaml:"supports,omitempty"`
 
 	IntendedAudience *struct {
 		Scope                *[]string `json:"scope,omitempty"                validate:"omitempty,dive,is_scope_v0"                     yaml:"scope,omitempty"`
@@ -123,6 +125,12 @@ type DependencyV0 struct {
 type OrganisationV0 struct {
 	Name *string `json:"name,omitempty" yaml:"name,omitempty"`
 	URI  string  `json:"uri"            validate:"required,organisation_uri" yaml:"uri"`
+}
+
+// SupportV0 declares a standard, regulation, framework or system the
+// software supports or complies with.
+type SupportV0 struct {
+	ID string `json:"id" validate:"required,supports_id" yaml:"id"`
 }
 
 // Country-specific sections

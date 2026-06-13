@@ -23,6 +23,8 @@ func New() *validator.Validate {
 	_ = validate.RegisterValidation("is_category_v0", isCategoryV0)
 	_ = validate.RegisterValidation("is_scope_v0", isScopeV0)
 
+	_ = validate.RegisterValidation("supports_id", isSupportsID)
+
 	_ = validate.RegisterValidation("is_italian_ipa_code", isItalianIpaCode)
 
 	_ = validate.RegisterValidation("bcp47_keys", bcp47_keys)
@@ -197,6 +199,42 @@ func RegisterLocalErrorMessages(v *validator.Validate, trans ut.Translator) erro
 		{
 			tag:         "is_scope_v0",
 			translation: "{0} must be a valid scope (see https://github.com/publiccodeyml/publiccode.yml/blob/main/docs/standard/scope-list.rst)", //nolint:lll // long URL in message
+		},
+		{
+			tag: "supports_id",
+			customRegisFunc: func(ut ut.Translator) error {
+				if err := ut.Add(
+					"supports_id",
+					"{0} must be a known alias ('alias:<name>') or a valid URI (URL or URN)",
+					false,
+				); err != nil {
+					return fmt.Errorf("registering translation: %w", err)
+				}
+
+				if err := ut.Add(
+					"supports_id_unknown_alias",
+					"{0} contains an unknown alias (see https://github.com/publiccodeyml/publiccode.yml/blob/main/docs/standard/aliases-list.rst)", //nolint:lll // long URL in message
+					false,
+				); err != nil {
+					return fmt.Errorf("registering translation: %w", err)
+				}
+
+				return nil
+			},
+			customTransFunc: func(ut ut.Translator, fe validator.FieldError) string {
+				field := fe.Field()
+				val, _ := fe.Value().(string)
+
+				if strings.HasPrefix(val, "alias:") {
+					t, _ := ut.T("supports_id_unknown_alias", field)
+
+					return t
+				}
+
+				t, _ := ut.T("supports_id", field)
+
+				return t
+			},
 		},
 		{
 			tag:         "is_italian_ipa_code",
