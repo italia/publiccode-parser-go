@@ -114,6 +114,7 @@ dependsOn:
     - name: NFC Reader
       optional: true
 
+# Should NOT validate: the IT section was removed in v1
 IT:
   riuso:
     codiceIPA: pcm

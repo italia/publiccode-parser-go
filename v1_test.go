@@ -18,6 +18,15 @@ func TestInvalidTestcasesV1(t *testing.T) {
 		"applicationSuite_wrong_type.yml": ValidationResults{
 			ValidationError{"applicationSuite", "wrong type for this field", 4, 1},
 		},
+		"it_conforme.yml": ValidationResults{
+			ValidationError{"IT", "unknown field \"IT\"", 118, 1},
+		},
+		"IT_riuso_codiceIPA.yml": ValidationResults{
+			ValidationError{"IT", "unknown field \"IT\"", 118, 1},
+		},
+		"country_specific_section_downcase.yml": ValidationResults{
+			ValidationError{"it", "unknown field \"it\"", 107, 1},
+		},
 		"categories_invalid.yml": ValidationResults{
 			ValidationError{"categories[0]", "categories[0] must be a valid category (see https://github.com/publiccodeyml/publiccode.yml/blob/main/docs/standard/categories-list.rst)", 13, 5},
 		},
