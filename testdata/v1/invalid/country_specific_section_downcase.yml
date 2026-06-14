@@ -103,7 +103,7 @@ dependsOn:
     - name: NFC Reader2
       optional: true
 
-# Should have a warning here, downcase is deprecated:
+# Should NOT validate: the it section was removed in v1
 it:
   countryExtensionVersion: "1.0"
 
