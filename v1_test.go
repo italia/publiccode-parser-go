@@ -147,6 +147,11 @@ func TestInvalidTestcasesV1(t *testing.T) {
 		"intendedAudience_countries_invalid_iso_3166_1_alpha_2.yml": ValidationResults{
 			ValidationError{"intendedAudience.countries[2]", "countries[2] must be a valid ISO 3166-1 alpha-2 two-letter country code", 22, 7},
 		},
+		"lowercase_countries.yml": ValidationResults{
+			ValidationError{"intendedAudience.countries[0]", "countries[0] must be a valid ISO 3166-1 alpha-2 two-letter country code", 31, 7},
+			ValidationError{"intendedAudience.countries[1]", "countries[1] must be a valid ISO 3166-1 alpha-2 two-letter country code", 32, 7},
+			ValidationError{"intendedAudience.unsupportedCountries[0]", "unsupportedCountries[0] must be a valid ISO 3166-1 alpha-2 two-letter country code", 34, 7},
+		},
 		"intendedAudience_countries_wrong_type.yml": ValidationResults{
 			ValidationError{"intendedAudience.countries", "wrong type for this field", 19, 1},
 		},
