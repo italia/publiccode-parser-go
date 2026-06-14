@@ -250,6 +250,9 @@ func TestInvalidTestcasesV1(t *testing.T) {
 		"maintenance_contacts_email_invalid.yml": ValidationResults{
 			ValidationError{"maintenance.contacts[0].email", "email must be a valid email address", 49, 9},
 		},
+		"maintenance_contacts_phone_invalid.yml": ValidationResults{
+			ValidationError{"maintenance.contacts[0].phone", "phone must be a valid E.164 formatted phone number", 31, 7},
+		},
 		"maintenance_contacts_missing_with_type_community.yml": ValidationResults{
 			ValidationError{"maintenance.contacts", "contacts is a required field when \"type\" is \"community\"", 44, 3},
 		},

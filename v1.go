@@ -94,7 +94,7 @@ type ContactV1 struct {
 	Name        string  `json:"name"                  validate:"required"          yaml:"name"`
 	Email       *string `json:"email,omitempty"       validate:"omitempty,email"   yaml:"email,omitempty"`
 	Affiliation *string `json:"affiliation,omitempty" yaml:"affiliation,omitempty"`
-	Phone       *string `json:"phone,omitempty"       validate:"omitempty"         yaml:"phone,omitempty"`
+	Phone       *string `json:"phone,omitempty"       validate:"omitempty,e164"    yaml:"phone,omitempty"`
 }
 
 // DependencyV1 describes system-level dependencies required to install and use this software.
