@@ -22,6 +22,7 @@ func New() *validator.Validate {
 
 	_ = validate.RegisterValidation("is_category_v0", isCategoryV0)
 	_ = validate.RegisterValidation("is_scope_v0", isScopeV0)
+	_ = validate.RegisterValidation("is_scope_v1", isScopeV1)
 
 	_ = validate.RegisterValidation("is_italian_ipa_code", isItalianIpaCode)
 
@@ -196,6 +197,10 @@ func RegisterLocalErrorMessages(v *validator.Validate, trans ut.Translator) erro
 		},
 		{
 			tag:         "is_scope_v0",
+			translation: "{0} must be a valid scope (see https://github.com/publiccodeyml/publiccode.yml/blob/main/docs/standard/scope-list.rst)", //nolint:lll // long URL in message
+		},
+		{
+			tag:         "is_scope_v1",
 			translation: "{0} must be a valid scope (see https://github.com/publiccodeyml/publiccode.yml/blob/main/docs/standard/scope-list.rst)", //nolint:lll // long URL in message
 		},
 		{

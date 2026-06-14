@@ -270,7 +270,7 @@ func TestValidateFieldsV1WithCountriesDeprecated(t *testing.T) {
 	locReady := true
 	v1 := &PublicCodeV1{
 		IntendedAudience: &struct {
-			Scope                *[]string `json:"scope,omitempty"                validate:"omitempty,dive,is_scope_v0"                     yaml:"scope,omitempty"`
+			Scope                *[]string `json:"scope,omitempty"                validate:"omitempty,dive,is_scope_v1"                     yaml:"scope,omitempty"`
 			Countries            *[]string `json:"countries,omitempty"            validate:"omitempty,dive,iso3166_1_alpha2_lower_or_upper" yaml:"countries,omitempty"`
 			UnsupportedCountries *[]string `json:"unsupportedCountries,omitempty" validate:"omitempty,dive,iso3166_1_alpha2_lower_or_upper" yaml:"unsupportedCountries,omitempty"`
 		}{

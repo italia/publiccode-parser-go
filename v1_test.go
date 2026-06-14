@@ -150,6 +150,9 @@ func TestInvalidTestcasesV1(t *testing.T) {
 		"intendedAudience_countries_wrong_type.yml": ValidationResults{
 			ValidationError{"intendedAudience.countries", "wrong type for this field", 19, 1},
 		},
+		"intendedAudience_scope_government.yml": ValidationResults{
+			ValidationError{"intendedAudience.scope[0]", "scope[0] must be a valid scope (see https://github.com/publiccodeyml/publiccode.yml/blob/main/docs/standard/scope-list.rst)", 16, 7},
+		},
 		"intendedAudience_scope_invalid_scope.yml": ValidationResults{
 			ValidationError{"intendedAudience.scope[0]", "scope[0] must be a valid scope (see https://github.com/publiccodeyml/publiccode.yml/blob/main/docs/standard/scope-list.rst)", 20, 9},
 		},
