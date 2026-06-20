@@ -80,37 +80,42 @@ func isURL(fl validator.FieldLevel) bool {
 	panic(fmt.Sprintf("Bad field type for %T. Must implement fmt.Stringer", fl.Field().Interface()))
 }
 
-func isOrganisationURI(fl validator.FieldLevel) bool {
-	field := fl.Field().String()
+// MakeIsOrganisationURI returns a validator.Func that validates an organisation URI,
+// including Italian PA URNs (urn:x-italian-pa:<codiceIPA>), using the provided
+// IPA codes set. The inner validator is built once and captured in the closure.
+func MakeIsOrganisationURI(codes map[string]struct{}) validator.Func {
+	inner := validator.New(validator.WithRequiredStructEnabled())
+	_ = inner.RegisterValidation("is_italian_ipa_code", MakeIsItalianIpaCode(codes))
 
-	u, err := url.ParseRequestURI(field)
-	if err != nil {
-		return false
-	}
+	return func(fl validator.FieldLevel) bool {
+		field := fl.Field().String()
 
-	// Validate URNs as well
-	if strings.EqualFold(u.Scheme, "urn") {
-		err := sharedValidator.Var(field, "urn_rfc2141")
+		u, err := url.ParseRequestURI(field)
 		if err != nil {
 			return false
 		}
 
-		if strings.HasPrefix(strings.ToLower(u.Opaque), "x-italian-pa:") {
-			ipa := u.Opaque[len("x-italian-pa:"):]
+		// Validate URNs as well
+		if strings.EqualFold(u.Scheme, "urn") {
+			if err := inner.Var(field, "urn_rfc2141"); err != nil {
+				return false
+			}
 
-			_, ok := ipaCodes[strings.ToLower(ipa)]
+			if strings.HasPrefix(strings.ToLower(u.Opaque), "x-italian-pa:") {
+				ipa := u.Opaque[len("x-italian-pa:"):]
 
-			return ok
+				return inner.Var(ipa, "is_italian_ipa_code") == nil
+			}
+
+			return true
+		}
+
+		if u.Scheme == "" || u.Host == "" {
+			return false
 		}
 
 		return true
 	}
-
-	if u.Scheme == "" || u.Host == "" {
-		return false
-	}
-
-	return true
 }
 
 // Custom validator to work around https://github.com/go-playground/validator/issues/1260
