@@ -25,7 +25,10 @@ legal:
   license: MIT
 
 maintenance:
-  type: none
+  type: internal
+  contacts:
+    - name: Test Contact
+      phone: "06 1234567"
 
 localisation:
   localisationReady: true

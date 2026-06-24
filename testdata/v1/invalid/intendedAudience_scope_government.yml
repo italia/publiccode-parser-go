@@ -10,6 +10,11 @@ developmentStatus: stable
 
 softwareType: "standalone/web"
 
+intendedAudience:
+  scope:
+    # Should NOT validate: government was removed from the scope list in v1
+    - government
+
 description:
   en:
     shortDescription: "A test software for v1 parsing."

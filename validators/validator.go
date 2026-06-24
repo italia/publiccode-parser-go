@@ -22,6 +22,7 @@ func New() *validator.Validate {
 
 	_ = validate.RegisterValidation("is_category_v0", isCategoryV0)
 	_ = validate.RegisterValidation("is_scope_v0", isScopeV0)
+	_ = validate.RegisterValidation("is_scope_v1", isScopeV1)
 
 	_ = validate.RegisterValidation("is_italian_ipa_code", isItalianIpaCode)
 
@@ -199,11 +200,20 @@ func RegisterLocalErrorMessages(v *validator.Validate, trans ut.Translator) erro
 			translation: "{0} must be a valid scope (see https://github.com/publiccodeyml/publiccode.yml/blob/main/docs/standard/scope-list.rst)", //nolint:lll // long URL in message
 		},
 		{
+			tag:         "is_scope_v1",
+			translation: "{0} must be a valid scope (see https://github.com/publiccodeyml/publiccode.yml/blob/main/docs/standard/scope-list.rst)", //nolint:lll // long URL in message
+		},
+		{
 			tag:         "is_italian_ipa_code",
 			translation: "{0} must be a valid Italian Public Administration Code (iPA) (see https://github.com/publiccodeyml/italian-organizations-ipa-vocabulary)", //nolint:lll // long URL in message
 		},
 		{
 			tag:         "iso3166_1_alpha2_lower_or_upper",
+			translation: "{0} must be a valid ISO 3166-1 alpha-2 two-letter country code",
+		},
+		{
+			tag:         "iso3166_1_alpha2",
+			override:    true,
 			translation: "{0} must be a valid ISO 3166-1 alpha-2 two-letter country code",
 		},
 		{
