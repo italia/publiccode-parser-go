@@ -81,6 +81,11 @@ func TestInvalidTestcasesV0_NoNetwork(t *testing.T) {
 			ValidationError{"localisation.localisationReady", "localisationReady is a required field", 51, 3},
 			ValidationError{"localisation.availableLanguages", "availableLanguages is a required field", 52, 3},
 		},
+
+		// supports
+		"supports_unknown_alias.yml": ValidationResults{
+			ValidationError{"supports[0].id", "id contains an unknown alias (see https://github.com/publiccodeyml/publiccode.yml/blob/main/docs/standard/aliases-list.rst)", 17, 5},
+		},
 	}
 
 	dir := "testdata/v0/invalid/no-network/"
@@ -110,7 +115,7 @@ func TestInvalidTestcasesV0(t *testing.T) {
 		"publiccodeYmlVersion_invalid.yml": ValidationResults{
 			ValidationError{
 				"publiccodeYmlVersion",
-				"unsupported version: '1'. Supported versions: 0, 0.2, 0.2.0, 0.2.1, 0.2.2, 0.3, 0.3.0, 0.4, 0.4.0, 0.5.0, 0.5",
+				"unsupported version: '1'. Supported versions: 0, 0.2, 0.2.0, 0.2.1, 0.2.2, 0.3, 0.3.0, 0.4, 0.4.0, 0.5.0, 0.5, 0.7.0, 0.7",
 				0,
 				0,
 			},
@@ -604,13 +609,13 @@ func TestValidWithWarningsTestcasesV0(t *testing.T) {
 			ValidationWarning{"description.en.genericName", "This key is DEPRECATED and will be removed in the future. It's safe to drop it", 23, 5},
 		},
 		"valid.minimal.v0.2.yml": ValidationResults{
-			ValidationWarning{"publiccodeYmlVersion", "v0.2 is not the latest version, use '0'. Parsing this file as v0.5.", 1, 1},
+			ValidationWarning{"publiccodeYmlVersion", "v0.2 is not the latest version, use '0'. Parsing this file as v0.7.", 1, 1},
 		},
 		"valid.minimal.v0.3.yml": ValidationResults{
-			ValidationWarning{"publiccodeYmlVersion", "v0.3 is not the latest version, use '0'. Parsing this file as v0.5.", 1, 1},
+			ValidationWarning{"publiccodeYmlVersion", "v0.3 is not the latest version, use '0'. Parsing this file as v0.7.", 1, 1},
 		},
 		"valid.minimal.v0.4.yml": ValidationResults{
-			ValidationWarning{"publiccodeYmlVersion", "v0.4 is not the latest version, use '0'. Parsing this file as v0.5.", 1, 1},
+			ValidationWarning{"publiccodeYmlVersion", "v0.4 is not the latest version, use '0'. Parsing this file as v0.7.", 1, 1},
 		},
 		"valid.mime_types.yml": ValidationResults{
 			ValidationWarning{"inputTypes", "This key is DEPRECATED and will be removed in the future. It's safe to drop it", 48, 1},

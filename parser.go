@@ -249,7 +249,7 @@ func (p *Parser) parseStream(in io.Reader, fileURL *url.URL) (PublicCode, error)
 
 	var ve ValidationResults
 
-	if slices.Contains(SupportedVersions, version) && version != "0" && !strings.HasPrefix(version, "0.5") {
+	if slices.Contains(SupportedVersions, version) && version != "0" && !strings.HasPrefix(version, "0.7") {
 		latestVersion := SupportedVersions[len(SupportedVersions)-1]
 		line, column := getPositionInFile("publiccodeYmlVersion", file)
 
