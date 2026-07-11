@@ -38,9 +38,9 @@ type PublicCodeV1 struct {
 	SoftwareType string `json:"softwareType" validate:"required,oneof=standalone/mobile standalone/iot standalone/desktop standalone/web standalone/backend standalone/other addon library configurationFiles" yaml:"softwareType"`
 
 	IntendedAudience *struct {
-		Scope                *[]string `json:"scope,omitempty"                validate:"omitempty,dive,is_scope_v0"                     yaml:"scope,omitempty"`
-		Countries            *[]string `json:"countries,omitempty"            validate:"omitempty,dive,iso3166_1_alpha2_lower_or_upper" yaml:"countries,omitempty"`
-		UnsupportedCountries *[]string `json:"unsupportedCountries,omitempty" validate:"omitempty,dive,iso3166_1_alpha2_lower_or_upper" yaml:"unsupportedCountries,omitempty"`
+		Scope                *[]string `json:"scope,omitempty"                validate:"omitempty,dive,is_scope_v1"      yaml:"scope,omitempty"`
+		Countries            *[]string `json:"countries,omitempty"            validate:"omitempty,dive,iso3166_1_alpha2" yaml:"countries,omitempty"`
+		UnsupportedCountries *[]string `json:"unsupportedCountries,omitempty" validate:"omitempty,dive,iso3166_1_alpha2" yaml:"unsupportedCountries,omitempty"`
 	} `json:"intendedAudience,omitempty" yaml:"intendedAudience,omitempty"`
 
 	Description map[string]DescV1 `json:"description" validate:"gt=0,bcp47_keys,dive" yaml:"description"`
@@ -94,7 +94,7 @@ type ContactV1 struct {
 	Name        string  `json:"name"                  validate:"required"          yaml:"name"`
 	Email       *string `json:"email,omitempty"       validate:"omitempty,email"   yaml:"email,omitempty"`
 	Affiliation *string `json:"affiliation,omitempty" yaml:"affiliation,omitempty"`
-	Phone       *string `json:"phone,omitempty"       validate:"omitempty"         yaml:"phone,omitempty"`
+	Phone       *string `json:"phone,omitempty"       validate:"omitempty,e164"    yaml:"phone,omitempty"`
 }
 
 // DependencyV1 describes system-level dependencies required to install and use this software.

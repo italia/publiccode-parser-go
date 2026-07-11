@@ -103,16 +103,7 @@ dependsOn:
     - name: NFC Reader2
       optional: true
 
-# Should NOT validate: 'it' (deprecated) and 'IT' present at the same time
-IT:
-  countryExtensionVersion: "1.0"
-
-  piattaforme:
-    spid: false
-    pagopa: false
-    cie: false
-    anpr: false
-
+# Should NOT validate: the it section was removed in v1
 it:
   countryExtensionVersion: "1.0"
 

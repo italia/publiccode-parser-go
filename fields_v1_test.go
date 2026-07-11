@@ -261,37 +261,6 @@ func TestValidateFieldsV1WithAPIDocNetworkCheck(t *testing.T) {
 	}
 }
 
-func TestValidateFieldsV1WithCountriesDeprecated(t *testing.T) {
-	p, _ := NewParser(ParserConfig{DisableNetwork: true, DisableExternalChecks: true})
-	base := &url.URL{Scheme: "file", Path: "/tmp"}
-
-	countries := []string{"it"} // lowercase - deprecated
-	unsupported := []string{"de"} // lowercase - deprecated
-	locReady := true
-	v1 := &PublicCodeV1{
-		IntendedAudience: &struct {
-			Scope                *[]string `json:"scope,omitempty"                validate:"omitempty,dive,is_scope_v0"                     yaml:"scope,omitempty"`
-			Countries            *[]string `json:"countries,omitempty"            validate:"omitempty,dive,iso3166_1_alpha2_lower_or_upper" yaml:"countries,omitempty"`
-			UnsupportedCountries *[]string `json:"unsupportedCountries,omitempty" validate:"omitempty,dive,iso3166_1_alpha2_lower_or_upper" yaml:"unsupportedCountries,omitempty"`
-		}{
-			Countries:            &countries,
-			UnsupportedCountries: &unsupported,
-		},
-		Localisation: struct {
-			LocalisationReady  *bool    `json:"localisationReady"  validate:"required"                                     yaml:"localisationReady"`
-			AvailableLanguages []string `json:"availableLanguages" validate:"required,gt=0,dive,bcp47_strict_language_tag" yaml:"availableLanguages"`
-		}{
-			LocalisationReady:  &locReady,
-			AvailableLanguages: []string{"en"},
-		},
-	}
-
-	err := validateFieldsV1(v1, p, false, base)
-	if err == nil {
-		t.Error("expected deprecation warnings for lowercase countries")
-	}
-}
-
 func TestValidateFieldsV0MonochromeLogoAbsPath(t *testing.T) {
 	p, _ := NewParser(ParserConfig{DisableNetwork: true, DisableExternalChecks: false})
 	base := &url.URL{Scheme: "file", Path: "/tmp"}

@@ -249,16 +249,14 @@ func (p *Parser) parseStream(in io.Reader, fileURL *url.URL) (PublicCode, error)
 
 	var ve ValidationResults
 
-	if slices.Contains(SupportedVersions, version) && version != "0" && !strings.HasPrefix(version, "0.5") {
-		latestVersion := SupportedVersions[len(SupportedVersions)-1]
+	if version != "0" && version != "1" && !strings.HasPrefix(version, "0.5") {
 		line, column := getPositionInFile("publiccodeYmlVersion", file)
 
 		ve = append(ve, ValidationWarning{
 			Key: "publiccodeYmlVersion",
 			Description: fmt.Sprintf(
-				"v%s is not the latest version, use '0'. Parsing this file as v%s.",
+				"v%s is not the latest version, use '0'. Parsing this file as v0.5.",
 				version,
-				latestVersion,
 			),
 			Line:   line,
 			Column: column,
