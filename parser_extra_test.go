@@ -133,6 +133,50 @@ func TestParseStreamSyntaxError(t *testing.T) {
 	}
 }
 
+// TestIPACodesURLFetch verifies that WithIPACodesURL fetches and uses the
+// provided list, making a code from the served file valid.
+func TestIPACodesURLFetch(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		_, _ = w.Write([]byte("TESTCODE\n"))
+	}))
+	defer srv.Close()
+
+	p, err := NewParser(ParserConfig{IPACodesURL: srv.URL})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if err := p.validate.Var("TESTCODE", "is_italian_ipa_code"); err != nil {
+		t.Errorf("expected TESTCODE to be valid with custom list: %v", err)
+	}
+
+	if err := p.validate.Var("pcm", "is_italian_ipa_code"); err == nil {
+		t.Error("expected 'pcm' to be invalid when not in custom list")
+	}
+}
+
+// TestIPACodesURLFetchError verifies that an unreachable IPACodesURL returns an
+// error from NewParser.
+func TestIPACodesURLFetchError(t *testing.T) {
+	_, err := NewParser(ParserConfig{IPACodesURL: "http://127.0.0.1:1/ipa_codes.txt"})
+	if err == nil {
+		t.Fatal("expected error for unreachable IPACodesURL")
+	}
+}
+
+// TestIPACodesDefaultEmbedded verifies that the embedded list is used when
+// IPACodesURL is empty.
+func TestIPACodesDefaultEmbedded(t *testing.T) {
+	p, err := NewParser(ParserConfig{})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if err := p.validate.Var("pcm", "is_italian_ipa_code"); err != nil {
+		t.Errorf("expected 'pcm' to be valid with embedded list: %v", err)
+	}
+}
+
 func TestParseStreamReaderError(t *testing.T) {
 	p, _ := NewParser(ParserConfig{DisableNetwork: true})
 	_, err := p.ParseStream(errReader{})
