@@ -662,7 +662,9 @@ func TestValidWithWarningsTestcasesV0(t *testing.T) {
 // Test publiccode.yml remote files for key errors.
 func TestDecodeValueErrorsRemote(t *testing.T) {
 	testRemoteFiles := []testType{
-		{"https://raw.githubusercontent.com/italia/publiccode-parser-go/refs/heads/main/testdata/v0/valid_with_warnings/valid_with_lowercase_countries.yml", ValidationResults{
+		// Pinned to a commit: fetching from main means a testdata change
+		// breaks this test in every PR until the change itself lands.
+		{"https://raw.githubusercontent.com/italia/publiccode-parser-go/2a1f25a36e0f2ab2d71efb67db8b66ff00573fbe/testdata/v0/valid_with_warnings/valid_with_lowercase_countries.yml", ValidationResults{
 			ValidationWarning{"intendedAudience.countries[0]", "Lowercase country codes are DEPRECATED. Use uppercase instead ('IT')", 31, 7},
 			ValidationWarning{"intendedAudience.countries[1]", "Lowercase country codes are DEPRECATED. Use uppercase instead ('DE')", 32, 7},
 			ValidationWarning{"intendedAudience.unsupportedCountries[0]", "Lowercase country codes are DEPRECATED. Use uppercase instead ('US')", 34, 7},
@@ -691,8 +693,8 @@ func TestRelativePathsOrURLs(t *testing.T) {
 	testRemoteFiles := []testType{
 		// Remote publiccode.yml and relative path in screenshots:
 		// should look for the screenshot remotely relative to this URL
-		{"https://raw.githubusercontent.com/italia/publiccode-parser-go/refs/heads/main/testdata/v0/invalid/description_en_screenshots_missing_file.yml", ValidationResults{
-			ValidationError{"description.en.screenshots[0]", "'no_such_file.png' is not an image: HTTP GET failed for https://raw.githubusercontent.com/italia/publiccode-parser-go/refs/heads/main/testdata/v0/invalid/no_such_file.png: not found", 42, 9},
+		{"https://raw.githubusercontent.com/italia/publiccode-parser-go/2a1f25a36e0f2ab2d71efb67db8b66ff00573fbe/testdata/v0/invalid/description_en_screenshots_missing_file.yml", ValidationResults{
+			ValidationError{"description.en.screenshots[0]", "'no_such_file.png' is not an image: HTTP GET failed for https://raw.githubusercontent.com/italia/publiccode-parser-go/2a1f25a36e0f2ab2d71efb67db8b66ff00573fbe/testdata/v0/invalid/no_such_file.png: not found", 42, 9},
 		}},
 
 		// Local publiccode.yml and relative path in screenshot:
@@ -703,7 +705,7 @@ func TestRelativePathsOrURLs(t *testing.T) {
 
 		// Remote publiccode.yml and URL in logo:
 		// should look for the logo remotely
-		{"https://raw.githubusercontent.com/italia/publiccode-parser-go/refs/heads/main/testdata/v0/invalid/logo_missing_url.yml", ValidationResults{
+		{"https://raw.githubusercontent.com/italia/publiccode-parser-go/2a1f25a36e0f2ab2d71efb67db8b66ff00573fbe/testdata/v0/invalid/logo_missing_url.yml", ValidationResults{
 			ValidationError{"logo", "HTTP GET failed for https://google.com/no_such_file.png: not found", 18, 1},
 		}},
 
@@ -739,11 +741,11 @@ func TestRelativePathsOrURLsNoNetworkRemoteChecks(t *testing.T) {
 		// Remote publiccode.yml and relative path in screenshots:
 		// should look for the screenshot remotely relative to this URL,
 		// but DisableNetwork is true, so no check is performed.
-		"https://raw.githubusercontent.com/italia/publiccode-parser-go/refs/heads/main/testdata/v0/invalid/description_en_screenshots_missing_file.yml",
+		"https://raw.githubusercontent.com/italia/publiccode-parser-go/2a1f25a36e0f2ab2d71efb67db8b66ff00573fbe/testdata/v0/invalid/description_en_screenshots_missing_file.yml",
 
 		// Remote publiccode.yml and URL in logo:
 		// should look for the logo remotely but DisableNetwork is true, so no check is performed.
-		"https://raw.githubusercontent.com/italia/publiccode-parser-go/refs/heads/main/testdata/v0/invalid/logo_missing_url.yml",
+		"https://raw.githubusercontent.com/italia/publiccode-parser-go/2a1f25a36e0f2ab2d71efb67db8b66ff00573fbe/testdata/v0/invalid/logo_missing_url.yml",
 
 		// Local publiccode.yml and URL in logo:
 		// should look for the logo remotely but DisableNetwork is true, so no check is performed.

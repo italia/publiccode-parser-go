@@ -176,8 +176,10 @@ func TestValidationTimeout(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	// The URL below has to match the fixture byte for byte, otherwise the
+	// logo stays remote and the test measures the network instead.
 	yml := bytes.ReplaceAll(fixture,
-		[]byte("https://raw.githubusercontent.com/italia/publiccode-parser-go/refs/heads/main/testdata/v0/valid/assets/img/logo.png"),
+		[]byte("https://raw.githubusercontent.com/italia/publiccode-parser-go/2a1f25a36e0f2ab2d71efb67db8b66ff00573fbe/testdata/v0/valid/assets/img/logo.png"),
 		[]byte(slow.URL+"/logo.png"),
 	)
 
