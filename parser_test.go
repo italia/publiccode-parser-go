@@ -146,7 +146,7 @@ func TestParseTimeout(t *testing.T) {
 	}))
 	defer srv.Close()
 
-	p, err := NewParser(ParserConfig{Timeout: 1 * time.Millisecond})
+	p, err := NewParser(ParserConfig{Timeout: 1 * time.Millisecond, AllowNetworkToPrivateHosts: true})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -156,7 +156,7 @@ func TestParseTimeout(t *testing.T) {
 		t.Fatal("expected timeout error, got nil")
 	}
 
-	if !strings.Contains(err.Error(), "deadline exceeded") && !strings.Contains(err.Error(), "timeout") {
+	if lower := strings.ToLower(err.Error()); !strings.Contains(lower, "deadline exceeded") && !strings.Contains(lower, "timeout") {
 		t.Errorf("expected timeout error, got: %v", err)
 	}
 }
@@ -187,7 +187,7 @@ func TestValidationTimeout(t *testing.T) {
 	}))
 	defer fast.Close()
 
-	p, err := NewParser(ParserConfig{Timeout: 1 * time.Millisecond})
+	p, err := NewParser(ParserConfig{Timeout: 1 * time.Millisecond, AllowNetworkToPrivateHosts: true})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -197,7 +197,7 @@ func TestValidationTimeout(t *testing.T) {
 		t.Fatal("expected timeout error, got nil")
 	}
 
-	if !strings.Contains(err.Error(), "deadline exceeded") && !strings.Contains(err.Error(), "timeout") {
+	if lower := strings.ToLower(err.Error()); !strings.Contains(lower, "deadline exceeded") && !strings.Contains(lower, "timeout") {
 		t.Errorf("expected timeout error, got: %v", err)
 	}
 }

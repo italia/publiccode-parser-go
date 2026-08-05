@@ -75,6 +75,15 @@ type ParserConfig struct {
 	// Timeout is the maximum duration for each HTTP request during external checks.
 	// Defaults to 30s if zero.
 	Timeout time.Duration
+
+	// AllowNetworkToPrivateHosts allows the external checks to connect to
+	// non-public addresses (loopback, private, link-local, ...).
+	//
+	// It is false by default so that URLs coming from an untrusted
+	// publiccode.yml cannot be abused to perform SSRF against internal services
+	// or cloud metadata endpoints. Enable it only when the input is trusted
+	// (or in tests targeting a local server).
+	AllowNetworkToPrivateHosts bool
 }
 
 const defaultHTTPTimeout = 30 * time.Second
@@ -110,7 +119,10 @@ func NewParser(config ParserConfig) (*Parser, error) {
 		timeout = defaultHTTPTimeout
 	}
 
-	httpClient := &http.Client{Timeout: timeout}
+	// Hardened HTTP client: refuses connections to non-public addresses (SSRF)
+	// and caps the size of each response (resource exhaustion). See
+	// internal/safehttp.go.
+	httpClient := urlutil.SafeHTTPClient(timeout, config.AllowNetworkToPrivateHosts)
 	vcsurl.Client = httpClient
 	p := Parser{
 		disableNetwork:        config.DisableNetwork,

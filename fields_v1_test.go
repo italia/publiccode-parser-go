@@ -156,7 +156,7 @@ func TestValidateFieldsV1WithNetworkChecks(t *testing.T) {
 	}))
 	defer srv.Close()
 
-	p, _ := NewParser(ParserConfig{DisableNetwork: false, DisableExternalChecks: false})
+	p, _ := NewParser(ParserConfig{DisableNetwork: false, DisableExternalChecks: false, AllowNetworkToPrivateHosts: true})
 	base := &url.URL{Scheme: "file", Path: "/tmp"}
 
 	// srv.URL is not a code repo, so IsRepo should return false
@@ -202,7 +202,7 @@ func TestValidateFieldsV1WithUnreachableURLs(t *testing.T) {
 	}))
 	defer srv.Close()
 
-	p, _ := NewParser(ParserConfig{DisableNetwork: false, DisableExternalChecks: false})
+	p, _ := NewParser(ParserConfig{DisableNetwork: false, DisableExternalChecks: false, AllowNetworkToPrivateHosts: true})
 	base := &url.URL{Scheme: "file", Path: "/tmp"}
 
 	rawURL, _ := url.Parse(srv.URL + "/repo.git")
@@ -241,7 +241,7 @@ func TestValidateFieldsV1WithAPIDocNetworkCheck(t *testing.T) {
 	}))
 	defer srv.Close()
 
-	p, _ := NewParser(ParserConfig{})
+	p, _ := NewParser(ParserConfig{AllowNetworkToPrivateHosts: true})
 	base := &url.URL{Scheme: "file", Path: "/tmp"}
 
 	apiDocRaw, _ := url.Parse(srv.URL + "/api-docs")
