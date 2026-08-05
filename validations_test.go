@@ -96,7 +96,7 @@ func TestIsReachableNon200(t *testing.T) {
 	}))
 	defer srv.Close()
 
-	p, _ := NewParser(ParserConfig{})
+	p, _ := NewParser(ParserConfig{AllowNetworkToPrivateHosts: true})
 	parsed, _ := url.Parse(srv.URL + "/path")
 	reachable, err := p.isReachable(*parsed)
 	if reachable {
@@ -185,7 +185,7 @@ func TestValidLogoRemoteDownloadFailure(t *testing.T) {
 	}))
 	defer srv.Close()
 
-	p, _ := NewParser(ParserConfig{})
+	p, _ := NewParser(ParserConfig{AllowNetworkToPrivateHosts: true})
 	parsed, _ := url.Parse(srv.URL + "/logo.png")
 	ok, err := p.validLogo(*parsed, true)
 	// The downloaded file is not a valid PNG, so DecodeConfig should fail.
@@ -204,7 +204,7 @@ func TestIsReachableSuccess(t *testing.T) {
 	}))
 	defer srv.Close()
 
-	p, _ := NewParser(ParserConfig{})
+	p, _ := NewParser(ParserConfig{AllowNetworkToPrivateHosts: true})
 	parsed, _ := url.Parse(srv.URL + "/path")
 	reachable, err := p.isReachable(*parsed)
 	if !reachable {
