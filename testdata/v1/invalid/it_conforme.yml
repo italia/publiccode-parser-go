@@ -26,12 +26,11 @@ developmentStatus: development
 softwareType: "standalone/other"
 
 intendedAudience:
-  # Lowercase ISO 3166-1 alpha-2 is deprecated
   countries:
-    - it
-    - de
+    - IT
+    - DE
   unsupportedCountries:
-    - us
+    - US
 
 description:
   en:
@@ -80,15 +79,15 @@ maintenance:
     - name: Francesco Rossi
       email: "francesco.rossi@comune.reggioemilia.it"
       affiliation: Comune di Reggio Emilia
-      phone: +39 231 13215112
+      phone: +3923113215112
     - name: Dario Bianchi
       email: "dario.bianchi@fornitore.it"
       affiliation: Fornitore Privato S.P.A.
-      phone: +39 16 24231322
+      phone: +391624231322
     - name: Giancarlo Verdi
       email: "dario.bianchi@fornitore.it"
       affiliation: Fornitore Privato S.P.A.
-      phone: +39 16 24231322
+      phone: +391624231322
 
 localisation:
   localisationReady: true
@@ -114,3 +113,18 @@ dependsOn:
   hardware:
     - name: NFC Reader
       optional: true
+
+# Should NOT validate: the IT section was removed in v1
+IT:
+  conforme:
+    lineeGuidaDesign: true
+    modelloInteroperabilita: true
+    misureMinimeSicurezza: true
+    # Fields can also be nil
+    # gdpr:
+
+  piattaforme:
+    spid: true
+    pagopa: true
+    cie: true
+    anpr: true

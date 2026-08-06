@@ -318,35 +318,6 @@ func validateFieldsV1(publiccode PublicCode, parser *Parser, network bool, baseU
 		}
 	}
 
-	if publiccodev1.IntendedAudience != nil {
-		// This is not ideal, but we need to revalidate the countries
-		// here, because otherwise we could get a warning and the advice
-		// to use uppercase on an invalid country.
-		if publiccodev1.IntendedAudience.Countries != nil {
-			for i, c := range *publiccodev1.IntendedAudience.Countries {
-				if sharedValidate.Var(c, "iso3166_1_alpha2_lower_or_upper") == nil && c == strings.ToLower(c) {
-					vr = append(vr, ValidationWarning{
-						fmt.Sprintf("intendedAudience.countries[%d]", i),
-						fmt.Sprintf("Lowercase country codes are DEPRECATED. Use uppercase instead ('%s')", strings.ToUpper(c)),
-						0, 0,
-					})
-				}
-			}
-		}
-
-		if publiccodev1.IntendedAudience.UnsupportedCountries != nil {
-			for i, c := range *publiccodev1.IntendedAudience.UnsupportedCountries {
-				if sharedValidate.Var(c, "iso3166_1_alpha2_lower_or_upper") == nil && c == strings.ToLower(c) {
-					vr = append(vr, ValidationWarning{
-						fmt.Sprintf("intendedAudience.unsupportedCountries[%d]", i),
-						fmt.Sprintf("Lowercase country codes are DEPRECATED. Use uppercase instead ('%s')", strings.ToUpper(c)),
-						0, 0,
-					})
-				}
-			}
-		}
-	}
-
 	for lang, desc := range publiccodev1.Description {
 		if checksNetwork && desc.Documentation != nil {
 			if reachable, err := parser.isReachable(*(*url.URL)(desc.Documentation)); !reachable {

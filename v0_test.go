@@ -110,7 +110,7 @@ func TestInvalidTestcasesV0(t *testing.T) {
 		"publiccodeYmlVersion_invalid.yml": ValidationResults{
 			ValidationError{
 				"publiccodeYmlVersion",
-				"unsupported version: '1'. Supported versions: 0, 0.2, 0.2.0, 0.2.1, 0.2.2, 0.3, 0.3.0, 0.4, 0.4.0, 0.5.0, 0.5",
+				"unsupported version: '2'. Supported versions: 0, 0.2, 0.2.0, 0.2.1, 0.2.2, 0.3, 0.3.0, 0.4, 0.4.0, 0.5.0, 0.5, 1",
 				0,
 				0,
 			},
