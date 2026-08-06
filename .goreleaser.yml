@@ -39,8 +39,10 @@ archives:
         formats: [zip]
 
 sboms:
-  - artifacts: archive
-  - artifacts: source
+  - id: archive
+    artifacts: archive
+  - id: source
+    artifacts: source
 
 checksum:
   name_template: 'checksums.txt'
