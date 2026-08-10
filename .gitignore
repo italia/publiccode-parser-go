@@ -2,3 +2,4 @@ publiccode-parser/publiccode-parser
 .vscode
 .history
 .DS_Store
+.env
