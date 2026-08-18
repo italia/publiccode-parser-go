@@ -11,8 +11,13 @@ jobs:
   goreleaser:
     runs-on: ubuntu-latest
     permissions:
+      # To upload archives as GitHub Releases
       contents: write
+      # To push Docker images
       packages: write
+      # To sign the provenance attestation for the release archives
+      id-token: write
+      attestations: write
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -51,3 +56,10 @@ jobs:
           args: release --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # Every archive listed in the checksums file goreleaser just wrote, so
+      # `gh attestation verify` can tie a downloaded artifact back to this
+      # workflow and commit.
+      - uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-checksums: dist/checksums.txt
