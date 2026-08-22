@@ -3,6 +3,7 @@ package publiccode
 import (
 	"log"
 	"os"
+	"path"
 	"path/filepath"
 	"reflect"
 	"testing"
@@ -80,14 +81,34 @@ func checkValidFilesNoNetwork(pattern string, t *testing.T) {
 	}
 }
 
+// Return a copy of the expected diagnostics carrying the name of the file
+// they refer to.
+func withFileName(name string, expected error) error {
+	results, ok := expected.(ValidationResults)
+	if !ok {
+		return expected
+	}
+
+	stamped := make(ValidationResults, len(results))
+	copy(stamped, results)
+
+	setFileName(stamped, name)
+
+	return stamped
+}
+
+// The expected diagnostics are written with no file name, because every test
+// here parses a file whose name the parser reports on each of them.
 func checkParseErrors(t *testing.T, err error, test testType) {
-	if test.err == nil && err != nil {
+	expected := withFileName(path.Base(test.file), test.err)
+
+	if expected == nil && err != nil {
 		t.Errorf("[%s] unexpected error: %v\n", test.file, err)
-	} else if test.err != nil && err == nil {
+	} else if expected != nil && err == nil {
 		t.Errorf("[%s] no error generated\n", test.file)
-	} else if test.err != nil && err != nil {
-		if !reflect.DeepEqual(test.err, err) {
-			t.Errorf("[%s] wrong error generated:\n%T - %s\n- instead of:\n%T - %s", test.file, err, err, test.err, test.err)
+	} else if expected != nil && err != nil {
+		if !reflect.DeepEqual(expected, err) {
+			t.Errorf("[%s] wrong error generated:\n%T - %s\n- instead of:\n%T - %s", test.file, err, err, expected, expected)
 		}
 	}
 }

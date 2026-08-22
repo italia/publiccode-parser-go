@@ -2,11 +2,13 @@ package publiccode
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
 	"os"
+	"path/filepath"
 	"reflect"
 	"strings"
 	"sync"
@@ -224,6 +226,87 @@ func TestToURL(t *testing.T) {
 
 		if *u != *out {
 			t.Errorf("%s: expected %v got %v", in, out, u)
+		}
+	}
+}
+
+// The diagnostics must name the file that was validated, whatever it is
+// called, or an editor reading the errorformat output jumps to the wrong file.
+func TestParseReportsInputFileName(t *testing.T) {
+	source, err := os.ReadFile("testdata/v0/invalid/categories_invalid.yml")
+	if err != nil {
+		t.Fatalf("can't read the fixture: %v", err)
+	}
+
+	file := filepath.Join(t.TempDir(), "my-amazing-code.yaml")
+	if err = os.WriteFile(file, source, 0o600); err != nil {
+		t.Fatalf("can't write the fixture copy: %v", err)
+	}
+
+	parser, err := NewParser(ParserConfig{DisableExternalChecks: true})
+	if err != nil {
+		t.Fatalf("can't create parser: %v", err)
+	}
+
+	_, err = parser.Parse(file)
+
+	var results ValidationResults
+	if !errors.As(err, &results) {
+		t.Fatalf("expected validation results, got %T: %v", err, err)
+	}
+
+	for _, result := range results {
+		var ve ValidationError
+		if errors.As(result, &ve) && ve.File != "my-amazing-code.yaml" {
+			t.Errorf("got file %q, want %q", ve.File, "my-amazing-code.yaml")
+		}
+	}
+
+	want := "my-amazing-code.yaml:13:5: error: "
+	if !strings.HasPrefix(results.Error(), want) {
+		t.Errorf("got %q, want a diagnostic starting with %q", results.Error(), want)
+	}
+}
+
+// A stream carries no name, so its diagnostics keep the default one.
+func TestParseStreamReportsDefaultFileName(t *testing.T) {
+	source, err := os.ReadFile("testdata/v0/invalid/categories_invalid.yml")
+	if err != nil {
+		t.Fatalf("can't read the fixture: %v", err)
+	}
+
+	parser, err := NewParser(ParserConfig{DisableExternalChecks: true})
+	if err != nil {
+		t.Fatalf("can't create parser: %v", err)
+	}
+
+	_, err = parser.ParseStream(bytes.NewReader(source))
+	if err == nil {
+		t.Fatal("expected validation results, got nil")
+	}
+
+	want := "publiccode.yml:13:5: error: "
+	if !strings.HasPrefix(err.Error(), want) {
+		t.Errorf("got %q, want a diagnostic starting with %q", err.Error(), want)
+	}
+}
+
+// Test the fileNameFromURL function
+func TestFileNameFromURL(t *testing.T) {
+	expected := []struct {
+		in   *url.URL
+		want string
+	}{
+		{nil, ""},
+		{&url.URL{Scheme: "file", Path: "/path/to/my-amazing-code.yaml"}, "my-amazing-code.yaml"},
+		{&url.URL{Scheme: "file", Path: ""}, ""},
+		{&url.URL{Scheme: "https", Host: "example.org", Path: "/dir/publiccode.yml"}, "publiccode.yml"},
+		{&url.URL{Scheme: "https", Host: "example.org", Path: "/"}, ""},
+	}
+
+	for _, test := range expected {
+		if got := fileNameFromURL(test.in); got != test.want {
+			t.Errorf("%v: expected %q got %q", test.in, test.want, got)
 		}
 	}
 }

@@ -185,7 +185,67 @@ func (p *Parser) Parse(uri string) (PublicCode, error) {
 	return p.parseStream(stream, fileURL)
 }
 
-func (p *Parser) parseStream(in io.Reader, fileURL *url.URL) (PublicCode, error) { //nolint:maintidx
+func (p *Parser) parseStream(in io.Reader, fileURL *url.URL) (PublicCode, error) {
+	publiccode, err := p.parseAndValidate(in, fileURL)
+
+	var results ValidationResults
+	if errors.As(err, &results) {
+		setFileName(results, fileNameFromURL(fileURL))
+	}
+
+	return publiccode, err
+}
+
+// fileNameFromURL returns the name to report in the diagnostics for the input
+// at fileURL. Only the last path segment is used, because the errorformat
+// prefix ends at the first colon and a whole URL there would send an editor
+// nowhere.
+func fileNameFromURL(fileURL *url.URL) string {
+	if fileURL == nil {
+		return ""
+	}
+
+	var name string
+
+	if fileURL.Scheme == "file" {
+		name = filepath.Base(fileURL.Path)
+	} else {
+		name = path.Base(fileURL.Path)
+	}
+
+	// Base() answers "." for an empty path and "/" for the root, neither of
+	// which is a file name.
+	if name == "." || name == "/" {
+		return ""
+	}
+
+	return name
+}
+
+// setFileName records name on every diagnostic in results. Both diagnostic
+// types are values, so each one has to be written back into the slice.
+func setFileName(results ValidationResults, name string) {
+	if name == "" {
+		return
+	}
+
+	for i, result := range results {
+		var valErr ValidationError
+
+		var valWarn ValidationWarning
+
+		switch {
+		case errors.As(result, &valErr):
+			valErr.File = name
+			results[i] = valErr
+		case errors.As(result, &valWarn):
+			valWarn.File = name
+			results[i] = valWarn
+		}
+	}
+}
+
+func (p *Parser) parseAndValidate(in io.Reader, fileURL *url.URL) (PublicCode, error) { //nolint:maintidx
 	b, err := io.ReadAll(in)
 	if err != nil {
 		return nil, ValidationResults{newValidationErrorf("", "Can't read the stream: %v", err)}
