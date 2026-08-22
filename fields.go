@@ -67,11 +67,10 @@ func validateFieldsV0(publiccode PublicCode, parser *Parser, network bool, baseU
 	}
 
 	if publiccodev0.MonochromeLogo != nil && *publiccodev0.MonochromeLogo != "" {
-		vr = append(vr, ValidationWarning{
+		vr = append(vr, newValidationWarning(
 			"monochromeLogo",
 			"This key is DEPRECATED and will be removed in the future. Use 'logo' instead",
-			0, 0,
-		})
+		))
 
 		if _, err := isRelativePathOrURL(*publiccodev0.MonochromeLogo, "monochromeLogo"); err != nil {
 			vr = append(vr, err)
@@ -93,11 +92,10 @@ func validateFieldsV0(publiccode PublicCode, parser *Parser, network bool, baseU
 		if publiccodev0.IntendedAudience.Countries != nil {
 			for i, c := range *publiccodev0.IntendedAudience.Countries {
 				if sharedValidate.Var(c, "iso3166_1_alpha2_lower_or_upper") == nil && c == strings.ToLower(c) {
-					vr = append(vr, ValidationWarning{
+					vr = append(vr, newValidationWarningf(
 						fmt.Sprintf("intendedAudience.countries[%d]", i),
-						fmt.Sprintf("Lowercase country codes are DEPRECATED. Use uppercase instead ('%s')", strings.ToUpper(c)),
-						0, 0,
-					})
+						"Lowercase country codes are DEPRECATED. Use uppercase instead ('%s')", strings.ToUpper(c),
+					))
 				}
 			}
 		}
@@ -105,22 +103,20 @@ func validateFieldsV0(publiccode PublicCode, parser *Parser, network bool, baseU
 		if publiccodev0.IntendedAudience.UnsupportedCountries != nil {
 			for i, c := range *publiccodev0.IntendedAudience.UnsupportedCountries {
 				if sharedValidate.Var(c, "iso3166_1_alpha2_lower_or_upper") == nil && c == strings.ToLower(c) {
-					vr = append(vr, ValidationWarning{
+					vr = append(vr, newValidationWarningf(
 						fmt.Sprintf("intendedAudience.unsupportedCountries[%d]", i),
-						fmt.Sprintf("Lowercase country codes are DEPRECATED. Use uppercase instead ('%s')", strings.ToUpper(c)),
-						0, 0,
-					})
+						"Lowercase country codes are DEPRECATED. Use uppercase instead ('%s')", strings.ToUpper(c),
+					))
 				}
 			}
 		}
 	}
 
 	if publiccodev0.Legal.AuthorsFile != nil {
-		vr = append(vr, ValidationWarning{
+		vr = append(vr, newValidationWarning(
 			"legal.authorsFile",
 			"This key is DEPRECATED and will be removed in the future. It's safe to drop it",
-			0, 0,
-		})
+		))
 
 		if _, err := isRelativePathOrURL(*publiccodev0.Legal.AuthorsFile, "legal.authorsFile"); err != nil {
 			vr = append(vr, err)
@@ -138,35 +134,32 @@ func validateFieldsV0(publiccode PublicCode, parser *Parser, network bool, baseU
 	}
 
 	if publiccodev0.Legal.RepoOwner != nil {
-		vr = append(vr, ValidationWarning{
+		vr = append(vr, newValidationWarning(
 			"legal.repoOwner",
 			"This key is DEPRECATED and will be removed in the future. Use 'organisation.name' instead",
-			0, 0,
-		})
+		))
 	}
 
 	if publiccodev0.InputTypes != nil {
-		vr = append(vr, ValidationWarning{
+		vr = append(vr, newValidationWarning(
 			"inputTypes",
 			"This key is DEPRECATED and will be removed in the future. It's safe to drop it",
-			0, 0,
-		})
+		))
 	}
 
 	if publiccodev0.OutputTypes != nil {
-		vr = append(vr, ValidationWarning{
+		vr = append(vr, newValidationWarning(
 			"outputTypes",
 			"This key is DEPRECATED and will be removed in the future. It's safe to drop it",
-			0, 0,
-		})
+		))
 	}
 
 	for lang, desc := range publiccodev0.Description {
 		if len(desc.GenericName) > 0 {
-			vr = append(vr, ValidationWarning{
+			vr = append(vr, newValidationWarning(
 				fmt.Sprintf("description.%s.genericName", lang),
-				"This key is DEPRECATED and will be removed in the future. It's safe to drop it", 0, 0,
-			})
+				"This key is DEPRECATED and will be removed in the future. It's safe to drop it",
+			))
 		}
 
 		if checksNetwork && desc.Documentation != nil {
@@ -219,10 +212,10 @@ func validateFieldsV0(publiccode PublicCode, parser *Parser, network bool, baseU
 	it := publiccodev0.IT
 
 	if publiccodev0.It != nil {
-		vr = append(vr, ValidationWarning{
+		vr = append(vr, newValidationWarning(
 			"it",
-			"Lowercase country codes are DEPRECATED and will be removed in the future. Use 'IT' instead", 0, 0,
-		})
+			"Lowercase country codes are DEPRECATED and will be removed in the future. Use 'IT' instead",
+		))
 
 		it = publiccodev0.It
 	}
@@ -235,23 +228,20 @@ func validateFieldsV0(publiccode PublicCode, parser *Parser, network bool, baseU
 
 	if it != nil {
 		if it.Conforme != nil {
-			vr = append(vr, ValidationWarning{
+			vr = append(vr, newValidationWarning(
 				"IT.conforme",
-				"This key is DEPRECATED and will be removed in the future. It's safe to drop it", 0, 0,
-			})
+				"This key is DEPRECATED and will be removed in the future. It's safe to drop it",
+			))
 		}
 
 		if it.Riuso.CodiceIPA != "" {
 			if sharedValidate.Var(it.Riuso.CodiceIPA, "is_italian_ipa_code") == nil {
-				vr = append(vr, ValidationWarning{
+				vr = append(vr, newValidationWarningf(
 					"IT.riuso.codiceIPA",
-					fmt.Sprintf(
-						"This key is DEPRECATED and will be removed in the future. "+
-							"Use 'organisation.uri' and set it to 'urn:x-italian-pa:%s' instead",
-						it.Riuso.CodiceIPA,
-					),
-					0, 0,
-				})
+					"This key is DEPRECATED and will be removed in the future. "+
+						"Use 'organisation.uri' and set it to 'urn:x-italian-pa:%s' instead",
+					it.Riuso.CodiceIPA,
+				))
 			}
 		}
 	}
@@ -325,11 +315,10 @@ func validateFieldsV1(publiccode PublicCode, parser *Parser, network bool, baseU
 		if publiccodev1.IntendedAudience.Countries != nil {
 			for i, c := range *publiccodev1.IntendedAudience.Countries {
 				if sharedValidate.Var(c, "iso3166_1_alpha2_lower_or_upper") == nil && c == strings.ToLower(c) {
-					vr = append(vr, ValidationWarning{
+					vr = append(vr, newValidationWarningf(
 						fmt.Sprintf("intendedAudience.countries[%d]", i),
-						fmt.Sprintf("Lowercase country codes are DEPRECATED. Use uppercase instead ('%s')", strings.ToUpper(c)),
-						0, 0,
-					})
+						"Lowercase country codes are DEPRECATED. Use uppercase instead ('%s')", strings.ToUpper(c),
+					))
 				}
 			}
 		}
@@ -337,11 +326,10 @@ func validateFieldsV1(publiccode PublicCode, parser *Parser, network bool, baseU
 		if publiccodev1.IntendedAudience.UnsupportedCountries != nil {
 			for i, c := range *publiccodev1.IntendedAudience.UnsupportedCountries {
 				if sharedValidate.Var(c, "iso3166_1_alpha2_lower_or_upper") == nil && c == strings.ToLower(c) {
-					vr = append(vr, ValidationWarning{
+					vr = append(vr, newValidationWarningf(
 						fmt.Sprintf("intendedAudience.unsupportedCountries[%d]", i),
-						fmt.Sprintf("Lowercase country codes are DEPRECATED. Use uppercase instead ('%s')", strings.ToUpper(c)),
-						0, 0,
-					})
+						"Lowercase country codes are DEPRECATED. Use uppercase instead ('%s')", strings.ToUpper(c),
+					))
 				}
 			}
 		}

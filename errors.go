@@ -15,7 +15,14 @@ func (e ParseError) Error() string {
 	return e.Reason
 }
 
+// defaultFileName is reported by diagnostics coming from an input with no
+// name of its own, as happens when parsing a stream.
+const defaultFileName = "publiccode.yml"
+
 type ValidationError struct {
+	// Name of the validated file, with no directory part. It is empty when
+	// the input is a stream, which has no name.
+	File        string `json:"file"`
 	Key         string `json:"key"`
 	Description string `json:"description"`
 	Line        int    `json:"line"`
@@ -28,7 +35,7 @@ func (e ValidationError) Error() string {
 		key = e.Key + ": "
 	}
 
-	return fmt.Sprintf("publiccode.yml:%d:%d: error: %s%s", e.Line, e.Column, key, e.Description)
+	return fmt.Sprintf("%s:%d:%d: error: %s%s", e.fileName(), e.Line, e.Column, key, e.Description)
 }
 
 func (e ValidationError) MarshalJSON() ([]byte, error) {
@@ -44,6 +51,14 @@ func (e ValidationError) MarshalJSON() ([]byte, error) {
 	})
 }
 
+func (e ValidationError) fileName() string {
+	if e.File == "" {
+		return defaultFileName
+	}
+
+	return e.File
+}
+
 func newValidationError(key string, description string) ValidationError {
 	return ValidationError{Key: key, Description: description}
 }
@@ -55,13 +70,21 @@ func newValidationErrorf(key string, description string, args ...any) Validation
 //nolint:errname,lll // ValidationWarning is intentionally named as a warning, not an error, even though it implements error.
 type ValidationWarning ValidationError
 
+func newValidationWarning(key string, description string) ValidationWarning {
+	return ValidationWarning{Key: key, Description: description}
+}
+
+func newValidationWarningf(key string, description string, args ...any) ValidationWarning {
+	return newValidationWarning(key, fmt.Sprintf(description, args...))
+}
+
 func (e ValidationWarning) Error() string {
 	key := ""
 	if e.Key != "" {
 		key = e.Key + ": "
 	}
 
-	return fmt.Sprintf("publiccode.yml:%d:%d: warning: %s%s", e.Line, e.Column, key, e.Description)
+	return fmt.Sprintf("%s:%d:%d: warning: %s%s", ValidationError(e).fileName(), e.Line, e.Column, key, e.Description)
 }
 
 func (e ValidationWarning) MarshalJSON() ([]byte, error) {
