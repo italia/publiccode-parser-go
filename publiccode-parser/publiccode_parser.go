@@ -5,6 +5,7 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"io"
 	"os"
 	"runtime/debug"
 
@@ -30,49 +31,62 @@ func init() {
 }
 
 func main() {
-	flag.Usage = func() {
-		_, _ = fmt.Fprintf(flag.CommandLine.Output(), "Usage: %s [ OPTIONS ] publiccode.yml\n", os.Args[0])
+	os.Exit(run(os.Args[1:], os.Stdout, os.Stderr))
+}
 
-		flag.PrintDefaults()
+func run(args []string, stdout, stderr io.Writer) int {
+	flags := flag.NewFlagSet("publiccode-parser", flag.ContinueOnError)
+	flags.SetOutput(stderr)
+	flags.Usage = func() {
+		_, _ = fmt.Fprintf(flags.Output(), "Usage: %s [ OPTIONS ] publiccode.yml\n", flags.Name())
+
+		flags.PrintDefaults()
 	}
-	localBasePathPtr := flag.String(
+	localBasePathPtr := flags.String(
 		"path", "",
 		"Use this local directory as base path when checking for files existence "+
 			"instead of using the `url` key in publiccode.yml",
 	)
-	disableNetworkPtr := flag.Bool(
+	disableNetworkPtr := flags.Bool(
 		"no-network", false,
 		"Disables checks that require network connections (URL existence and oEmbed). This makes validation much faster.",
 	)
-	disableExternalChecksPtr := flag.Bool(
+	disableExternalChecksPtr := flags.Bool(
 		"no-external-checks", false,
 		"Disables ALL checks that reference external resources such as remote URLs or local file existence. "+
 			"Implies --no-network",
 	)
-	timeoutPtr := flag.Duration(
+	timeoutPtr := flags.Duration(
 		"timeout", 0,
 		"Timeout for each HTTP request during external checks (e.g. 10s, 1m). "+
 			"Defaults to 30s if not set. No effect with --no-network or --no-external-checks.",
 	)
-	jsonOutputPtr := flag.Bool("json", false, "Output the validation errors as a JSON list.")
-	helpPtr := flag.Bool("help", false, "Display command line usage.")
-	versionPtr := flag.Bool("version", false, "Display current software version.")
+	jsonOutputPtr := flags.Bool("json", false, "Output the validation errors as a JSON list.")
+	helpPtr := flags.Bool("help", false, "Display command line usage.")
+	versionPtr := flags.Bool("version", false, "Display current software version.")
 
-	flag.Parse()
+	if err := flags.Parse(args); err != nil {
+		return 2
+	}
 
 	if *versionPtr {
-		println(version, date)
+		fmt.Fprintln(stdout, version, date)
 
-		return
+		return 0
 	}
 
-	if *helpPtr || len(flag.Args()) < 1 {
-		flag.Usage()
+	if *helpPtr {
+		flags.SetOutput(stdout)
+		flags.Usage()
 
-		return
+		return 0
 	}
 
-	publiccodeFile := flag.Args()[0]
+	if flags.NArg() < 1 {
+		flags.Usage()
+
+		return 2
+	}
 
 	config := publiccode.ParserConfig{BaseURL: *localBasePathPtr}
 	config.DisableNetwork = *disableNetworkPtr
@@ -81,38 +95,56 @@ func main() {
 
 	p, err := publiccode.NewParser(config)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error creating Parser: %s\n", err.Error())
-		os.Exit(1)
+		fmt.Fprintf(stderr, "Error creating Parser: %s\n", err.Error())
+
+		return 1
 	}
 
-	_, err = p.Parse(publiccodeFile)
+	_, parseErr := p.Parse(flags.Arg(0))
 
 	if *jsonOutputPtr {
-		if err == nil {
-			fmt.Println("[]")
-			os.Exit(0)
-		}
-
-		out, jsonerr := json.MarshalIndent(err, "", "    ")
-		if jsonerr != nil {
-			fmt.Fprintf(os.Stderr, "Error encoding JSON\n")
-			os.Exit(1)
-		}
-
-		fmt.Println(string(out))
-
-		return
-	} else {
-		if err != nil {
-			fmt.Println(err)
-		}
-
-		if hasValidationErrors(err) {
-			os.Exit(1)
-		}
-
-		os.Exit(0)
+		return reportJSON(parseErr, stdout, stderr)
 	}
+
+	if parseErr != nil {
+		fmt.Fprintln(stdout, parseErr)
+	}
+
+	if hasValidationErrors(parseErr) {
+		return 1
+	}
+
+	return 0
+}
+
+func reportJSON(parseErr error, stdout, stderr io.Writer) int {
+	if parseErr == nil {
+		fmt.Fprintln(stdout, "[]")
+
+		return 0
+	}
+
+	// Failures that are not validation results, such as an unreadable file, carry
+	// unexported fields only and would marshal to an empty JSON object.
+	var results publiccode.ValidationResults
+	if !errors.As(parseErr, &results) {
+		results = publiccode.ValidationResults{publiccode.ValidationError{Description: parseErr.Error()}}
+	}
+
+	out, jsonerr := json.MarshalIndent(results, "", "    ")
+	if jsonerr != nil {
+		fmt.Fprintf(stderr, "Error encoding JSON\n")
+
+		return 1
+	}
+
+	fmt.Fprintln(stdout, string(out))
+
+	if hasValidationErrors(parseErr) {
+		return 1
+	}
+
+	return 0
 }
 
 func hasValidationErrors(results error) bool {

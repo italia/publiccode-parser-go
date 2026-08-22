@@ -62,7 +62,12 @@ publiccode.yml:12:5: warning: description.en.genericName: This key is DEPRECATED
 
 Run `publiccode-parser --help` for the available command line flags.
 
-The tool returns 0 in case of successful validation, 1 otherwise.
+The tool returns 0 in case of successful validation, 1 when the file has
+validation errors or can't be read and 2 when it's invoked with no file
+argument or an unknown flag.
+
+With `--json` the same exit codes apply and the output is always a
+JSON list, empty when there is nothing to report.
 
 ## With Docker
 
