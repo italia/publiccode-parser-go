@@ -69,7 +69,7 @@ type ParserConfig struct {
 	Branch string
 
 	// The URL used as base of relative files in publiccode.yml (eg. logo)
-	// It can be a local file with the 'file' scheme.
+	// It can also be a local directory path.
 	BaseURL string
 
 	// Timeout is the maximum duration for each HTTP request during external checks.
