@@ -62,9 +62,21 @@ mypubliccode.yml:12:5: warning: description.en.genericName: This key is DEPRECAT
 
 Run `publiccode-parser --help` for the available command line flags.
 
+The checks on resources external to the `publiccode.yml` are selected
+with `-external-checks`:
+
+- `none`: no external resource is checked, local or remote
+- `local`: local files are checked for existence and images for being
+  images, nothing goes over the network
+- `network`: everything is checked, including the existence of the
+  URLs. It's the default
+
+`-no-network` and `-no-external-checks` keep working as deprecated
+aliases of `-external-checks=local` and `-external-checks=none`.
+
 The tool returns 0 in case of successful validation, 1 when the file has
 validation errors or can't be read and 2 when it's invoked with no file
-argument or an unknown flag.
+argument, an unknown flag or an unknown check mode.
 
 With `--json` the same exit codes apply and the output is always a
 JSON list, empty when there is nothing to report.
