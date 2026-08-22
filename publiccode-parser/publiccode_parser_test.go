@@ -100,6 +100,19 @@ func TestRunJSONInvalidFileIsList(t *testing.T) {
 	}
 }
 
+func TestRunJSONReportsInputFileName(t *testing.T) {
+	_, stdout, _ := runCLI(t, "-no-external-checks", "-json", invalidFile)
+
+	results := unmarshalList(t, stdout)
+	if len(results) == 0 {
+		t.Fatalf("expected at least one entry, got %q", stdout)
+	}
+
+	if results[0]["file"] != "categories_invalid.yml" {
+		t.Errorf("expected the name of the validated file, got %v", results[0]["file"])
+	}
+}
+
 func TestRunJSONUnreadableFileIsList(t *testing.T) {
 	_, stdout, stderr := runCLI(t, "-no-external-checks", "-json", notThereFile)
 

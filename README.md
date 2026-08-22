@@ -55,9 +55,9 @@ Example:
 
 ```shell
 $ publiccode-parser mypubliccode.yml
-publiccode.yml:36:1: error: developmentStatus: developmentStatus must be one of the following: "concept", "development", "beta", "stable" or "obsolete"
-publiccode.yml:48:3: warning: legal.authorsFile: This key is DEPRECATED and will be removed in the future. It's safe to drop it
-publiccode.yml:12:5: warning: description.en.genericName: This key is DEPRECATED and will be removed in the future. It's safe to drop it
+mypubliccode.yml:36:1: error: developmentStatus: developmentStatus must be one of the following: "concept", "development", "beta", "stable" or "obsolete"
+mypubliccode.yml:48:3: warning: legal.authorsFile: This key is DEPRECATED and will be removed in the future. It's safe to drop it
+mypubliccode.yml:12:5: warning: description.en.genericName: This key is DEPRECATED and will be removed in the future. It's safe to drop it
 ```
 
 Run `publiccode-parser --help` for the available command line flags.
