@@ -31,7 +31,7 @@ parser, err := publiccode.NewDefaultParser()
 
 // error handling
 
-publiccode, err := parser.Parse("file:///path/to/local/dir/publiccode.yml")
+publiccode, err := parser.Parse("/path/to/local/dir/publiccode.yml")
 // OR
 // parse.Parse("https://github.com/example/example/publiccode.yml")
 ```
