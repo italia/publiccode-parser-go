@@ -49,15 +49,57 @@ func init() {
 
 var reMapKey = regexp.MustCompile(`\[([[:alpha:]]+)\]`)
 
+// CheckMode selects which checks on resources external to the publiccode.yml
+// are performed.
+type CheckMode int
+
+const (
+	// CheckNetwork performs every external check, both on local files and on
+	// remote URLs. It's the zero value, hence the default.
+	CheckNetwork CheckMode = iota
+
+	// CheckLocal performs the external checks on local files only, nothing
+	// goes over the network.
+	CheckLocal
+
+	// CheckNone performs no check on external resources at all, local or
+	// remote. Syntactic and semantic checks are still performed.
+	CheckNone
+)
+
+func (m CheckMode) String() string {
+	switch m {
+	case CheckNetwork:
+		return "network"
+	case CheckLocal:
+		return "local"
+	case CheckNone:
+		return "none"
+	default:
+		return fmt.Sprintf("CheckMode(%d)", int(m))
+	}
+}
+
 type ParserConfig struct {
+	// ExternalChecks selects which checks on external resources are performed:
+	// all of them (CheckNetwork, the default), the ones on local files only
+	// (CheckLocal) or none (CheckNone).
+	ExternalChecks CheckMode
+
 	// DisableNetwork disables all network tests (eg. URL existence). This
 	// results in much faster parsing.
+	//
+	// Deprecated: use ExternalChecks with CheckLocal. When true it takes
+	// precedence over ExternalChecks.
 	DisableNetwork bool
 
 	// DisableExternalChecks disables ALL the additional checks on external files
 	// and resources, local or remote (eg. existence, images actually being images, etc.).
 	//
 	// It implies DisableNetwork = true.
+	//
+	// Deprecated: use ExternalChecks with CheckNone. When true it takes
+	// precedence over DisableNetwork and ExternalChecks.
 	DisableExternalChecks bool
 
 	// Domain will have domain specific settings, including basic auth if provided
@@ -90,13 +132,12 @@ const defaultHTTPTimeout = 30 * time.Second
 
 // Parser is a helper class for parsing publiccode.yml files.
 type Parser struct {
-	disableNetwork        bool
-	disableExternalChecks bool
-	domain                Domain
-	branch                string
-	baseURL               *url.URL
-	client                *http.Client
-	httpclient            *httpclient.Client
+	checks     CheckMode
+	domain     Domain
+	branch     string
+	baseURL    *url.URL
+	client     *http.Client
+	httpclient *httpclient.Client
 }
 
 // Domain is a single code hosting service.
@@ -110,8 +151,15 @@ type Domain struct {
 // NewParser initializes and returns a new Parser object following the settings in
 // ParserConfig.
 func NewParser(config ParserConfig) (*Parser, error) {
-	if config.DisableExternalChecks {
-		config.DisableNetwork = true
+	checks := config.ExternalChecks
+
+	// The deprecated booleans win over the mode, so a caller setting both
+	// keeps the behaviour it had before ExternalChecks existed.
+	switch {
+	case config.DisableExternalChecks:
+		checks = CheckNone
+	case config.DisableNetwork:
+		checks = CheckLocal
 	}
 
 	timeout := config.Timeout
@@ -125,12 +173,11 @@ func NewParser(config ParserConfig) (*Parser, error) {
 	httpClient := urlutil.SafeHTTPClient(timeout, config.AllowNetworkToPrivateHosts)
 	vcsurl.Client = httpClient
 	p := Parser{
-		disableNetwork:        config.DisableNetwork,
-		disableExternalChecks: config.DisableExternalChecks,
-		domain:                config.Domain,
-		branch:                config.Branch,
-		client:                httpClient,
-		httpclient:            httpclient.NewClient(httpClient),
+		checks:     checks,
+		domain:     config.Domain,
+		branch:     config.Branch,
+		client:     httpClient,
+		httpclient: httpclient.NewClient(httpClient),
 	}
 
 	if config.BaseURL != "" {
@@ -401,7 +448,7 @@ func (p *Parser) parseAndValidate(in io.Reader, fileURL *url.URL) (PublicCode, e
 	}
 
 	// Still no base URL: we parsed from a stream, try to use the publiccode.yml's `url` field
-	if currentBaseURL == nil && !p.disableNetwork && publiccode.Url() != nil {
+	if currentBaseURL == nil && p.checks == CheckNetwork && publiccode.Url() != nil {
 		rawRoot, err := vcsurl.GetRawRoot((*url.URL)(publiccode.Url()), p.branch)
 		if err != nil {
 			line, column := getPositionInFile("url", file)
@@ -421,7 +468,7 @@ func (p *Parser) parseAndValidate(in io.Reader, fileURL *url.URL) (PublicCode, e
 		currentBaseURL = rawRoot
 	}
 
-	// Still no base URL: DisableNetwork is true, use the current working directory as a fallback
+	// Still no base URL: the network is off, use the current working directory as a fallback
 	if currentBaseURL == nil {
 		cwd, err := os.Getwd()
 		if err != nil {
@@ -433,7 +480,7 @@ func (p *Parser) parseAndValidate(in io.Reader, fileURL *url.URL) (PublicCode, e
 		currentBaseURL = &url.URL{Scheme: "file", Path: cwd}
 	}
 
-	if err = validateFields(publiccode, p, !p.disableNetwork, currentBaseURL); err != nil {
+	if err = validateFields(publiccode, p, currentBaseURL); err != nil {
 		var vr ValidationResults
 		if errors.As(err, &vr) {
 			for _, result := range vr {

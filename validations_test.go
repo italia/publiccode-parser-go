@@ -110,7 +110,7 @@ func TestIsReachableNon200(t *testing.T) {
 func TestIsImageFileInvalidExtension(t *testing.T) {
 	p, _ := NewParser(ParserConfig{DisableNetwork: true})
 	u := url.URL{Scheme: "file", Path: "/tmp/test.gif"}
-	ok, err := p.isImageFile(u, false)
+	ok, err := p.isImageFile(u, CheckLocal)
 	if ok {
 		t.Error("expected false for .gif extension")
 	}
@@ -122,7 +122,7 @@ func TestIsImageFileInvalidExtension(t *testing.T) {
 func TestIsImageFileValidExtensionMissing(t *testing.T) {
 	p, _ := NewParser(ParserConfig{DisableNetwork: true})
 	u := url.URL{Scheme: "file", Path: "/nonexistent/test.png"}
-	ok, err := p.isImageFile(u, false)
+	ok, err := p.isImageFile(u, CheckLocal)
 	if ok {
 		t.Error("expected false for nonexistent file")
 	}
@@ -134,7 +134,7 @@ func TestIsImageFileValidExtensionMissing(t *testing.T) {
 func TestValidLogoInvalidExtension(t *testing.T) {
 	p, _ := NewParser(ParserConfig{DisableNetwork: true})
 	u := url.URL{Scheme: "file", Path: "/tmp/test.gif"}
-	ok, err := p.validLogo(u, false)
+	ok, err := p.validLogo(u, CheckLocal)
 	if ok {
 		t.Error("expected false for .gif extension")
 	}
@@ -146,7 +146,7 @@ func TestValidLogoInvalidExtension(t *testing.T) {
 func TestValidLogoMissingFile(t *testing.T) {
 	p, _ := NewParser(ParserConfig{DisableNetwork: true})
 	u := url.URL{Scheme: "file", Path: "/nonexistent/logo.svg"}
-	ok, err := p.validLogo(u, false)
+	ok, err := p.validLogo(u, CheckLocal)
 	if ok {
 		t.Error("expected false for nonexistent file")
 	}
@@ -165,10 +165,10 @@ func TestValidLogoRemoteNoNetwork(t *testing.T) {
 	defer srv.Close()
 
 	parsed, _ := url.Parse(srv.URL + "/logo.svg")
-	// network=false: fileExists returns true for non-file scheme, and validLogo skips download
-	ok, err := p.validLogo(*parsed, false)
+	// CheckLocal: fileExists returns true for non-file scheme, and validLogo skips download
+	ok, err := p.validLogo(*parsed, CheckLocal)
 	if !ok {
-		t.Errorf("expected true for remote SVG with network=false (no download): %v", err)
+		t.Errorf("expected true for remote SVG with CheckLocal (no download): %v", err)
 	}
 }
 
@@ -187,7 +187,7 @@ func TestValidLogoRemoteDownloadFailure(t *testing.T) {
 
 	p, _ := NewParser(ParserConfig{AllowNetworkToPrivateHosts: true})
 	parsed, _ := url.Parse(srv.URL + "/logo.png")
-	ok, err := p.validLogo(*parsed, true)
+	ok, err := p.validLogo(*parsed, CheckNetwork)
 	// The downloaded file is not a valid PNG, so DecodeConfig should fail.
 	if ok {
 		t.Error("expected false for invalid PNG content")
@@ -197,6 +197,64 @@ func TestValidLogoRemoteDownloadFailure(t *testing.T) {
 	}
 }
 
+func TestCheckModeSelectsTheExternalChecks(t *testing.T) {
+	const (
+		missingLocalFile = "testdata/v0/invalid/no-network/logo_missing_file.yml"
+		deadRemoteURL    = "testdata/v0/invalid/logo_missing_url.yml"
+	)
+
+	missingFileError := ValidationResults{
+		ValidationError{"", "logo", "no such file: " + cwd + "/testdata/v0/invalid/no-network/no_such_file.png", 18, 1},
+	}
+	unreachableURLError := ValidationResults{
+		ValidationError{"", "logo", "HTTP GET failed for https://google.com/no_such_file.png: not found", 18, 1},
+	}
+
+	tests := map[string]struct {
+		file string
+		mode CheckMode
+		want error
+	}{
+		"missing local file, network": {missingLocalFile, CheckNetwork, missingFileError},
+		"missing local file, local":   {missingLocalFile, CheckLocal, missingFileError},
+		"missing local file, none":    {missingLocalFile, CheckNone, nil},
+		"dead remote URL, network":    {deadRemoteURL, CheckNetwork, unreachableURLError},
+		"dead remote URL, local":      {deadRemoteURL, CheckLocal, nil},
+		"dead remote URL, none":       {deadRemoteURL, CheckNone, nil},
+	}
+
+	for name, test := range tests {
+		t.Run(name, func(t *testing.T) {
+			p, err := NewParser(ParserConfig{ExternalChecks: test.mode})
+			if err != nil {
+				t.Fatalf("can't create parser: %v", err)
+			}
+
+			_, err = p.Parse(test.file)
+
+			checkParseErrors(t, err, testType{test.file, test.want})
+		})
+	}
+}
+
+func TestCheckNoneKeepsTheOtherChecks(t *testing.T) {
+	p, err := NewParser(ParserConfig{ExternalChecks: CheckNone})
+	if err != nil {
+		t.Fatalf("can't create parser: %v", err)
+	}
+
+	_, err = p.Parse("testdata/v0/invalid/categories_invalid.yml")
+
+	checkParseErrors(t, err, testType{"testdata/v0/invalid/categories_invalid.yml", ValidationResults{
+		ValidationError{
+			"",
+			"categories[0]",
+			"categories[0] must be a valid category " +
+				"(see https://github.com/publiccodeyml/publiccode.yml/blob/main/docs/standard/categories-list.rst)",
+			13, 5,
+		},
+	}})
+}
 
 func TestIsReachableSuccess(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

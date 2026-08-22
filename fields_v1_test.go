@@ -64,7 +64,7 @@ func TestValidateFieldsV1Direct(t *testing.T) {
 		},
 	}
 
-	err = validateFieldsV1(v1, p, false, base)
+	err = validateFieldsV1(v1, p, base)
 	if err != nil {
 		t.Errorf("unexpected error from validateFieldsV1: %v", err)
 	}
@@ -87,7 +87,7 @@ func TestValidateFieldsV1WithLogoAbsPath(t *testing.T) {
 		},
 	}
 
-	err := validateFieldsV1(v1, p, false, base)
+	err := validateFieldsV1(v1, p, base)
 	if err == nil {
 		t.Error("expected error for absolute logo path")
 	}
@@ -108,7 +108,7 @@ func TestValidateFieldsV1WithVideos(t *testing.T) {
 		},
 	}
 
-	err := validateFieldsV1(v1, p, false, base)
+	err := validateFieldsV1(v1, p, base)
 	if err == nil {
 		t.Error("expected error for invalid oEmbed video URL")
 	}
@@ -126,7 +126,7 @@ func TestValidateFieldsV1WithScreenshotAbsPath(t *testing.T) {
 		},
 	}
 
-	err := validateFieldsV1(v1, p, false, base)
+	err := validateFieldsV1(v1, p, base)
 	if err == nil {
 		t.Error("expected error for absolute path screenshot")
 	}
@@ -145,7 +145,7 @@ func TestValidateFieldsV1WithScreenshotRelative(t *testing.T) {
 	}
 
 	// Should not panic, may produce an error about missing file
-	_ = validateFieldsV1(v1, p, false, base)
+	_ = validateFieldsV1(v1, p, base)
 }
 
 func TestValidateFieldsV1WithNetworkChecks(t *testing.T) {
@@ -187,8 +187,7 @@ func TestValidateFieldsV1WithNetworkChecks(t *testing.T) {
 		},
 	}
 
-	// network=true, checksNetwork=true
-	err := validateFieldsV1(v1, p, true, base)
+	err := validateFieldsV1(v1, p, base)
 	// We expect the "not a valid code repository" error.
 	if err == nil {
 		t.Log("no error (URL might have been checked differently)")
@@ -227,8 +226,7 @@ func TestValidateFieldsV1WithUnreachableURLs(t *testing.T) {
 		"en": {Documentation: docURL},
 	}
 
-	// network=true, checksNetwork=true
-	err := validateFieldsV1(v1, p, true, base)
+	err := validateFieldsV1(v1, p, base)
 	// We expect errors because the URLs return 404.
 	if err == nil {
 		t.Error("expected errors for unreachable URLs")
@@ -255,7 +253,7 @@ func TestValidateFieldsV1WithAPIDocNetworkCheck(t *testing.T) {
 		},
 	}
 
-	err := validateFieldsV1(v1, p, true, base)
+	err := validateFieldsV1(v1, p, base)
 	if err == nil {
 		t.Error("expected error for unreachable API documentation URL")
 	}
@@ -286,7 +284,7 @@ func TestValidateFieldsV1WithCountriesDeprecated(t *testing.T) {
 		},
 	}
 
-	err := validateFieldsV1(v1, p, false, base)
+	err := validateFieldsV1(v1, p, base)
 	if err == nil {
 		t.Error("expected deprecation warnings for lowercase countries")
 	}
@@ -300,7 +298,7 @@ func TestValidateFieldsV0MonochromeLogoAbsPath(t *testing.T) {
 	v0 := &PublicCodeV0{}
 	v0.MonochromeLogo = &logo
 
-	err := validateFieldsV0(v0, p, false, base)
+	err := validateFieldsV0(v0, p, base)
 	vr, ok := err.(ValidationResults)
 	if !ok {
 		t.Fatal("expected ValidationResults")
@@ -326,7 +324,7 @@ func TestValidateFieldsV0AuthorsFileAbsPath(t *testing.T) {
 	v0 := &PublicCodeV0{}
 	v0.Legal.AuthorsFile = &authorsFile
 
-	err := validateFieldsV0(v0, p, false, base)
+	err := validateFieldsV0(v0, p, base)
 	vr, ok := err.(ValidationResults)
 	if !ok {
 		t.Fatal("expected ValidationResults")
@@ -354,7 +352,7 @@ func TestValidateFieldsV0ScreenshotsAbsPath(t *testing.T) {
 		},
 	}
 
-	err := validateFieldsV0(v0, p, false, base)
+	err := validateFieldsV0(v0, p, base)
 	vr, ok := err.(ValidationResults)
 	if !ok {
 		t.Fatal("expected ValidationResults")
@@ -392,7 +390,7 @@ func TestValidateFieldsV1LogoRelativeExternalChecks(t *testing.T) {
 	}
 
 	// /tmp/logo.svg does not exist, so validLogo should produce an error
-	err := validateFieldsV1(v1, p, false, base)
+	err := validateFieldsV1(v1, p, base)
 	if err == nil {
 		t.Error("expected error for missing logo file")
 	}

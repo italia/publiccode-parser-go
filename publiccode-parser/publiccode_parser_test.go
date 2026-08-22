@@ -11,10 +11,11 @@ import (
 )
 
 const (
-	validFile    = "../testdata/v0/valid/valid.minimal.yml"
-	invalidFile  = "../testdata/v0/invalid/categories_invalid.yml"
-	warningFile  = "../testdata/v0/valid_with_warnings/valid.minimal.v0.4.yml"
-	notThereFile = "../testdata/v0/valid/no-such-file.yml"
+	validFile       = "../testdata/v0/valid/valid.minimal.yml"
+	invalidFile     = "../testdata/v0/invalid/categories_invalid.yml"
+	warningFile     = "../testdata/v0/valid_with_warnings/valid.minimal.v0.4.yml"
+	notThereFile    = "../testdata/v0/valid/no-such-file.yml"
+	missingLogoFile = "../testdata/v0/invalid/no-network/logo_missing_file.yml"
 )
 
 func runCLI(t *testing.T, args ...string) (int, string, string) {
@@ -32,18 +33,32 @@ func TestRunExitCodes(t *testing.T) {
 		args []string
 		want int
 	}{
-		"valid file":               {[]string{"-no-external-checks", validFile}, 0},
-		"valid file, JSON":         {[]string{"-no-external-checks", "-json", validFile}, 0},
-		"invalid file":             {[]string{"-no-external-checks", invalidFile}, 1},
-		"invalid file, JSON":       {[]string{"-no-external-checks", "-json", invalidFile}, 1},
-		"file with warnings":       {[]string{"-no-external-checks", warningFile}, 0},
-		"file with warnings, JSON": {[]string{"-no-external-checks", "-json", warningFile}, 0},
-		"unreadable file":          {[]string{"-no-external-checks", notThereFile}, 1},
-		"unreadable file, JSON":    {[]string{"-no-external-checks", "-json", notThereFile}, 1},
+		"valid file":               {[]string{"-external-checks=none", validFile}, 0},
+		"valid file, JSON":         {[]string{"-external-checks=none", "-json", validFile}, 0},
+		"invalid file":             {[]string{"-external-checks=none", invalidFile}, 1},
+		"invalid file, JSON":       {[]string{"-external-checks=none", "-json", invalidFile}, 1},
+		"file with warnings":       {[]string{"-external-checks=none", warningFile}, 0},
+		"file with warnings, JSON": {[]string{"-external-checks=none", "-json", warningFile}, 0},
+		"unreadable file":          {[]string{"-external-checks=none", notThereFile}, 1},
+		"unreadable file, JSON":    {[]string{"-external-checks=none", "-json", notThereFile}, 1},
 		"no file argument":         {[]string{}, 2},
 		"no file argument, JSON":   {[]string{"-json"}, 2},
 		"unknown flag":             {[]string{"-bogus", validFile}, 2},
 		"help":                     {[]string{"-help"}, 0},
+
+		"local mode":            {[]string{"-external-checks=local", validFile}, 0},
+		"unknown mode":          {[]string{"-external-checks=bogus", validFile}, 2},
+		"clone mode":            {[]string{"-external-checks=clone", validFile}, 2},
+		"deprecated no-network": {[]string{"-no-network", validFile}, 0},
+		"deprecated no-external-checks": {
+			[]string{"-no-external-checks", validFile}, 0,
+		},
+		"deprecated flag agreeing with the mode": {
+			[]string{"-no-network", "-external-checks=local", validFile}, 0,
+		},
+		"deprecated flag conflicting with the mode": {
+			[]string{"-no-network", "-external-checks=none", validFile}, 2,
+		},
 	}
 
 	for name, test := range tests {
@@ -59,8 +74,82 @@ func TestRunExitCodes(t *testing.T) {
 	}
 }
 
+func TestRunLocalModeChecksLocalFiles(t *testing.T) {
+	_, stdout, _ := runCLI(t, "-external-checks=local", missingLogoFile)
+
+	if !strings.Contains(stdout, "no such file") {
+		t.Errorf("expected the missing logo on stdout, got %q", stdout)
+	}
+}
+
+func TestRunNoneModeSkipsLocalFiles(t *testing.T) {
+	code, stdout, _ := runCLI(t, "-external-checks=none", missingLogoFile)
+
+	if code != 0 || stdout != "" {
+		t.Errorf("expected no check on the missing logo, got exit code %d and %q", code, stdout)
+	}
+}
+
+func TestRunNoExternalChecksWinsOverNoNetwork(t *testing.T) {
+	code, stdout, _ := runCLI(t, "-no-network", "-no-external-checks", missingLogoFile)
+
+	if code != 0 || stdout != "" {
+		t.Errorf("expected the none mode to win, got exit code %d and %q", code, stdout)
+	}
+}
+
+func TestRunDeprecatedFlagsWarnOnStderr(t *testing.T) {
+	tests := map[string]struct {
+		flag string
+		want string
+	}{
+		"no-network": {"-no-network", "-no-network is deprecated, use -external-checks=local\n"},
+		"no-external-checks": {
+			"-no-external-checks", "-no-external-checks is deprecated, use -external-checks=none\n",
+		},
+	}
+
+	for name, test := range tests {
+		t.Run(name, func(t *testing.T) {
+			_, stdout, stderr := runCLI(t, test.flag, validFile)
+
+			if stderr != test.want {
+				t.Errorf("expected %q on stderr, got %q", test.want, stderr)
+			}
+
+			if stdout != "" {
+				t.Errorf("expected no output on stdout, got %q", stdout)
+			}
+		})
+	}
+}
+
+func TestRunUnknownModeListsTheValidOnes(t *testing.T) {
+	_, _, stderr := runCLI(t, "-external-checks=bogus", validFile)
+
+	if !strings.Contains(stderr, "none, local and network") {
+		t.Errorf("expected the valid modes on stderr, got %q", stderr)
+	}
+}
+
+func TestRunCloneModeIsNotImplementedYet(t *testing.T) {
+	_, _, stderr := runCLI(t, "-external-checks=clone", validFile)
+
+	if !strings.Contains(stderr, "not implemented") {
+		t.Errorf("expected the clone mode to be refused, got %q", stderr)
+	}
+}
+
+func TestRunConflictingModeIsRejected(t *testing.T) {
+	_, _, stderr := runCLI(t, "-no-network", "-external-checks=none", validFile)
+
+	if !strings.Contains(stderr, "-no-network and -external-checks=none") {
+		t.Errorf("expected the conflict on stderr, got %q", stderr)
+	}
+}
+
 func TestRunValidFileIsSilent(t *testing.T) {
-	_, stdout, stderr := runCLI(t, "-no-external-checks", validFile)
+	_, stdout, stderr := runCLI(t, "-external-checks=none", validFile)
 
 	if stdout != "" {
 		t.Errorf("expected no output on stdout, got %q", stdout)
@@ -72,7 +161,7 @@ func TestRunValidFileIsSilent(t *testing.T) {
 }
 
 func TestRunInvalidFileReportsOnStdout(t *testing.T) {
-	_, stdout, _ := runCLI(t, "-no-external-checks", invalidFile)
+	_, stdout, _ := runCLI(t, "-external-checks=none", invalidFile)
 
 	if !strings.Contains(stdout, "error: categories[0]") {
 		t.Errorf("expected the validation error on stdout, got %q", stdout)
@@ -80,7 +169,7 @@ func TestRunInvalidFileReportsOnStdout(t *testing.T) {
 }
 
 func TestRunJSONValidFileIsEmptyList(t *testing.T) {
-	_, stdout, _ := runCLI(t, "-no-external-checks", "-json", validFile)
+	_, stdout, _ := runCLI(t, "-external-checks=none", "-json", validFile)
 
 	if strings.TrimSpace(stdout) != "[]" {
 		t.Errorf("expected an empty JSON list, got %q", stdout)
@@ -88,7 +177,7 @@ func TestRunJSONValidFileIsEmptyList(t *testing.T) {
 }
 
 func TestRunJSONInvalidFileIsList(t *testing.T) {
-	_, stdout, _ := runCLI(t, "-no-external-checks", "-json", invalidFile)
+	_, stdout, _ := runCLI(t, "-external-checks=none", "-json", invalidFile)
 
 	results := unmarshalList(t, stdout)
 	if len(results) == 0 {
@@ -114,7 +203,7 @@ func TestRunJSONReportsInputFileName(t *testing.T) {
 }
 
 func TestRunJSONUnreadableFileIsList(t *testing.T) {
-	_, stdout, stderr := runCLI(t, "-no-external-checks", "-json", notThereFile)
+	_, stdout, stderr := runCLI(t, "-external-checks=none", "-json", notThereFile)
 
 	results := unmarshalList(t, stdout)
 	if len(results) != 1 {

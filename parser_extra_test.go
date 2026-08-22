@@ -30,13 +30,31 @@ func TestNewParserBaseURL(t *testing.T) {
 	}
 }
 
-func TestNewParserDisableExternalChecksImpliesDisableNetwork(t *testing.T) {
-	p, err := NewParser(ParserConfig{DisableExternalChecks: true})
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
+func TestNewParserDeprecatedFlagsMapToCheckMode(t *testing.T) {
+	tests := map[string]struct {
+		config ParserConfig
+		want   CheckMode
+	}{
+		"no deprecated flag":       {ParserConfig{}, CheckNetwork},
+		"DisableNetwork":           {ParserConfig{DisableNetwork: true}, CheckLocal},
+		"DisableExternalChecks":    {ParserConfig{DisableExternalChecks: true}, CheckNone},
+		"both":                     {ParserConfig{DisableNetwork: true, DisableExternalChecks: true}, CheckNone},
+		"over ExternalChecks":      {ParserConfig{ExternalChecks: CheckNetwork, DisableNetwork: true}, CheckLocal},
+		"none over ExternalChecks": {ParserConfig{ExternalChecks: CheckLocal, DisableExternalChecks: true}, CheckNone},
+		"ExternalChecks alone":     {ParserConfig{ExternalChecks: CheckNone}, CheckNone},
 	}
-	if !p.disableNetwork {
-		t.Error("expected disableNetwork to be true when DisableExternalChecks is true")
+
+	for name, test := range tests {
+		t.Run(name, func(t *testing.T) {
+			p, err := NewParser(test.config)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+
+			if p.checks != test.want {
+				t.Errorf("expected the %s mode, got %s", test.want, p.checks)
+			}
+		})
 	}
 }
 

@@ -104,10 +104,10 @@ func (p *Parser) isReachable(u url.URL) (bool, error) {
 //
 // It supports relative paths and turns them into remote URLs or file:// URLs
 // depending on the value of baseURL.
-func toAbsoluteURL(file string, baseURL *url.URL, network bool) *url.URL {
+func toAbsoluteURL(file string, baseURL *url.URL, mode CheckMode) *url.URL {
 	// Check if file is an absolute URL
 	if uri, err := url.ParseRequestURI(file); err == nil {
-		if !network {
+		if mode != CheckNetwork {
 			return nil
 		}
 
@@ -129,7 +129,7 @@ func toAbsoluteURL(file string, baseURL *url.URL, network bool) *url.URL {
 }
 
 // fileExists returns true if the file resource exists.
-func (p *Parser) fileExists(u url.URL, network bool) (bool, error) {
+func (p *Parser) fileExists(u url.URL, mode CheckMode) (bool, error) {
 	// Don't check if we are running in WASM because there's no stat(2) there
 	if runtime.GOARCH == "wasm" {
 		return true, nil
@@ -146,7 +146,7 @@ func (p *Parser) fileExists(u url.URL, network bool) (bool, error) {
 		return err == nil, err
 	}
 
-	if network {
+	if mode == CheckNetwork {
 		reachable, err := p.isReachable(u)
 
 		return reachable, err
@@ -157,7 +157,7 @@ func (p *Parser) fileExists(u url.URL, network bool) (bool, error) {
 
 // isImageFile check whether the string is a valid image. It also checks if the file exists.
 // It returns true if it is an image or false if it's not and an error, if any.
-func (p *Parser) isImageFile(u url.URL, network bool) (bool, error) {
+func (p *Parser) isImageFile(u url.URL, mode CheckMode) (bool, error) {
 	validExt := []string{".jpg", ".png"}
 	ext := strings.ToLower(filepath.Ext(u.Path))
 
@@ -165,12 +165,12 @@ func (p *Parser) isImageFile(u url.URL, network bool) (bool, error) {
 		return false, fmt.Errorf("invalid file extension for: %s", netutil.DisplayURL(&u)) //nolint:err113,lll // dynamic message with path context
 	}
 
-	return p.fileExists(u, network)
+	return p.fileExists(u, mode)
 }
 
 // validLogo returns true if the file path in value is a valid logo.
 // It also checks if the file exists.
-func (p *Parser) validLogo(u url.URL, network bool) (bool, error) {
+func (p *Parser) validLogo(u url.URL, mode CheckMode) (bool, error) {
 	validExt := []string{".svg", ".svgz", ".png"}
 	ext := strings.ToLower(filepath.Ext(u.Path))
 
@@ -179,7 +179,7 @@ func (p *Parser) validLogo(u url.URL, network bool) (bool, error) {
 		return false, fmt.Errorf("invalid file extension for: %s", netutil.DisplayURL(&u)) //nolint:err113,lll // dynamic message with path context
 	}
 
-	if exists, err := p.fileExists(u, network); !exists {
+	if exists, err := p.fileExists(u, mode); !exists {
 		return false, err
 	}
 
@@ -188,7 +188,7 @@ func (p *Parser) validLogo(u url.URL, network bool) (bool, error) {
 	if u.Scheme != "file" {
 		var err error
 
-		if !network {
+		if mode != CheckNetwork {
 			return true, nil
 		}
 

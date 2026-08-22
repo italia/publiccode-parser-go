@@ -17,6 +17,12 @@ var (
 	date    string
 )
 
+var (
+	errValidModes       = errors.New("valid modes are none, local and network")
+	errCloneMode        = errors.New("the clone mode is not implemented yet")
+	errConflictingModes = errors.New("conflicting external check modes")
+)
+
 func init() {
 	if version == "" {
 		version = "devel"
@@ -47,19 +53,27 @@ func run(args []string, stdout, stderr io.Writer) int {
 		"Use this local directory as base path when checking for files existence "+
 			"instead of using the `url` key in publiccode.yml",
 	)
+	externalChecksPtr := flags.String(
+		"external-checks", "network",
+		"Which `mode` of checks on resources external to the publiccode.yml to run: "+
+			"none (nothing external is checked), "+
+			"local (only local file existence and images), "+
+			"network (also URL existence and remote images).",
+	)
 	disableNetworkPtr := flags.Bool(
 		"no-network", false,
-		"Disables checks that require network connections (URL existence and oEmbed). This makes validation much faster.",
+		"Deprecated, use -external-checks=local. "+
+			"Disables checks that require network connections (URL existence and oEmbed).",
 	)
 	disableExternalChecksPtr := flags.Bool(
 		"no-external-checks", false,
-		"Disables ALL checks that reference external resources such as remote URLs or local file existence. "+
-			"Implies --no-network",
+		"Deprecated, use -external-checks=none. "+
+			"Disables ALL checks that reference external resources such as remote URLs or local file existence.",
 	)
 	timeoutPtr := flags.Duration(
 		"timeout", 0,
 		"Timeout for each HTTP request during external checks (e.g. 10s, 1m). "+
-			"Defaults to 30s if not set. No effect with --no-network or --no-external-checks.",
+			"Defaults to 30s if not set. No effect with -external-checks=none or -external-checks=local.",
 	)
 	jsonOutputPtr := flags.Bool("json", false, "Output the validation errors as a JSON list.")
 	helpPtr := flags.Bool("help", false, "Display command line usage.")
@@ -82,6 +96,18 @@ func run(args []string, stdout, stderr io.Writer) int {
 		return 0
 	}
 
+	mode, err := resolveCheckMode(checkModeFlags{
+		mode:             *externalChecksPtr,
+		modeSet:          flagPassed(flags, "external-checks"),
+		noNetwork:        *disableNetworkPtr,
+		noExternalChecks: *disableExternalChecksPtr,
+	}, stderr)
+	if err != nil {
+		fmt.Fprintln(stderr, err)
+
+		return 2
+	}
+
 	if flags.NArg() < 1 {
 		flags.Usage()
 
@@ -89,8 +115,7 @@ func run(args []string, stdout, stderr io.Writer) int {
 	}
 
 	config := publiccode.ParserConfig{BaseURL: *localBasePathPtr}
-	config.DisableNetwork = *disableNetworkPtr
-	config.DisableExternalChecks = *disableExternalChecksPtr
+	config.ExternalChecks = mode
 	config.Timeout = *timeoutPtr
 
 	p, err := publiccode.NewParser(config)
@@ -115,6 +140,82 @@ func run(args []string, stdout, stderr io.Writer) int {
 	}
 
 	return 0
+}
+
+// checkModeFlags is the state of the flags selecting which checks on external
+// resources run.
+type checkModeFlags struct {
+	mode    string
+	modeSet bool
+
+	noNetwork        bool
+	noExternalChecks bool
+}
+
+// resolveCheckMode turns the flags into the single mode the parser understands,
+// warning about the deprecated ones.
+func resolveCheckMode(opts checkModeFlags, stderr io.Writer) (publiccode.CheckMode, error) {
+	parsed, err := parseCheckMode(opts.mode)
+	if err != nil {
+		return parsed, err
+	}
+
+	alias, aliasMode := "", parsed
+
+	// -no-external-checks wins over -no-network, the precedence the two
+	// booleans have in the parser configuration.
+	switch {
+	case opts.noExternalChecks:
+		alias, aliasMode = "-no-external-checks", publiccode.CheckNone
+	case opts.noNetwork:
+		alias, aliasMode = "-no-network", publiccode.CheckLocal
+	}
+
+	if alias == "" {
+		return parsed, nil
+	}
+
+	if opts.modeSet && aliasMode != parsed {
+		return parsed, fmt.Errorf("%w: %s and -external-checks=%s", errConflictingModes, alias, opts.mode)
+	}
+
+	if opts.noNetwork {
+		fmt.Fprintln(stderr, "-no-network is deprecated, use -external-checks=local")
+	}
+
+	if opts.noExternalChecks {
+		fmt.Fprintln(stderr, "-no-external-checks is deprecated, use -external-checks=none")
+	}
+
+	return aliasMode, nil
+}
+
+func parseCheckMode(mode string) (publiccode.CheckMode, error) {
+	switch mode {
+	case "none":
+		return publiccode.CheckNone, nil
+	case "local":
+		return publiccode.CheckLocal, nil
+	case "network":
+		return publiccode.CheckNetwork, nil
+	case "clone":
+		// Reserved for the mode checking the files in a clone of the repository.
+		return publiccode.CheckNetwork, errCloneMode
+	default:
+		return publiccode.CheckNetwork, fmt.Errorf("invalid value %q for -external-checks: %w", mode, errValidModes)
+	}
+}
+
+func flagPassed(flags *flag.FlagSet, name string) bool {
+	passed := false
+
+	flags.Visit(func(f *flag.Flag) {
+		if f.Name == name {
+			passed = true
+		}
+	})
+
+	return passed
 }
 
 func reportJSON(parseErr error, stdout, stderr io.Writer) int {

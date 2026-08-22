@@ -9,12 +9,12 @@ import (
 	urlutil "github.com/italia/publiccode-parser-go/v5/internal"
 )
 
-type validateFn func(publiccode PublicCode, parser *Parser, network bool, baseURL *url.URL) error
+type validateFn func(publiccode PublicCode, parser *Parser, baseURL *url.URL) error
 
 // validateFieldsV0 validates publiccode.yml with additional rules not validatable
 // with go-playground/validator
 // It returns any error encountered as ValidationResults.
-func validateFieldsV0(publiccode PublicCode, parser *Parser, network bool, baseURL *url.URL) error { //nolint:maintidx
+func validateFieldsV0(publiccode PublicCode, parser *Parser, baseURL *url.URL) error { //nolint:maintidx
 	publiccodev0, ok := publiccode.(*PublicCodeV0)
 	if !ok {
 		return fmt.Errorf("internal: expected *PublicCodeV0, got %T", publiccode) //nolint:err113 // dynamic type name
@@ -22,7 +22,7 @@ func validateFieldsV0(publiccode PublicCode, parser *Parser, network bool, baseU
 
 	var vr ValidationResults
 
-	checksNetwork := network && !parser.disableExternalChecks
+	checksNetwork := parser.checks == CheckNetwork
 
 	if checksNetwork && publiccodev0.URL != nil {
 		if reachable, err := parser.isReachable(*(*url.URL)(publiccodev0.URL)); !reachable {
@@ -55,10 +55,10 @@ func validateFieldsV0(publiccode PublicCode, parser *Parser, network bool, baseU
 	if publiccodev0.Logo != nil && *publiccodev0.Logo != "" {
 		if _, err := isRelativePathOrURL(*publiccodev0.Logo, "logo"); err != nil {
 			vr = append(vr, err)
-		} else if !parser.disableExternalChecks {
-			u := toAbsoluteURL(*publiccodev0.Logo, baseURL, network)
+		} else if parser.checks != CheckNone {
+			u := toAbsoluteURL(*publiccodev0.Logo, baseURL, parser.checks)
 			if u != nil {
-				validLogo, err := parser.validLogo(*u, network)
+				validLogo, err := parser.validLogo(*u, parser.checks)
 				if !validLogo {
 					vr = append(vr, newValidationError("logo", err.Error()))
 				}
@@ -74,10 +74,10 @@ func validateFieldsV0(publiccode PublicCode, parser *Parser, network bool, baseU
 
 		if _, err := isRelativePathOrURL(*publiccodev0.MonochromeLogo, "monochromeLogo"); err != nil {
 			vr = append(vr, err)
-		} else if !parser.disableExternalChecks {
-			u := toAbsoluteURL(*publiccodev0.MonochromeLogo, baseURL, network)
+		} else if parser.checks != CheckNone {
+			u := toAbsoluteURL(*publiccodev0.MonochromeLogo, baseURL, parser.checks)
 			if u != nil {
-				validLogo, err := parser.validLogo(*u, network)
+				validLogo, err := parser.validLogo(*u, parser.checks)
 				if !validLogo {
 					vr = append(vr, newValidationError("monochromeLogo", err.Error()))
 				}
@@ -120,10 +120,10 @@ func validateFieldsV0(publiccode PublicCode, parser *Parser, network bool, baseU
 
 		if _, err := isRelativePathOrURL(*publiccodev0.Legal.AuthorsFile, "legal.authorsFile"); err != nil {
 			vr = append(vr, err)
-		} else if !parser.disableExternalChecks {
-			u := toAbsoluteURL(*publiccodev0.Legal.AuthorsFile, baseURL, network)
+		} else if parser.checks != CheckNone {
+			u := toAbsoluteURL(*publiccodev0.Legal.AuthorsFile, baseURL, parser.checks)
 			if u != nil {
-				exists, err := parser.fileExists(*u, network)
+				exists, err := parser.fileExists(*u, parser.checks)
 				if !exists {
 					vr = append(vr, newValidationErrorf(
 						"legal.authorsFile", "'%s' does not exist: %s", urlutil.DisplayURL(u), err.Error(),
@@ -184,10 +184,10 @@ func validateFieldsV0(publiccode PublicCode, parser *Parser, network bool, baseU
 			keyName := fmt.Sprintf("description.%s.screenshots[%d]", lang, i)
 			if _, err := isRelativePathOrURL(v, keyName); err != nil {
 				vr = append(vr, err)
-			} else if !parser.disableExternalChecks {
-				u := toAbsoluteURL(v, baseURL, network)
+			} else if parser.checks != CheckNone {
+				u := toAbsoluteURL(v, baseURL, parser.checks)
 				if u != nil {
-					isImage, err := parser.isImageFile(*u, network)
+					isImage, err := parser.isImageFile(*u, parser.checks)
 					if !isImage {
 						vr = append(vr, newValidationErrorf(
 							keyName,
@@ -256,7 +256,7 @@ func validateFieldsV0(publiccode PublicCode, parser *Parser, network bool, baseU
 // validateFieldsV1 validates publiccode.yml with additional rules not validatable
 // with go-playground/validator
 // It returns any error encountered as ValidationResults.
-func validateFieldsV1(publiccode PublicCode, parser *Parser, network bool, baseURL *url.URL) error {
+func validateFieldsV1(publiccode PublicCode, parser *Parser, baseURL *url.URL) error {
 	publiccodev1, ok := publiccode.(*PublicCodeV1)
 	if !ok {
 		return fmt.Errorf("internal: expected *PublicCodeV1, got %T", publiccode) //nolint:err113 // dynamic type name
@@ -264,7 +264,7 @@ func validateFieldsV1(publiccode PublicCode, parser *Parser, network bool, baseU
 
 	var vr ValidationResults
 
-	checksNetwork := network && !parser.disableExternalChecks
+	checksNetwork := parser.checks == CheckNetwork
 
 	if checksNetwork && publiccodev1.URL != nil {
 		if reachable, err := parser.isReachable(*(*url.URL)(publiccodev1.URL)); !reachable {
@@ -297,10 +297,10 @@ func validateFieldsV1(publiccode PublicCode, parser *Parser, network bool, baseU
 	if publiccodev1.Logo != nil && *publiccodev1.Logo != "" {
 		if _, err := isRelativePathOrURL(*publiccodev1.Logo, "logo"); err != nil {
 			vr = append(vr, err)
-		} else if !parser.disableExternalChecks {
-			u := toAbsoluteURL(*publiccodev1.Logo, baseURL, network)
+		} else if parser.checks != CheckNone {
+			u := toAbsoluteURL(*publiccodev1.Logo, baseURL, parser.checks)
 			if u != nil {
-				validLogo, err := parser.validLogo(*u, network)
+				validLogo, err := parser.validLogo(*u, parser.checks)
 				if !validLogo {
 					vr = append(vr, newValidationError("logo", err.Error()))
 				}
@@ -358,10 +358,10 @@ func validateFieldsV1(publiccode PublicCode, parser *Parser, network bool, baseU
 			keyName := fmt.Sprintf("description.%s.screenshots[%d]", lang, i)
 			if _, err := isRelativePathOrURL(v, keyName); err != nil {
 				vr = append(vr, err)
-			} else if !parser.disableExternalChecks {
-				u := toAbsoluteURL(v, baseURL, network)
+			} else if parser.checks != CheckNone {
+				u := toAbsoluteURL(v, baseURL, parser.checks)
 				if u != nil {
-					isImage, err := parser.isImageFile(*u, network)
+					isImage, err := parser.isImageFile(*u, parser.checks)
 					if !isImage {
 						vr = append(vr, newValidationErrorf(
 							keyName,
