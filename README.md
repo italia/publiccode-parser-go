@@ -69,62 +69,6 @@ argument or an unknown flag.
 With `--json` the same exit codes apply and the output is always a
 JSON list, empty when there is nothing to report.
 
-## With Docker
-
-You can easily validate your files using Docker on your local machine or in your
-CI pipeline:
-
-```shell
-docker run -i italia/publiccode-parser-go /dev/stdin < publiccode.yml
-```
-
-The image is available on [Dockerhub](https://hub.docker.com/repository/docker/italia/publiccode-parser-go).
-You can also build your own running:
-
-```sh
-docker build -t italia/publiccode-parser-go .
-```
-
-### Examples
-
-<details>
-  <summary>Click to expand</summary>
-
-The examples assume that your `publiccode.yml` file is on your local machine,
-at `/opt/publiccodes/publiccode.yml`
-
-- Validate and print the canonicalized file
-
-  ```shell
-  docker run -i italia/publiccode-parser-go -export /dev/stdout /dev/stdin < publiccode.yml
-  ```
-
-- Validate a publiccode file named `publiccode.yml` in `/home/user`
-
-  ```shell
-  docker run -v /home/user:/go/src/files italia/publiccode-parser-go
-  ```
-
-- Validate a publiccode file named `/opt/publiccodes/my-amazing-code.yaml`
-
-  ```shell
-  docker run -v /opt/publiccodes:/go/src/files italia/publiccode-parser-go my-amazing-code.yaml
-  ```
-
-- Validate `publiccode.yml` without using the network (fe. checking URLs are reachable)
-
-  ```shell
-  docker run -v /opt/publiccodes/publiccodes:/files italia/publiccode-parser-go -no-network publiccode.yml
-  ```
-
-- Debugging, access the container interactive shell, overriding the entrypoint
-
-  ```shell
-  docker run -it --entrypoint /bin/sh italia/publiccode-parser-go
-  ```
-
-</details>
-
 ## Contributing
 
 Contributing is always appreciated.
