@@ -50,7 +50,7 @@ description:
       on multiple rows. You should note what the software
       is and why one should need it. This is 632 characters.
 
-    documentation: "https://docs.italia.it"
+    documentation: "https://raw.githubusercontent.com/italia/publiccode-parser-go/2a1f25a36e0f2ab2d71efb67db8b66ff00573fbe/testdata/v1/invalid_valid_with_warnings_in_v0/valid_with_IT_riuso_codiceIPA.yml"
     apiDocumentation: "https://developers.italia.it/it/api"
 
     features:
