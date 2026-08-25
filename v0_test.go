@@ -670,7 +670,7 @@ func TestDecodeValueErrorsRemote(t *testing.T) {
 	testRemoteFiles := []testType{
 		// Pinned to a commit: fetching from main means a testdata change
 		// breaks this test in every PR until the change itself lands.
-		{"https://raw.githubusercontent.com/italia/publiccode-parser-go/2a1f25a36e0f2ab2d71efb67db8b66ff00573fbe/testdata/v0/valid_with_warnings/valid_with_lowercase_countries.yml", ValidationResults{
+		{"https://raw.githubusercontent.com/italia/publiccode-parser-go/389af926bcb5bcb723b56d8e390585f2d0f2c7e8/testdata/v0/valid_with_warnings/valid_with_lowercase_countries.yml", ValidationResults{
 			ValidationWarning{"", "intendedAudience.countries[0]", "Lowercase country codes are DEPRECATED. Use uppercase instead ('IT')", 31, 7},
 			ValidationWarning{"", "intendedAudience.countries[1]", "Lowercase country codes are DEPRECATED. Use uppercase instead ('DE')", 32, 7},
 			ValidationWarning{"", "intendedAudience.unsupportedCountries[0]", "Lowercase country codes are DEPRECATED. Use uppercase instead ('US')", 34, 7},
