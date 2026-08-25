@@ -661,9 +661,6 @@ func TestValidWithWarningsTestcasesV0(t *testing.T) {
 
 // Test publiccode.yml remote files for key errors.
 func TestDecodeValueErrorsRemote(t *testing.T) {
-	// TODO: re-enable once the docs.italia.it removal is on main.
-	t.Skip("the fetched copy on main still points at docs.italia.it")
-
 	testRemoteFiles := []testType{
 		{"https://raw.githubusercontent.com/italia/publiccode-parser-go/refs/heads/main/testdata/v0/valid_with_warnings/valid_with_lowercase_countries.yml", ValidationResults{
 			ValidationWarning{"intendedAudience.countries[0]", "Lowercase country codes are DEPRECATED. Use uppercase instead ('IT')", 31, 7},
