@@ -45,14 +45,14 @@ func TestSafeHTTPClientBlocksPrivate(t *testing.T) {
 	}))
 	defer srv.Close()
 
-	blocked := SafeHTTPClient(5*time.Second, false)
+	blocked := SafeHTTPClient(5*time.Second, false, "")
 	if _, err := blocked.Get(srv.URL); err == nil {
 		t.Fatal("expected the SSRF guard to block the loopback request")
 	} else if !errors.Is(err, ErrBlockedAddress) && !strings.Contains(err.Error(), "non-public") {
 		t.Errorf("expected a blocked-address error, got: %v", err)
 	}
 
-	allowed := SafeHTTPClient(5*time.Second, true)
+	allowed := SafeHTTPClient(5*time.Second, true, "")
 	resp, err := allowed.Get(srv.URL)
 	if err != nil {
 		t.Fatalf("expected the opt-out client to reach the server, got: %v", err)
@@ -133,4 +133,111 @@ func TestResponseUnderLimitIsReadFully(t *testing.T) {
 	if string(got) != body {
 		t.Errorf("body mismatch: got %q, want %q", got, body)
 	}
+}
+
+func TestUserAgentTransportSetsTheDefault(t *testing.T) {
+	const userAgent = "publiccode-parser-go/1.2.3 (+https://example.org)"
+
+	var got string
+	transport := &userAgentTransport{
+		base: roundTripFunc(func(r *http.Request) (*http.Response, error) {
+			got = r.Header.Get("User-Agent")
+
+			return newResponse("", 0), nil
+		}),
+		userAgent: userAgent,
+	}
+
+	req, _ := http.NewRequest(http.MethodGet, "http://example.com", nil)
+	if _, err := transport.RoundTrip(req); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if got != userAgent {
+		t.Errorf("User-Agent sent: got %q, want %q", got, userAgent)
+	}
+
+	// A RoundTripper must not modify the request it is handed.
+	if _, set := req.Header["User-Agent"]; set {
+		t.Errorf("the original request was modified: %q", req.Header.Get("User-Agent"))
+	}
+}
+
+func TestUserAgentTransportKeepsTheCallerHeader(t *testing.T) {
+	cases := map[string]string{
+		"caller sets its own": "harvester/2.0",
+		"caller clears it":    "",
+	}
+
+	for name, want := range cases {
+		t.Run(name, func(t *testing.T) {
+			var got string
+			var seen bool
+
+			transport := &userAgentTransport{
+				base: roundTripFunc(func(r *http.Request) (*http.Response, error) {
+					got, seen = r.Header.Get("User-Agent"), true
+
+					return newResponse("", 0), nil
+				}),
+				userAgent: "publiccode-parser-go/1.2.3",
+			}
+
+			req, _ := http.NewRequest(http.MethodGet, "http://example.com", nil)
+			req.Header["User-Agent"] = []string{want}
+
+			if _, err := transport.RoundTrip(req); err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+
+			if !seen {
+				t.Fatal("the base transport was not called")
+			}
+			if got != want {
+				t.Errorf("User-Agent sent: got %q, want %q", got, want)
+			}
+		})
+	}
+}
+
+// TestSafeHTTPClientSendsUserAgent checks the User-Agent all the way down to the
+// wire, and that an empty one leaves Go's default alone.
+func TestSafeHTTPClientSendsUserAgent(t *testing.T) {
+	const userAgent = "publiccode-parser-go/1.2.3 (+https://example.org)"
+
+	// The server echoes back what it received, so there is nothing shared
+	// between the handler and the test.
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_, _ = io.WriteString(w, r.UserAgent())
+	}))
+	defer srv.Close()
+
+	got, err := getBody(SafeHTTPClient(5*time.Second, true, userAgent), srv.URL)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if got != userAgent {
+		t.Errorf("User-Agent received by the server: got %q, want %q", got, userAgent)
+	}
+
+	if got, err = getBody(SafeHTTPClient(5*time.Second, true, ""), srv.URL); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if !strings.HasPrefix(got, "Go-http-client/") {
+		t.Errorf("an empty User-Agent must leave Go's default in place, got %q", got)
+	}
+}
+
+// getBody GETs url and returns the response body as a string.
+func getBody(client *http.Client, url string) (string, error) {
+	resp, err := client.Get(url)
+	if err != nil {
+		return "", err
+	}
+
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+
+	return string(body), err
 }
