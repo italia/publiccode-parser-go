@@ -93,6 +93,10 @@ func run(args []string, stdout, stderr io.Writer) int {
 	config.DisableExternalChecks = *disableExternalChecksPtr
 	config.Timeout = *timeoutPtr
 
+	// The version is stamped in at link time, so it's more reliable here than
+	// the build information the library falls back to.
+	config.UserAgent = publiccode.UserAgentForVersion(version)
+
 	p, err := publiccode.NewParser(config)
 	if err != nil {
 		fmt.Fprintf(stderr, "Error creating Parser: %s\n", err.Error())

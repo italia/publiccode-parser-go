@@ -122,11 +122,39 @@ func (t *safeTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	return resp, nil
 }
 
+// userAgentTransport sets a User-Agent on the requests that don't carry one.
+// Without it Go sends "Go-http-client/<version>", which WAFs and bot protections
+// routinely challenge: a perfectly reachable URL in a publiccode.yml then gets
+// reported as an error. Setting it here, at the transport level, covers every
+// caller of the client, whatever builds the request.
+type userAgentTransport struct {
+	base      http.RoundTripper
+	userAgent string
+}
+
+func (t *userAgentTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+	// A caller that set its own User-Agent is left alone, and so is one that
+	// explicitly cleared it with an empty value. A nil Header is left alone as
+	// well: the base transport reports it as an error.
+	if _, set := req.Header["User-Agent"]; set || req.Header == nil {
+		return t.base.RoundTrip(req) //nolint:wrapcheck // http.Client inspects the transport error; keep it intact
+	}
+
+	// A RoundTripper must not modify the request it is given, hence the clone.
+	clone := req.Clone(req.Context())
+	clone.Header.Set("User-Agent", t.userAgent)
+
+	return t.base.RoundTrip(clone) //nolint:wrapcheck // http.Client inspects the transport error; keep it intact
+}
+
 // SafeHTTPClient builds an *http.Client hardened against SSRF and unbounded
 // downloads. When allowPrivate is true the SSRF address filtering is disabled
 // (used for trusted input and tests that target loopback servers); the response
 // size limit is always enforced.
-func SafeHTTPClient(timeout time.Duration, allowPrivate bool) *http.Client {
+//
+// userAgent is sent as the User-Agent of every request that doesn't already
+// carry one. An empty userAgent leaves Go's default in place.
+func SafeHTTPClient(timeout time.Duration, allowPrivate bool, userAgent string) *http.Client {
 	dialer := &net.Dialer{
 		Timeout:   30 * time.Second,
 		KeepAlive: 30 * time.Second,
@@ -145,8 +173,13 @@ func SafeHTTPClient(timeout time.Duration, allowPrivate bool) *http.Client {
 		ExpectContinueTimeout: 1 * time.Second,
 	}
 
+	var roundTripper http.RoundTripper = &safeTransport{base: transport, max: MaxResponseBytes}
+	if userAgent != "" {
+		roundTripper = &userAgentTransport{base: roundTripper, userAgent: userAgent}
+	}
+
 	return &http.Client{
 		Timeout:   timeout,
-		Transport: &safeTransport{base: transport, max: MaxResponseBytes},
+		Transport: roundTripper,
 	}
 }
