@@ -1,3 +1,5 @@
+// Keep the historical module path while the project transitions to the
+// libpubliccode name, so existing Go applications continue to build.
 module github.com/italia/publiccode-parser-go/v5
 
 require (

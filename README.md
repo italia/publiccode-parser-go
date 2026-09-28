@@ -1,18 +1,32 @@
 <!-- markdownlint-disable MD033 -->
 <!-- MD033/no-inline-html -->
-# publiccode.yml parser for Go
+# libpubliccode
 
 [![Join the #publiccode channel](https://img.shields.io/badge/Slack%20channel-%23publiccode-blue.svg?logo=slack)](https://developersitalia.slack.com/messages/CAM3F785T)
 [![Get invited](https://slack.developers.italia.it/badge.svg)](https://slack.developers.italia.it/)
 
-A Go parser and validator for [publiccode.yml](https://github.com/publiccodeyml/publiccode.yml)
-files.
+The core parser and validator for
+[publiccode.yml](https://github.com/publiccodeyml/publiccode.yml), implemented
+in Go and available both as a Go library and as the `publiccode-parser` command.
 
 `publiccode.yml` is an international standard for describing public software, which
 should be placed at the root of Free/Libre and Open Source software repositories.
 
 This parser performs syntactic and semantic validation according to the
 [official spec](https://yml.publiccode.tools).
+
+## Backwards compatibility
+
+This project was previously named `publiccode-parser-go`. During the rename,
+the existing integration points remain unchanged:
+
+- Go module: `github.com/italia/publiccode-parser-go/v5`
+- command: `publiccode-parser`
+- Docker image: `italia/publiccode-parser-go`
+
+Existing consumers do not need to change their imports, installation commands,
+or deployment configuration. New canonical integration names will only be
+introduced in a future major release with a documented migration path.
 
 ## Features
 

@@ -1,6 +1,6 @@
 publiccodeYmlVersion: "0.5"
 
-name: publiccode-parser-go
+name: libpubliccode
 url: "https://github.com/italia/publiccode-parser-go"
 
 platforms:
@@ -16,10 +16,11 @@ softwareType: library
 
 description:
   en:
-    shortDescription: "Go library and CLI tool for parsing and validating publiccode.yml files."
+    shortDescription: "Core library and CLI tool for parsing and validating publiccode.yml files."
     longDescription: >
-      publiccode-parser-go is a Go library and command-line tool for parsing and
-      validating publiccode.yml files against the official standard.
+      libpubliccode is the core library for parsing and validating
+      publiccode.yml files against the official standard. It is implemented in
+      Go and is also available as a command-line tool.
       It performs syntactic and semantic validation, and verifies the existence
       of URLs. The library can be embedded in Go applications or used as a
       standalone CLI validator that outputs errors in JSON or
